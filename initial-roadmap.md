@@ -23,7 +23,7 @@ The system should not merely replace a paper logbook. It should function as a co
 
 A good project name could be:
 
-**ParkFlow — Automated Parking Operations Platform**
+**E-ParkGo — Automated Parking Operations Platform**
 
 Its main promise would be:
 
