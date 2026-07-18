@@ -1,437 +1,303 @@
-# Automated Parking Management System Roadmap
+# ParkFlow: Serverless Parking Management System
 
-## 1. Project Vision
+## Project Summary
 
-The system will be a **Progressive Web Application parking platform** that automates the complete parking lifecycle:
+**ParkFlow** is an automated, serverless parking management system delivered as an installable Progressive Web Application.
 
-1. Detect or register a vehicle entering.
-2. Create a parking session automatically.
-3. Generate a unique QR ticket or receipt.
-4. Record the vehicle’s official entry time.
-5. Track the vehicle as currently parked.
-6. Scan the QR ticket during exit.
-7. Calculate parking duration and fees automatically.
-8. Confirm payment or exit authorization.
-9. Record the official exit time.
-10. Close and permanently store the parking transaction.
+Instead of manually recording vehicle entry times, exit times, durations, and fees, the system automatically manages the entire parking lifecycle:
 
-The system should not merely replace a paper logbook. It should function as a complete parking operations platform with real-time occupancy, staff accountability, automated calculations, audit records, reporting, and optional hardware integrations.
+1. Staff registers an arriving vehicle.
+2. The system creates a parking session.
+3. The database records the official server-generated entry time.
+4. A unique QR parking ticket is generated.
+5. The parking space is marked as occupied.
+6. Exit staff scans the QR ticket.
+7. The system retrieves the active parking session.
+8. Parking duration and fees are calculated automatically.
+9. Staff confirms payment and vehicle exit.
+10. The database records the exit time and closes the session.
+11. The parking space becomes available again.
 
----
-
-# 2. Recommended System Concept
-
-A good project name could be:
-
-**ParkFlow — Automated Parking Operations Platform**
-
-Its main promise would be:
-
-> One scan at entry, one scan at exit, and every parking transaction is automatically recorded, calculated, and verified.
-
-The platform can support three levels of automation.
-
-| Level           | Entry Process                                                | Best Use                |
-| --------------- | ------------------------------------------------------------ | ----------------------- |
-| Staff-assisted  | Staff enters the plate number and generates the QR ticket    | Initial MVP             |
-| Kiosk-assisted  | Driver enters details or scans a generated ticket at a kiosk | Medium automation       |
-| Fully automated | Camera recognizes the plate and automatically opens the gate | Advanced implementation |
-
-The project should begin with staff-assisted automation, but its architecture should already support cameras, barriers, printers, and sensors later.
+The system will work on phones, tablets, laptops, and desktop computers without requiring separate native Android or iOS applications.
 
 ---
 
-# 3. Core Parking Workflow
-
-## Entry Workflow
+# Recommended Serverless Architecture
 
 ```text
-Vehicle arrives
-      ↓
-Staff selects “New Vehicle Entry”
-      ↓
-Vehicle type and plate number are entered
-      ↓
-System checks for an existing active parking session
-      ↓
-Available parking space is assigned
-      ↓
-Parking session is created
-      ↓
-Entry time is recorded by the server
-      ↓
-Unique QR ticket is generated
-      ↓
-Ticket is printed or displayed
-      ↓
-Parking slot becomes occupied
+Staff Phone / Tablet / Computer
+              │
+              ▼
+┌────────────────────────────────────┐
+│       Next.js Parking PWA          │
+│                                    │
+│ Entry • QR Scanner • Exit          │
+│ Dashboard • Parking Map • Reports  │
+└─────────────────┬──────────────────┘
+                  │
+                  ▼
+┌────────────────────────────────────┐
+│             Supabase               │
+│                                    │
+│ Authentication                     │
+│ PostgreSQL Database                │
+│ Database Functions                 │
+│ Edge Functions                     │
+│ Realtime Updates                   │
+│ File Storage                       │
+└─────────────────┬──────────────────┘
+                  │
+                  ▼
+       Optional Future Hardware
+
+ QR Printer • Plate Camera • Gate Barrier
 ```
 
-The entry time should not depend on the staff member manually entering a time.
+The PWA will be deployed on **Vercel**, while Supabase will provide the database and backend services.
 
-The server should assign the official timestamp when the parking session is successfully created.
+There will be no traditional VPS, Express server, NestJS server, or manually maintained cloud server during the MVP.
+
+---
+
+# Recommended Technology Stack
+
+| Layer                 | Technology                          | Purpose                                                  |
+| --------------------- | ----------------------------------- | -------------------------------------------------------- |
+| Application framework | Next.js with App Router             | PWA interface and routing                                |
+| Programming language  | TypeScript                          | Type-safe frontend and backend logic                     |
+| UI styling            | Tailwind CSS                        | Responsive interface design                              |
+| Component library     | shadcn/ui                           | Dashboard, dialogs, tables, forms, and controls          |
+| Icons                 | Lucide React                        | Interface icons                                          |
+| Form management       | React Hook Form                     | Entry, payment, and configuration forms                  |
+| Validation            | Zod                                 | Client-side and server-side validation                   |
+| Hosting               | Vercel                              | Frontend deployment, HTTPS, CDN, and CI/CD               |
+| Database              | Supabase PostgreSQL                 | Parking sessions, tickets, vehicles, rates, and payments |
+| Authentication        | Supabase Auth                       | Secure staff login and session management                |
+| Authorization         | PostgreSQL Row Level Security       | Role and data-access enforcement                         |
+| Backend logic         | Supabase Edge Functions             | Secure server-only operations                            |
+| Transaction logic     | PostgreSQL functions or RPC         | Atomic entry, payment, and exit operations               |
+| Live dashboard        | Supabase Realtime                   | Instant parking occupancy updates                        |
+| File storage          | Supabase Storage                    | Optional receipts, vehicle images, and exports           |
+| QR generation         | QR-code generation package          | Generate parking ticket QR codes                         |
+| QR scanning           | Browser camera scanner              | Scan tickets using phone or tablet cameras               |
+| Offline storage       | IndexedDB                           | Cache pending operations and application data            |
+| PWA support           | Web app manifest and service worker | Installation, caching, and limited offline operation     |
+| Testing               | Vitest and Playwright               | Unit and end-to-end workflow tests                       |
+| Source control        | GitHub                              | Version control and automated Vercel deployment          |
+
+Next.js has built-in support for web app manifests, while service workers can provide installation, notifications, caching, and offline functionality. A valid manifest and HTTPS deployment allow the application to behave like an installable app on supported devices.
+
+---
+
+# Responsibilities of Each Platform
+
+## Vercel
+
+Vercel will handle:
+
+* Hosting the Next.js PWA
+* HTTPS and SSL certificates
+* Global CDN delivery
+* Automatic deployments from GitHub
+* Preview deployments
+* Static asset caching
+* Security and response headers
+* Lightweight Next.js Route Handlers when necessary
+
+Most business logic should remain in Supabase so that Vercel primarily serves the application interface. This helps reduce Vercel function usage and keeps the architecture simpler.
+
+## Supabase
+
+Supabase will provide:
+
+* PostgreSQL database
+* Staff authentication
+* Role-based database access
+* Parking transaction processing
+* Realtime occupancy updates
+* Serverless Edge Functions
+* Receipt and file storage
+* Database triggers and constraints
+* Audit records
+
+Supabase Edge Functions run server-side TypeScript and are globally distributed. They are suitable for secure QR validation, receipt generation, webhooks, payment integrations, notifications, and other operations that must not run in the browser.
+
+Supabase Realtime can listen to database changes, allowing all connected dashboards to update immediately when a vehicle enters, exits, pays, or changes parking spaces.
+
+---
+
+# Core Application Modules
+
+## 1. Authentication and Staff Management
+
+The system will support roles such as:
+
+* Administrator
+* Supervisor
+* Entry staff
+* Exit staff
+* Cashier
+
+Administrators can manage rates, parking spaces, staff members, reports, and system settings.
+
+Entry staff can create parking sessions and generate tickets.
+
+Exit staff can scan tickets and confirm vehicle exits.
+
+Supervisors can approve manual corrections, lost tickets, voids, and fee overrides.
+
+---
+
+## 2. Vehicle Entry
+
+Staff enters:
+
+* Plate number
+* Vehicle type
+* Vehicle color
+* Assigned parking space
+
+The backend then:
+
+1. Normalizes the plate number.
+2. Checks for an existing active parking session.
+3. Confirms that the parking space is available.
+4. Creates the parking session.
+5. Records the database server time.
+6. Generates a ticket number and secure QR token.
+7. Marks the space as occupied.
+8. Returns the printable ticket.
+
+The frontend must never supply the official entry timestamp. PostgreSQL should generate it using the database server time.
+
+---
+
+## 3. QR Parking Ticket
+
+The QR code should contain only an opaque secure token or verification URL.
 
 Example:
 
 ```text
-Ticket Number: PK-20260716-00421
-Plate Number: ABC 1234
-Vehicle Type: Car
-Slot: A-017
-Entry Time: July 16, 2026, 10:42 PM
-Status: Active
-QR Reference: Random secure ticket token
+https://parkflow.vercel.app/verify/7c52f7d2...
 ```
 
-## Exit Workflow
-
-```text
-Vehicle approaches exit
-      ↓
-Staff opens QR scanner
-      ↓
-Ticket QR code is scanned
-      ↓
-System retrieves the active parking session
-      ↓
-Current server time becomes the proposed exit time
-      ↓
-Parking duration is calculated
-      ↓
-Parking fee is calculated
-      ↓
-Staff reviews the details
-      ↓
-Payment or exit is confirmed
-      ↓
-Official exit time is recorded
-      ↓
-Parking session is closed
-      ↓
-Parking slot becomes available
-      ↓
-Digital receipt is generated
-```
-
-Scanning should not immediately close the transaction. The staff should first see a confirmation screen to prevent accidental scans.
-
----
-
-# 4. Important Architectural Principle
-
-The QR code must not contain editable parking details such as:
+It should not directly contain:
 
 * Entry time
+* Exit time
 * Parking fee
-* Vehicle plate
-* Exit status
 * Payment status
+* Staff account
+* Editable parking information
 
-Instead, it should contain only a secure ticket reference.
+The QR token should be randomly generated, and its hashed representation should be stored in the database.
 
-Example:
-
-```text
-https://parking.example.com/ticket/verify/4f0bdf86-d876-4e07-a908-95ba08239afe
-```
-
-The system uses that reference to retrieve the official information from the database.
-
-This prevents users from modifying a QR code to change their entry time, plate number, or parking fee.
-
-The database remains the source of truth.
+This means changing information inside a locally generated QR code will not change the official parking record.
 
 ---
 
-# 5. Recommended Technology Stack
+## 4. Vehicle Exit
 
-Based on your current full-stack experience, the following stack would be appropriate.
+Exit staff scans the ticket using the PWA camera.
 
-## Frontend PWA
+The system will:
 
-* React
-* TypeScript
-* Vite
-* Tailwind CSS
-* shadcn/ui or PrimeReact
-* React Query or TanStack Query
-* React Router
-* Vite PWA Plugin
-* Browser camera API for QR scanning
-* IndexedDB for offline data
-* Workbox for service worker caching
+1. Validate the secure QR token.
+2. Retrieve the active parking session.
+3. Show the plate number and vehicle details.
+4. Generate a proposed exit time using the server clock.
+5. Calculate the parking duration.
+6. Apply the active parking rate.
+7. Display the total amount.
+8. Wait for staff confirmation.
+9. Record payment.
+10. Record the official exit time.
+11. Close the parking session.
+12. Release the parking space.
 
-A Next.js PWA is also possible, but React with Vite provides a focused and lightweight structure for a parking operations dashboard.
-
-## Backend
-
-**Recommended: NestJS with TypeScript**
-
-NestJS is suitable because the system will eventually need:
-
-* Authentication
-* Role-based permissions
-* Multiple parking branches
-* Audit logging
-* WebSockets
-* Hardware integration
-* Payment processing
-* Background jobs
-* Modular architecture
-
-Suggested backend modules:
-
-```text
-AuthModule
-UsersModule
-StaffModule
-VehiclesModule
-ParkingSessionsModule
-ParkingSpacesModule
-TicketsModule
-RatesModule
-PaymentsModule
-ReceiptsModule
-DevicesModule
-ReportsModule
-AuditLogsModule
-NotificationsModule
-```
-
-## Database
-
-**PostgreSQL**
-
-PostgreSQL is a good fit because parking transactions are highly relational and require reliable consistency.
-
-Optional supporting technologies:
-
-* Redis for real-time occupancy caching
-* BullMQ for background jobs
-* WebSockets for live dashboard updates
-* Docker for deployment
-* Supabase PostgreSQL, Neon, or managed PostgreSQL
-* Vercel for the PWA
-* Railway, Render, Fly.io, or Google Cloud Run for the backend
+Scanning alone should not immediately complete the exit. A confirmation screen prevents accidental or duplicate scans.
 
 ---
 
-# 6. High-Level System Architecture
+## 5. Parking Fee Engine
 
-```text
-┌───────────────────────────────────────────┐
-│               Parking PWA                 │
-│                                           │
-│ Entry • Exit • Scanner • Dashboard        │
-│ Reports • Rates • Staff • Settings        │
-└───────────────────┬───────────────────────┘
-                    │ HTTPS / WebSocket
-                    ▼
-┌───────────────────────────────────────────┐
-│              NestJS Backend               │
-│                                           │
-│ Authentication                            │
-│ Parking Session Engine                    │
-│ Ticket Generator                          │
-│ Fee Calculation Engine                    │
-│ Payment and Receipt Service               │
-│ Occupancy Service                         │
-│ Audit and Reporting Service               │
-└──────────────┬──────────────┬─────────────┘
-               │              │
-               ▼              ▼
-┌──────────────────────┐  ┌─────────────────┐
-│ PostgreSQL Database  │  │ Redis / Queue   │
-│                      │  │                 │
-│ Sessions             │  │ Live occupancy  │
-│ Tickets              │  │ Background jobs │
-│ Vehicles             │  │ Temporary cache │
-│ Payments             │  └─────────────────┘
-│ Audit logs           │
-└──────────────────────┘
-               ▲
-               │
-┌──────────────┴────────────────────────────┐
-│ Optional Hardware Integration Layer       │
-│                                           │
-│ QR printer • Plate camera • Gate barrier  │
-│ Occupancy sensor • Payment terminal       │
-└───────────────────────────────────────────┘
-```
+Rates will be configurable rather than hard-coded.
 
-A browser-based PWA can use a phone or tablet camera for QR scanning. However, direct control of barrier gates, receipt printers, USB devices, and entrance sensors may require a local device service or IoT gateway.
+The system can support:
+
+* Grace periods
+* Initial parking fee
+* Succeeding hourly rate
+* Different vehicle rates
+* Flat-rate parking
+* Overnight fees
+* Daily maximum charges
+* Lost-ticket penalties
+* Discounts
+* Complimentary parking
+
+The backend—not the browser—must perform the final fee calculation.
+
+A snapshot of the applied rate should be stored with the transaction so that old receipts remain correct even after an administrator changes the current parking rates.
 
 ---
 
-# 7. Main User Roles
+## 6. Live Parking Dashboard
 
-## Administrator
+The dashboard will show:
 
-The administrator can:
+* Total capacity
+* Available spaces
+* Occupied spaces
+* Occupancy percentage
+* Active parking sessions
+* Vehicles entered today
+* Vehicles exited today
+* Revenue today
+* Pending payments
+* Paid vehicles waiting to exit
+* Parking zones and space statuses
 
-* Configure parking locations
-* Create parking zones and spaces
-* Configure rates
-* Manage staff accounts
-* View all transactions
-* Review audit logs
-* Generate reports
-* Override parking sessions
-* Manage hardware devices
-* Configure penalties and lost-ticket rules
-
-## Entry Staff
-
-Entry staff can:
-
-* Register incoming vehicles
-* Generate QR tickets
-* Assign parking slots
-* Reprint active tickets
-* View current occupancy
-* Report entry-related incidents
-
-## Exit or Cashier Staff
-
-Exit staff can:
-
-* Scan QR tickets
-* View parking details
-* Calculate fees
-* Record payments
-* Confirm exits
-* Generate receipts
-* Handle lost tickets with authorization
-
-## Supervisor
-
-The supervisor can:
-
-* Approve manual corrections
-* Approve lost-ticket transactions
-* Void incorrect transactions
-* Review shift totals
-* Inspect staff activity
-* Resolve duplicate or disputed sessions
+Supabase Realtime will publish only the necessary occupancy and transaction changes instead of repeatedly refreshing the entire dashboard.
 
 ---
 
-# 8. Core Database Structure
+# Main Database Tables
 
-## `users`
-
-```text
-id
-first_name
-last_name
-email
-password_hash
-role_id
-parking_location_id
-is_active
-created_at
-updated_at
-```
-
-## `roles`
+The MVP will use approximately the following tables:
 
 ```text
-id
-name
-description
+profiles
+staff_roles
+parking_locations
+parking_zones
+parking_spaces
+vehicles
+parking_sessions
+parking_tickets
+parking_rates
+payments
+receipts
+staff_shifts
+audit_logs
+devices
 ```
 
-Example roles:
+The central table is `parking_sessions`.
 
-```text
-ADMIN
-SUPERVISOR
-ENTRY_STAFF
-EXIT_STAFF
-CASHIER
-```
-
-## `parking_locations`
-
-Used when the platform supports multiple parking branches.
-
-```text
-id
-name
-address
-timezone
-operating_status
-created_at
-```
-
-## `parking_zones`
-
-Examples: Basement A, Outdoor B, VIP Area.
-
-```text
-id
-parking_location_id
-name
-description
-```
-
-## `parking_spaces`
-
-```text
-id
-zone_id
-space_code
-vehicle_type
-status
-is_accessible
-is_reserved
-created_at
-```
-
-Possible statuses:
-
-```text
-AVAILABLE
-OCCUPIED
-RESERVED
-BLOCKED
-MAINTENANCE
-```
-
-## `vehicles`
-
-```text
-id
-plate_number
-vehicle_type
-color
-brand
-model
-owner_name
-owner_contact
-created_at
-updated_at
-```
-
-The owner information can remain optional for ordinary walk-in parking.
-
-## `parking_sessions`
-
-This is the most important table.
+It should contain:
 
 ```text
 id
 ticket_id
 vehicle_id
 parking_space_id
-parking_location_id
 entry_staff_id
 exit_staff_id
 entry_time
 exit_time
 status
-entry_method
-exit_method
 total_minutes
 subtotal
 discount_amount
@@ -442,959 +308,270 @@ created_at
 updated_at
 ```
 
-Possible session statuses:
+Important session statuses include:
 
 ```text
 ACTIVE
 EXIT_PENDING
 PAYMENT_PENDING
+PAID_AWAITING_EXIT
 COMPLETED
 CANCELLED
 LOST_TICKET
 MANUAL_REVIEW
 ```
 
-## `parking_tickets`
-
-```text
-id
-session_id
-ticket_number
-qr_token_hash
-issued_at
-printed_at
-reprint_count
-expires_at
-status
-```
-
-The system should store a hash of the QR token rather than exposing sensitive identifiers directly.
-
-## `parking_rates`
-
-```text
-id
-parking_location_id
-vehicle_type
-rate_name
-initial_minutes
-initial_fee
-succeeding_minutes
-succeeding_fee
-daily_maximum
-grace_period_minutes
-lost_ticket_fee
-overnight_fee
-effective_from
-effective_until
-is_active
-```
-
-## `payments`
-
-```text
-id
-parking_session_id
-receipt_number
-amount_due
-amount_paid
-change_amount
-payment_method
-reference_number
-cashier_id
-payment_status
-paid_at
-created_at
-```
-
-Possible payment methods:
-
-```text
-CASH
-GCASH
-MAYA
-CARD
-BANK_TRANSFER
-COMPLIMENTARY
-```
-
-## `audit_logs`
-
-```text
-id
-user_id
-action
-entity_type
-entity_id
-old_values
-new_values
-ip_address
-device_information
-created_at
-```
-
-This records actions such as:
-
-* Ticket reprinted
-* Entry time corrected
-* Session manually closed
-* Payment voided
-* Lost ticket approved
-* Parking fee overridden
-* Slot manually changed
-
-## `staff_shifts`
-
-```text
-id
-staff_id
-parking_location_id
-started_at
-ended_at
-opening_cash
-closing_cash
-expected_cash
-actual_cash
-status
-```
-
-This will allow the system to reconcile cashier activity.
-
 ---
 
-# 9. Parking Session State Machine
+# Secure Transaction Design
 
-Parking sessions should follow controlled status transitions.
-
-```text
-CREATED
-   ↓
-ACTIVE
-   ↓
-EXIT_PENDING
-   ↓
-PAYMENT_PENDING
-   ↓
-COMPLETED
-```
-
-Alternative paths:
-
-```text
-ACTIVE → LOST_TICKET → MANUAL_REVIEW → COMPLETED
-
-ACTIVE → CANCELLED
-
-EXIT_PENDING → ACTIVE
-```
-
-The backend must reject invalid transitions.
+Critical operations should use PostgreSQL functions or Supabase Edge Functions.
 
 For example:
 
-* A completed ticket cannot be scanned again.
-* A cancelled ticket cannot be used for exit.
-* A ticket belonging to another parking branch cannot be accepted.
-* An active vehicle cannot receive another active ticket.
-* A parking slot cannot be assigned to two active sessions.
-
----
-
-# 10. Fee Calculation Engine
-
-The parking rate should not be hard-coded inside the frontend.
-
-The backend should calculate the fee using configurable rate rules.
-
-Example rate:
-
 ```text
-First 3 hours: ₱50
-Every succeeding hour: ₱20
-Grace period: 15 minutes
-Daily maximum: ₱300
-Lost ticket penalty: ₱200
+create_parking_entry()
+calculate_parking_exit()
+record_parking_payment()
+confirm_vehicle_exit()
+cancel_parking_session()
+approve_lost_ticket()
 ```
 
-Example calculation:
+Each function should validate the entire operation and apply all database changes within one transaction.
 
-```text
-Entry: 9:10 AM
-Exit: 1:45 PM
-Duration: 4 hours and 35 minutes
+For example, `confirm_vehicle_exit()` should atomically:
 
-Initial 3 hours: ₱50
-Remaining 1 hour and 35 minutes:
-Rounded to 2 billing hours × ₱20 = ₱40
-
-Total: ₱90
-```
-
-The system should store both the result and the rate configuration used at the time of calculation. This ensures that historical receipts remain correct even when rates are changed later.
-
----
-
-# 11. PWA Application Screens
-
-## Authentication
-
-* Login
-* Forgot password
-* Device authorization
-* Staff shift start
-
-## Dashboard
-
-The dashboard should show:
-
-* Total parking capacity
-* Currently occupied spaces
-* Available spaces
-* Occupancy percentage
-* Vehicles entered today
-* Vehicles exited today
-* Active parking sessions
-* Revenue today
-* Average parking duration
-* Pending exit confirmations
-* Parking zones with occupancy indicators
-
-## Vehicle Entry Screen
-
-Recommended interface:
-
-```text
-Plate Number
-Vehicle Type
-Vehicle Color
-Preferred Zone
-Parking Slot
-Generate Ticket
-```
-
-The plate-number input should automatically convert text to uppercase and remove unnecessary spaces.
-
-After submission:
-
-* Session is created.
-* Slot becomes occupied.
-* QR ticket appears.
-* Print button becomes available.
-* Dashboard updates in real time.
-
-## QR Ticket Screen
-
-The ticket should contain:
-
-* Parking establishment
-* Ticket number
-* QR code
-* Plate number
-* Vehicle type
-* Parking slot
-* Entry time
-* Basic lost-ticket notice
-* Verification instructions
-
-The QR should remain readable from both printed paper and a phone screen.
-
-## Exit Scanner Screen
-
-The scanner should:
-
-* Use the phone or tablet camera
-* Scan continuously
-* Detect duplicate scans
-* Vibrate or play a confirmation sound
-* Show invalid-ticket warnings
-* Retrieve the active parking session
-* Display a clear confirmation page
-
-## Exit Confirmation Screen
-
-It should display:
-
-* Ticket number
-* Plate number
-* Entry time
-* Proposed exit time
-* Total duration
-* Rate used
-* Parking fee
-* Payment status
-* Confirm payment
-* Confirm vehicle exit
-
-## Parking Map
-
-The map can visually display spaces as:
-
-```text
-Green  = Available
-Red    = Occupied
-Yellow = Reserved
-Gray   = Unavailable
-Blue   = Accessible parking
-```
-
-## Transaction History
-
-Search and filter by:
-
-* Ticket number
-* Plate number
-* Date
-* Staff member
-* Parking zone
-* Payment status
-* Session status
-* Payment method
-
-## Reports
-
-Reports may include:
-
-* Daily revenue
-* Weekly and monthly revenue
-* Occupancy trends
-* Peak entry hours
-* Average parking duration
-* Vehicle-type breakdown
-* Lost-ticket incidents
-* Manual overrides
-* Staff transaction totals
-* Payment-method totals
-
----
-
-# 12. API Structure
-
-## Entry
-
-```text
-POST /parking-sessions/entry
-```
-
-Example request:
-
-```json
-{
-  "plateNumber": "ABC 1234",
-  "vehicleType": "CAR",
-  "parkingSpaceId": "space-uuid"
-}
-```
-
-The backend should:
-
-1. Validate the plate number.
-2. Check for an existing active session.
-3. Check if the slot is available.
-4. Create or retrieve the vehicle.
-5. Generate the ticket.
-6. Record server entry time.
-7. Occupy the selected space.
-8. Return the QR ticket information.
-
-## Ticket Validation
-
-```text
-POST /parking-tickets/validate
-```
-
-The request sends the QR token.
-
-The response returns the active parking session without closing it.
-
-## Exit Calculation
-
-```text
-POST /parking-sessions/:id/calculate-exit
-```
-
-This produces a proposed exit time, duration, and fee.
-
-It should not yet finalize the session.
-
-## Payment
-
-```text
-POST /parking-sessions/:id/payments
-```
-
-This records payment and generates a receipt.
-
-## Exit Confirmation
-
-```text
-POST /parking-sessions/:id/confirm-exit
-```
-
-The backend should:
-
-1. Verify the session is active.
-2. Verify payment requirements.
-3. Record the official server exit time.
+1. Confirm the session is still active.
+2. Validate payment status.
+3. Record the exit time.
 4. Calculate the final duration.
-5. Close the parking session.
-6. Release the parking slot.
+5. Mark the session as completed.
+6. Mark the parking space as available.
 7. Create an audit record.
-8. Notify connected dashboards.
+
+This prevents situations where the parking session is completed but the space remains occupied because one database operation failed.
 
 ---
 
-# 13. Offline-First PWA Strategy
+# Security Strategy
 
-Parking systems must remain usable during temporary internet problems.
+## Row Level Security
 
-The PWA can cache:
+Row Level Security must be enabled on every exposed Supabase table. Supabase specifically requires RLS for tables in exposed schemas such as `public`.
 
-* Application interface
-* Parking-rate information
-* Parking-space list
-* Recent active sessions
-* Staff authentication session
-* Pending local operations
+Example authorization rules:
 
-However, offline entry creation introduces duplicate-ticket risks.
+* Entry staff can create entries but cannot change parking rates.
+* Cashiers can create payments but cannot delete transactions.
+* Supervisors can approve overrides.
+* Administrators can manage the entire parking location.
+* Staff can only access the parking branch assigned to them.
 
-A safe offline approach is:
+## Additional Security Measures
 
-1. Each authorized device receives a unique device identifier.
-2. Offline tickets use device-prefixed ticket numbers.
-3. Transactions are saved in IndexedDB.
-4. The PWA marks them as pending synchronization.
-5. When the connection returns, the backend validates and synchronizes them.
-6. Conflicts are sent for supervisor review.
+The system should implement:
 
-Example offline ticket number:
+* Secure Supabase Auth sessions
+* Password hashing handled by Supabase Auth
+* Role-based RLS policies
+* Server-generated timestamps
+* Secure QR tokens
+* Hashed QR-token storage
+* Rate limiting on scan and validation endpoints
+* Input validation with Zod
+* Database constraints
+* Audit logging
+* Restricted service-role credentials
+* HTTP security headers
+* Duplicate request prevention
+* Idempotency keys for entry, payment, and exit operations
 
-```text
-OFF-ENTRY01-20260716-0007
-```
-
-For the initial MVP, exit confirmation may require a connection because payment verification and duplicate prevention are more critical during exit.
-
----
-
-# 14. Hardware Automation Roadmap
-
-## Stage 1: Staff Device
-
-Equipment:
-
-* Android phone or tablet
-* Bluetooth or network thermal printer
-* PWA camera scanner
-
-The staff manually registers the plate, while ticket generation and time recording are automatic.
-
-## Stage 2: Entry Kiosk
-
-Equipment:
-
-* Touchscreen kiosk
-* QR printer
-* Vehicle-presence sensor
-* Barrier gate
-
-Flow:
-
-```text
-Sensor detects vehicle
-      ↓
-Kiosk requests vehicle information
-      ↓
-Ticket is generated
-      ↓
-Barrier opens
-```
-
-## Stage 3: License Plate Recognition
-
-Equipment:
-
-* Entry camera
-* Exit camera
-* Local recognition service
-* Barrier controller
-
-Flow:
-
-```text
-Camera captures plate
-      ↓
-Recognition service reads plate
-      ↓
-Backend creates session
-      ↓
-Digital or printed ticket is generated
-      ↓
-Barrier opens
-```
-
-At exit:
-
-```text
-Camera reads plate
-      ↓
-System searches for active session
-      ↓
-QR or plate is used as verification
-      ↓
-Payment is confirmed
-      ↓
-Barrier opens
-```
-
-The QR ticket remains a fallback when plate recognition is inaccurate.
-
-## Stage 4: Parking Space Sensors
-
-Sensors can report whether each physical parking slot is occupied.
-
-This allows the system to compare:
-
-```text
-Database says slot is available
-Physical sensor says slot is occupied
-```
-
-Any mismatch can generate an operational alert.
+The Supabase service-role or secret key must never appear in the browser. It should only be available inside secure Edge Functions or server-side environments.
 
 ---
 
-# 15. Security and Fraud Prevention
+# Reliability Strategy
+
+A free serverless platform alone does not guarantee reliability. The application itself must prevent inconsistent data.
 
 The system should include:
 
-* HTTPS for every request
-* Secure password hashing
-* Role-based access control
-* Short-lived access tokens
-* Refresh-token rotation
-* QR token hashing
-* Rate limiting
-* Device authorization
-* Audit logs
-* Server-generated timestamps
-* Server-side fee calculations
-* Database transactions
+* PostgreSQL transactions
+* Unique ticket constraints
 * Duplicate active-session prevention
-* Restricted manual overrides
-* Supervisor approval for sensitive actions
+* Unique payment references
+* Idempotent entry and exit functions
+* Automatic retries for temporary connection failures
+* Offline operation indicators
+* Pending synchronization queues
+* Audit records for every sensitive operation
+* Daily manual or automated database exports
+* Error monitoring
+* Clear recovery workflows
 
-Sensitive actions should require a reason.
+Exit transactions should require an internet connection during the MVP. Offline exit confirmation creates greater risks involving duplicate payments, reused tickets, and inconsistent parking-space statuses.
 
-Example:
-
-```text
-Action: Correct entry time
-Old value: 9:42 AM
-New value: 9:30 AM
-Reason: Entry device was temporarily offline
-Approved by: Supervisor
-```
-
-Staff members should never be allowed to silently edit historical transactions.
+Vehicle entry can later support controlled offline ticket generation using IndexedDB and device-prefixed ticket numbers.
 
 ---
 
-# 16. Critical Edge Cases
+# Performance and Optimization
 
-The system must prepare for the following situations.
+## Database Optimization
 
-## Lost Ticket
-
-Staff searches by:
-
-* Plate number
-* Vehicle description
-* Approximate entry time
-* Parking location
-* Entry camera record
-
-A supervisor approves the lost-ticket process and penalty.
-
-## Duplicate Ticket Scan
-
-The scanner displays:
+Add indexes for commonly searched columns:
 
 ```text
-This parking session was completed at 3:42 PM.
-Receipt: RCPT-20260716-00821
+parking_sessions.status
+parking_sessions.entry_time
+parking_sessions.exit_time
+parking_sessions.parking_location_id
+parking_tickets.ticket_number
+parking_tickets.qr_token_hash
+vehicles.normalized_plate_number
+payments.receipt_number
+parking_spaces.status
 ```
 
-## Wrong Parking Branch
+Use a partial unique index to prevent the same vehicle from having multiple active parking sessions.
 
-A ticket issued at Branch A cannot be processed at Branch B unless the administrator explicitly allows cross-branch exits.
+## Frontend Optimization
 
-## Vehicle Without a Plate
+* Cache the PWA shell and static assets.
+* Load dashboard sections only when needed.
+* Paginate transaction histories.
+* Use server-rendered pages where interactivity is unnecessary.
+* Use client components only for scanners, forms, and live dashboards.
+* Compress icons and images.
+* Avoid storing unnecessary vehicle photos.
+* Cache stable configuration such as vehicle types and parking zones.
+* Display optimistic updates only when they can safely be corrected.
 
-The system can generate a temporary identifier based on:
+## Realtime Optimization
 
-* Vehicle type
-* Color
-* Brand
-* Entry image
-* Temporary ticket number
+Do not enable database-change subscriptions for every table.
 
-## Printer Failure
+Realtime should primarily cover:
 
-The system can:
-
-* Display the QR on the customer’s phone
-* Send the ticket by SMS or email
-* Allow a reprint
-* Record every reprint in the audit log
-
-## Internet Failure
-
-The entry device can generate a controlled offline ticket and synchronize it later.
-
-## Early Grace-Period Exit
-
-If the vehicle exits within the configured grace period, the system may charge zero while still creating a completed transaction.
-
-## Payment Made but Exit Not Confirmed
-
-The session becomes:
-
-```text
-PAID_AWAITING_EXIT
-```
-
-It should not automatically free the parking space until the vehicle actually exits.
-
-## Staff Accidentally Scans the Wrong Ticket
-
-The scan first opens a review screen. Only the confirmation action records the exit.
-
----
-
-# 17. Development Roadmap
-
-## Phase 1: Planning and System Design
-
-Create:
-
-* Product requirements document
-* User-role definitions
-* Entry and exit workflows
-* Parking-rate rules
-* Entity relationship diagram
-* System architecture diagram
-* Screen map
-* API contract
-* Session status rules
-
-The most important outcome is a clearly defined parking-session lifecycle.
-
-## Phase 2: Backend Foundation
-
-Build:
-
-* NestJS project
-* PostgreSQL database
-* Authentication
-* Role-based authorization
-* User and staff management
-* Parking location management
-* Parking zone and space management
-* Audit-log foundation
-
-## Phase 3: Core Parking Engine
-
-Build:
-
-* Vehicle registration
-* Parking-session creation
-* Server-generated entry time
-* Duplicate session validation
-* Slot assignment
-* Ticket-number generation
-* Secure QR-token generation
-* Active-session management
-
-At this stage, a vehicle should be able to enter and receive a valid QR ticket.
-
-## Phase 4: Exit and Fee Calculation
-
-Build:
-
-* QR scanning
-* Ticket validation
-* Duration calculation
-* Parking-rate engine
-* Exit review
+* Parking-space status
+* Active parking sessions
+* Payment confirmation
 * Exit confirmation
-* Slot release
-* Completed transaction records
+* Operational alerts
 
-At this stage, the complete entry-to-exit workflow should function.
-
-## Phase 5: Payments and Receipts
-
-Build:
-
-* Cash payment recording
-* Digital payment references
-* Receipt generation
-* Payment history
-* Shift cash reconciliation
-* Refund and void workflow
-* Supervisor approval
-
-## Phase 6: PWA Capabilities
-
-Implement:
-
-* Installable PWA
-* Service worker
-* Cached interface
-* IndexedDB
-* Offline-entry queue
-* Connection indicators
-* Synchronization status
-* Device registration
-* Camera permissions
-* QR scanner optimization
-
-## Phase 7: Dashboard and Reports
-
-Build:
-
-* Live occupancy dashboard
-* Revenue dashboard
-* Parking-space map
-* Transaction search
-* CSV and PDF exports
-* Staff performance report
-* Occupancy analytics
-* Peak-hour analysis
-
-## Phase 8: Operational Hardening
-
-Add:
-
-* Lost-ticket workflow
-* Manual override approvals
-* Duplicate scan protection
-* Printer failure handling
-* Offline conflict resolution
-* Alerting
-* Backup and recovery
-* Audit review tools
-* Database transaction protection
-
-## Phase 9: Hardware Integration
-
-Integrate progressively:
-
-1. Thermal ticket printer
-2. Entrance and exit tablets
-3. Vehicle-presence sensors
-4. Barrier controller
-5. License-plate camera
-6. Parking-space occupancy sensors
-
-## Phase 10: Multi-Branch and Production Scaling
-
-Add:
-
-* Multiple parking locations
-* Branch-specific rates
-* Branch-specific staff
-* Central administrator dashboard
-* Device monitoring
-* Queue processing
-* Centralized logging
-* Automated backups
-* Monitoring and error tracking
+Reports and historical transactions should use normal paginated database queries.
 
 ---
 
-# 18. Recommended MVP
+# Free Deployment Plan
 
-The MVP should focus on proving the complete parking lifecycle.
+## Vercel Hobby
 
-## Include
+As of July 16, 2026, Vercel Hobby costs $0 and includes automatic CI/CD, CDN delivery, HTTPS, DDoS mitigation, one million monthly edge requests, 100 GB monthly data transfer, one million monthly function invocations, and four hours of active function CPU.
 
-* Staff authentication
-* Entry and exit staff roles
-* Parking-space management
+However, Vercel states that the Hobby plan is for **personal and non-commercial use**. It is appropriate for a student project, capstone, prototype, portfolio project, demonstration, or limited non-commercial pilot. A parking business using the system commercially would eventually need an eligible paid plan or a different hosting arrangement.
+
+## Supabase Free
+
+The current Supabase Free plan includes:
+
+* Two active projects
+* 500 MB database size per project
+* 50,000 monthly active users
+* 5 GB database egress
+* 5 GB cached egress
+* 1 GB file storage
+* 200 peak Realtime connections
+* Two million Realtime messages monthly
+* 500,000 Edge Function invocations
+* Unlimited API requests
+
+These limits should be sufficient for development, demonstrations, school deployment, and a small pilot parking facility.
+
+However, the free plan has important limitations:
+
+* Projects may pause after one week of inactivity.
+* Automatic database backups are not included.
+* Only one day of API and database logs is retained.
+* No uptime service-level agreement is included.
+* Advanced support and compliance features are not included.
+
+Therefore, the system can initially cost **₱0 per month**, but “free” should not be treated as guaranteed production-grade infrastructure for a busy commercial parking facility.
+
+---
+
+# Recommended MVP Scope
+
+The first version should include:
+
+* Staff login
+* Role-based permissions
+* Parking-zone and space management
 * Vehicle entry registration
-* Automatic server-based entry time
+* Automatic server entry time
 * QR ticket generation
-* QR scanning through the PWA camera
-* Automatic exit-time proposal
-* Duration calculation
+* Printable ticket layout
+* Camera-based QR scanning
+* Automatic duration calculation
 * Configurable parking rates
-* Fee calculation
 * Cash payment recording
 * Exit confirmation
-* Parking-space release
-* Digital receipt
-* Active-session dashboard
-* Basic daily reports
+* Automatic space release
+* Active parking dashboard
+* Transaction history
+* Daily revenue report
+* Lost-ticket workflow
 * Audit logs
+* Installable PWA
 
-## Exclude Initially
+The following should be postponed:
 
-* License plate recognition
-* Automated barrier gates
-* Parking-space sensors
-* Online reservations
-* Customer mobile application
-* Advanced subscriptions
-* AI-powered predictions
-* Complex dynamic pricing
-* Multiple parking branches
-
-These features can be added once the basic parking transaction engine is stable.
+* Automatic plate recognition
+* Barrier-gate integration
+* Physical parking sensors
+* Customer reservations
+* Mobile payment API integration
+* Multi-branch management
+* Monthly subscriptions
+* AI occupancy prediction
 
 ---
 
-# 19. Features That Make the System “Built Different”
-
-After the MVP, the system can become more advanced through the following capabilities.
-
-## Ticketless Parking
-
-Returning users can register their plate number and exit using plate recognition rather than a physical QR ticket.
-
-## Smart Space Recommendation
-
-The system recommends a slot based on:
-
-* Vehicle size
-* Distance from entrance
-* Accessible-parking requirements
-* Current congestion
-* Expected parking duration
-
-## Real-Time Parking Map
-
-Staff can see the exact status of each space and identify occupancy mismatches.
-
-## Predictive Occupancy
-
-Historical data can estimate:
-
-* Expected peak hours
-* Expected available spaces
-* Typical parking durations
-* Staffing requirements
-
-## Digital Customer Ticket
-
-Drivers can receive their ticket through:
-
-* QR display
-* SMS
-* Email
-* Installable customer PWA
-
-## Exit Queue Management
-
-The platform can monitor how many vehicles are waiting and direct staff to open another exit lane.
-
-## Fraud Detection
-
-The system can flag:
-
-* Repeated lost-ticket claims
-* Frequent staff overrides
-* Unusual fee reductions
-* Payment and exit mismatches
-* Duplicate vehicle sessions
-* Suspicious ticket reprints
-
-## Emergency Mode
-
-During emergencies, authorized staff can open barriers while the system continues logging every manual release.
-
-## Memberships and Subscriptions
-
-Regular customers can receive:
-
-* Monthly parking plans
-* Reserved spaces
-* Automatic billing
-* Entry through registered plates
-* Usage history
-
----
-
-# 20. Suggested Project Structure
+# Final Recommended Setup
 
 ```text
-parking-management-system/
-│
-├── apps/
-│   ├── parking-pwa/
-│   │   ├── src/
-│   │   │   ├── features/
-│   │   │   │   ├── auth/
-│   │   │   │   ├── dashboard/
-│   │   │   │   ├── entry/
-│   │   │   │   ├── exit/
-│   │   │   │   ├── scanner/
-│   │   │   │   ├── parking-map/
-│   │   │   │   ├── payments/
-│   │   │   │   └── reports/
-│   │   │   ├── components/
-│   │   │   ├── services/
-│   │   │   ├── offline/
-│   │   │   └── routes/
-│   │   └── public/
-│   │
-│   └── parking-api/
-│       └── src/
-│           ├── auth/
-│           ├── users/
-│           ├── vehicles/
-│           ├── parking-sessions/
-│           ├── parking-spaces/
-│           ├── tickets/
-│           ├── rates/
-│           ├── payments/
-│           ├── reports/
-│           ├── audit-logs/
-│           └── devices/
-│
-├── packages/
-│   ├── shared-types/
-│   ├── validation/
-│   ├── database/
-│   └── ui/
-│
-├── docker/
-├── documentation/
-└── tests/
+Frontend and PWA
+Next.js + TypeScript + Tailwind CSS + shadcn/ui
+
+Deployment
+Vercel connected to GitHub
+
+Database
+Supabase PostgreSQL
+
+Authentication
+Supabase Auth
+
+Authorization
+PostgreSQL Row Level Security
+
+Secure Backend Operations
+Supabase Edge Functions + PostgreSQL RPC functions
+
+Live Occupancy
+Supabase Realtime
+
+Offline Support
+Service Worker + IndexedDB
+
+Validation
+Zod + React Hook Form
+
+Testing
+Vitest + Playwright
 ```
 
-A monorepo structure will make it easier to share TypeScript types, validation schemas, and business rules between the PWA and backend.
+This configuration gives the project a modern serverless foundation that is inexpensive to start, relatively easy to maintain, responsive on mobile devices, and capable of expanding into a larger parking operations platform.
 
----
-
-# 21. Final MVP Success Criteria
-
-The MVP can be considered successful when:
-
-1. A staff member can register a vehicle in less than a few seconds.
-2. The system generates a unique and secure QR ticket.
-3. Entry time is recorded automatically by the backend.
-4. A parking space cannot be assigned twice.
-5. An active vehicle cannot receive duplicate active sessions.
-6. Exit staff can scan the ticket using a phone or tablet.
-7. The system retrieves the correct parking transaction.
-8. Duration and fees are calculated without manual computation.
-9. Payment and exit confirmation are recorded separately.
-10. The slot becomes available only after confirmed exit.
-11. Completed tickets cannot be reused.
-12. Every sensitive staff action is auditable.
-13. The dashboard reflects occupancy changes in real time.
-14. Historical transactions remain searchable and reportable.
-
-The heart of the entire system is not the QR scanner or the ticket printer. It is the **parking-session engine** that reliably controls each vehicle from entry to completed exit.
+For a student project, portfolio application, proof of concept, or small non-commercial pilot, the initial infrastructure can remain completely free. For a real commercial deployment, the architecture can stay the same, but the hosting plans, backups, monitoring, support, and uptime guarantees should eventually be upgraded.
