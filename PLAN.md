@@ -32,9 +32,9 @@
 |-------|--------|--------------|
 | 1. Discovery and Decisions | ✅ **Complete** | Default decisions in §3 are approved for development. Fee vectors in §17 are the approved test corpus. |
 | **2. Repository and Environments** | ✅ **Complete** | `npm run build` clean; `npm test` shows RED; `npx supabase --version` works; full directory tree exists. Next.js 16.2.10, Node 22.17.0, Supabase CLI 2.109.1. |
-| **3. Database Foundation** | 🔄 **ACTIVE — START HERE** | Clean `supabase db reset`; full pgTAP integrity suite green. |
-| 4. Auth & Authorization | ⏳ Pending | Full identity/role/location/verb RLS matrix passes. |
-| 5. Facility, Spaces, Rates | ⏳ Pending | Validated mobile config flows; immutable publish behaviour verified. |
+| **3. Database Foundation** | ✅ **Complete** | Local: `supabase db reset` + `supabase test db` — 30/30 pgTAP pass. Remote schema + reference seed applied. |
+| **4. Auth & Authorization** | ✅ **Complete** | SSR auth, middleware, login/callback, RLS. Remote seeded: `admin@eparkgo.local` / `staff@eparkgo.local`. Connection verify OK. |
+| **5. Facility, Spaces, Rates** | 🔄 **ACTIVE** | Validated mobile config flows; immutable publish behaviour verified. |
 | 6. Entry & QR Ticket | ⏳ Pending | Concurrent plate/space tests pass; entry E2E passes. |
 | 7. Validation, Fee, Exit Preview | ⏳ Pending | Every fee vector and state transition in §17 passes. |
 | 8. Cash Payment & Confirmed Exit | ⏳ Pending | Network interruption and concurrency E2E passes. |
