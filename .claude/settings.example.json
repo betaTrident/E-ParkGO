@@ -1,0 +1,17 @@
+{
+  "env": {
+    "OPENROUTER_API_KEY": "YOUR_OPENROUTER_API_KEY_HERE",
+    "ANTHROPIC_BASE_URL": "https://openrouter.ai/api",
+    "ANTHROPIC_AUTH_TOKEN": "YOUR_OPENROUTER_API_KEY_HERE",
+    "ANTHROPIC_API_KEY": "",
+    "ANTHROPIC_MODEL": "nvidia/nemotron-3-ultra-550b-a55b:free"
+  },
+  "enabledMcpjsonServers": [
+    "github",
+    "context7",
+    "exa",
+    "memory",
+    "playwright",
+    "sequential-thinking"
+  ]
+} 

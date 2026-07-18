@@ -1,0 +1,28 @@
+# Repository instincts for commit and workflow hygiene
+
+id: repository-conventional-commits
+trigger: "when making a commit"
+enabled: true
+source_repo: codemini
+
+---
+
+# Repository Commit Hygiene
+
+- Prefer conventional commits.
+- Keep subjects concise and imperative.
+- Match the repository's existing review and test patterns.
+
+---
+
+id: repository-file-naming
+trigger: "when creating a new JavaScript or TypeScript module"
+enabled: true
+source_repo: codemini
+
+---
+
+# Repository File Naming
+
+- Use lowercase, hyphenated file names where the surrounding codebase expects them.
+- Prefer relative imports and the existing module style.
