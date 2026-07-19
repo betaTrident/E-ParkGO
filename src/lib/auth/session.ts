@@ -1,43 +1,46 @@
-import { redirect } from 'next/navigation'
+import { redirect } from "next/navigation";
 
-import { getActiveProfile } from '@/lib/auth/profile'
-import type { ActiveProfile, AppRole } from '@/lib/auth/types'
-import { createServerSupabaseClient } from '@/lib/supabase/server'
+import { getActiveProfile } from "@/lib/auth/profile";
+import type { ActiveProfile, AppRole } from "@/lib/auth/types";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export async function getSessionUser() {
-  const supabase = await createServerSupabaseClient()
+  const supabase = await createServerSupabaseClient();
   const {
     data: { user },
     error,
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
   if (error || !user) {
-    return null
+    return null;
   }
 
-  return user
+  return user;
 }
 
 export async function requireActiveProfile(): Promise<ActiveProfile> {
-  const profile = await getActiveProfile()
+  const profile = await getActiveProfile();
 
   if (!profile) {
-    redirect('/login')
+    const supabase = await createServerSupabaseClient();
+    const { error } = await supabase.auth.signOut({ scope: "local" });
+    if (error) console.error("Unable to clear an unavailable account session");
+    redirect("/login?reason=account-unavailable");
   }
 
-  return profile
+  return profile;
 }
 
 export async function requireAdminProfile(): Promise<ActiveProfile> {
-  const profile = await requireActiveProfile()
+  const profile = await requireActiveProfile();
 
-  if (profile.role !== 'ADMIN') {
-    redirect('/dashboard')
+  if (profile.role !== "ADMIN") {
+    redirect("/dashboard");
   }
 
-  return profile
+  return profile;
 }
 
 export function hasRole(profile: ActiveProfile, role: AppRole): boolean {
-  return profile.role === role
+  return profile.role === role;
 }

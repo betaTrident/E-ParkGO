@@ -19,11 +19,10 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:types": "node scripts/gen-types-local.mjs",
-    "db:types:remote": "node scripts/supabase-seed-remote.mjs",
+    "db:types:remote": "node scripts/gen-types-remote.mjs",
     "db:migrate": "supabase migration new",
     "db:test": "supabase test db",
-    "db:push": "node scripts/supabase-push-remote.mjs",
-    "db:seed:remote": "node scripts/supabase-seed-remote.mjs"
+    "db:push": "node scripts/supabase-push-remote.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",
@@ -73,5 +72,10 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.20"
+    }
   }
 }

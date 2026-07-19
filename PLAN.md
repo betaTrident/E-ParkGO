@@ -1,13 +1,13 @@
 # E-ParkGO Implementation Plan
 
-> Status: development blueprint for a greenfield implementation. Nothing described here is claimed to exist yet.
+> Status: living implementation plan. Only items marked **Complete** have passed their documented gate; **Implemented — verification pending** means the code exists but the full gate has not been executed successfully in the current environment.
 >
 > Product source: `initial-roadmap.md`. Business rules not fixed by that source are labeled **Assumption**.
 
 ## 0. Composer 2.5 Execution Guide
 
 > **This section is the primary entry point for Composer 2.5.** Read it before any other section, every session.
-> The full product specification begins at §1. Do not modify §0 during implementation — update the Status column in §0.2 only.
+> The full product specification begins at §1. Keep §0 factual and concise; update implementation status only when supported by reproducible gate evidence.
 
 ---
 
@@ -32,9 +32,9 @@
 |-------|--------|--------------|
 | 1. Discovery and Decisions | ✅ **Complete** | Default decisions in §3 are approved for development. Fee vectors in §17 are the approved test corpus. |
 | **2. Repository and Environments** | ✅ **Complete** | `npm run build` clean; `npm test` shows RED; `npx supabase --version` works; full directory tree exists. Next.js 16.2.10, Node 22.17.0, Supabase CLI 2.109.1. |
-| **3. Database Foundation** | ✅ **Complete** | Local: `supabase db reset` + `supabase test db` — 30/30 pgTAP pass. Remote schema + reference seed applied. |
-| **4. Auth & Authorization** | ✅ **Complete** | SSR auth, middleware, login/callback, RLS. Remote seeded: `admin@eparkgo.local` / `staff@eparkgo.local`. Connection verify OK. |
-| **5. Facility, Spaces, Rates** | 🔄 **ACTIVE** | Validated mobile config flows; immutable publish behaviour verified. |
+| **3. Database Foundation** | ⚠️ **Implemented — verification pending** | Schema, tenant integrity, safe remote tooling, and 230 planned pgTAP assertions are implemented. Required gate remains `supabase db reset` + `supabase test db`; blocked locally until Docker is available. No remote deployment is implied. |
+| **4. Auth & Authorization** | ⚠️ **Implemented — database gate pending** | SSR auth, safe callbacks, recovery/update flow, inactive-account handling, protected shell, permissions, grants, and expanded RLS coverage are implemented. Typecheck, lint, production build, 55 unit tests with ≥80% coverage, and 10 Chromium/Firefox/WebKit desktop/mobile auth checks pass. Completion remains blocked only by the Phase 3 database gate. |
+| **5. Facility, Spaces, Rates** | ⏳ **Pending** | Database groundwork exists, but configuration RPCs, responsive UI flows, immutable publish tests, and the full phase gate are not implemented. |
 | 6. Entry & QR Ticket | ⏳ Pending | Concurrent plate/space tests pass; entry E2E passes. |
 | 7. Validation, Fee, Exit Preview | ⏳ Pending | Every fee vector and state transition in §17 passes. |
 | 8. Cash Payment & Confirmed Exit | ⏳ Pending | Network interruption and concurrency E2E passes. |

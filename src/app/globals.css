@@ -49,13 +49,13 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  --background: oklch(0.985 0.006 255);
+  --foreground: oklch(0.19 0.04 260);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
+  --primary: oklch(0.58 0.22 257);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);
@@ -66,13 +66,13 @@
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --ring: oklch(0.58 0.22 257);
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -126,5 +126,27 @@
   }
   html {
     @apply font-sans;
+  }
+  body {
+    text-rendering: optimizeLegibility;
+  }
+  :focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--ring) 75%, white);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  .reference-card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-[0_1px_2px_rgb(15_23_42/0.03)] dark:border-slate-800 dark:bg-slate-900;
+  }
+  .icon-surface {
+    @apply inline-flex size-12 shrink-0 items-center justify-center rounded-full;
+  }
+  .nav-item {
+    @apply flex min-h-11 items-center gap-3 rounded-lg px-3 text-sm font-medium text-slate-600 transition-colors dark:text-slate-300;
+  }
+  .nav-item-active {
+    @apply bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-300;
   }
 }

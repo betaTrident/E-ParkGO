@@ -1,9 +1,10 @@
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
 function loadEnvFile(filename) {
   const path = resolve(process.cwd(), filename)
+  if (!existsSync(path)) return {}
   const content = readFileSync(path, 'utf8')
   const entries = {}
 
@@ -19,11 +20,12 @@ function loadEnvFile(filename) {
 }
 
 function run(command, args, env, { capture = false } = {}) {
-  const result = spawnSync(command, args, {
+  const executable = process.platform === 'win32' && command === 'npx' ? 'npx.cmd' : command
+  const result = spawnSync(executable, args, {
     cwd: process.cwd(),
     env: { ...process.env, ...env },
     encoding: 'utf8',
-    shell: process.platform === 'win32',
+    shell: false,
   })
 
   if (!capture) {
@@ -43,16 +45,20 @@ function run(command, args, env, { capture = false } = {}) {
 }
 
 const envLocal = loadEnvFile('.env.local')
-const projectRef = envLocal.SUPABASE_PROJECT_ID || 'nvjkigmnltxxvaimmxbg'
-const sharedEnv = { ...envLocal, SUPABASE_PROJECT_ID: projectRef }
+const sharedEnv = { ...envLocal, ...process.env }
+const projectRef = sharedEnv.SUPABASE_PROJECT_ID
+
+if (!projectRef) {
+  throw new Error('SUPABASE_PROJECT_ID is required; refusing to target an implicit project')
+}
 
 console.log('Linking Supabase project...')
 run('npx', ['supabase', 'link', '--project-ref', projectRef, '--yes'], sharedEnv)
 
-console.log('Pushing migrations and seed to linked project...')
+console.log('Pushing migrations to linked project...')
 run(
   'npx',
-  ['supabase', 'db', 'push', '--linked', '--include-seed', '--yes'],
+  ['supabase', 'db', 'push', '--linked', '--yes'],
   sharedEnv,
 )
 

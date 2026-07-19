@@ -1,6 +1,6 @@
 begin;
 
-select plan(20);
+select plan(23);
 
 select ok(
   to_regclass('public.parking_locations') is not null,
@@ -136,6 +136,72 @@ select ok(
     )
   ),
   'current_location_id uses empty search_path'
+);
+
+select ok(
+  exists (
+    select 1
+    from pg_constraint c
+    where c.conrelid = 'public.session_corrections'::regclass
+      and c.confrelid = 'public.profiles'::regclass
+      and c.contype = 'f'
+      and c.conname = 'session_corrections_requested_by_location_fk'
+      and (
+        select array_agg(a.attname order by keys.ordinality)
+        from unnest(c.conkey) with ordinality as keys(attnum, ordinality)
+        join pg_attribute a on a.attrelid = c.conrelid and a.attnum = keys.attnum
+      ) = array['requested_by', 'parking_location_id']::name[]
+      and (
+        select array_agg(a.attname order by keys.ordinality)
+        from unnest(c.confkey) with ordinality as keys(attnum, ordinality)
+        join pg_attribute a on a.attrelid = c.confrelid and a.attnum = keys.attnum
+      ) = array['id', 'parking_location_id']::name[]
+  ),
+  'session correction requester is constrained to the correction location'
+);
+
+select ok(
+  exists (
+    select 1
+    from pg_constraint c
+    where c.conrelid = 'public.session_corrections'::regclass
+      and c.confrelid = 'public.profiles'::regclass
+      and c.contype = 'f'
+      and c.conname = 'session_corrections_approved_by_location_fk'
+      and (
+        select array_agg(a.attname order by keys.ordinality)
+        from unnest(c.conkey) with ordinality as keys(attnum, ordinality)
+        join pg_attribute a on a.attrelid = c.conrelid and a.attnum = keys.attnum
+      ) = array['approved_by', 'parking_location_id']::name[]
+      and (
+        select array_agg(a.attname order by keys.ordinality)
+        from unnest(c.confkey) with ordinality as keys(attnum, ordinality)
+        join pg_attribute a on a.attrelid = c.confrelid and a.attnum = keys.attnum
+      ) = array['id', 'parking_location_id']::name[]
+  ),
+  'session correction approver is constrained to the correction location'
+);
+
+select ok(
+  exists (
+    select 1
+    from pg_constraint c
+    where c.conrelid = 'public.audit_logs'::regclass
+      and c.confrelid = 'public.profiles'::regclass
+      and c.contype = 'f'
+      and c.conname = 'audit_logs_actor_location_fk'
+      and (
+        select array_agg(a.attname order by keys.ordinality)
+        from unnest(c.conkey) with ordinality as keys(attnum, ordinality)
+        join pg_attribute a on a.attrelid = c.conrelid and a.attnum = keys.attnum
+      ) = array['actor_id', 'parking_location_id']::name[]
+      and (
+        select array_agg(a.attname order by keys.ordinality)
+        from unnest(c.confkey) with ordinality as keys(attnum, ordinality)
+        join pg_attribute a on a.attrelid = c.confrelid and a.attnum = keys.attnum
+      ) = array['id', 'parking_location_id']::name[]
+  ),
+  'audit actor is constrained to the audited location'
 );
 
 select * from finish();
