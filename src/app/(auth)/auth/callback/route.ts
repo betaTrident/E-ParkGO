@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSafeRedirectPath } from "@/lib/auth/safe-redirect";
 import { RECOVERY_INTENT_COOKIE } from "@/lib/auth/recovery-intent";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerActionSupabaseClient } from "@/lib/supabase/server-action";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
     );
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createServerActionSupabaseClient();
   const { error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {

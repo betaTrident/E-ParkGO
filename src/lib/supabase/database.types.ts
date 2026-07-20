@@ -57,11 +57,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "audit_logs_actor_id_fkey"
-            columns: ["actor_id"]
+            foreignKeyName: "audit_logs_actor_location_fk"
+            columns: ["actor_id", "parking_location_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "parking_location_id"]
           },
           {
             foreignKeyName: "audit_logs_parking_location_id_fkey"
@@ -980,11 +980,11 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "session_corrections_approved_by_fkey"
-            columns: ["approved_by"]
+            foreignKeyName: "session_corrections_approved_by_location_fk"
+            columns: ["approved_by", "parking_location_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "parking_location_id"]
           },
           {
             foreignKeyName: "session_corrections_parking_location_id_fkey"
@@ -994,11 +994,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "session_corrections_requested_by_fkey"
-            columns: ["requested_by"]
+            foreignKeyName: "session_corrections_requested_by_location_fk"
+            columns: ["requested_by", "parking_location_id"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
+            referencedColumns: ["id", "parking_location_id"]
           },
           {
             foreignKeyName: "session_corrections_session_fk"
@@ -1231,7 +1231,56 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      admin_create_staff_profile: {
+        Args: {
+          p_can_approve_overrides: boolean
+          p_can_cancel_sessions: boolean
+          p_can_correct_session_times: boolean
+          p_can_process_lost_tickets: boolean
+          p_can_void_payments: boolean
+          p_correlation_id: string
+          p_full_name: string
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_user_id: string
+        }
+        Returns: string
+      }
+      admin_disable_staff: {
+        Args: {
+          p_correlation_id: string
+          p_reason: string
+          p_target_id: string
+        }
+        Returns: undefined
+      }
+      admin_reactivate_staff: {
+        Args: {
+          p_correlation_id: string
+          p_reason: string
+          p_target_id: string
+        }
+        Returns: undefined
+      }
+      admin_update_staff_permissions: {
+        Args: {
+          p_can_approve_overrides: boolean
+          p_can_cancel_sessions: boolean
+          p_can_correct_session_times: boolean
+          p_can_process_lost_tickets: boolean
+          p_can_void_payments: boolean
+          p_correlation_id: string
+          p_target_id: string
+        }
+        Returns: undefined
+      }
+      admin_update_staff_role: {
+        Args: {
+          p_correlation_id: string
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_target_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "ADMIN" | "STAFF"

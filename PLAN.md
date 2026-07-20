@@ -1,6 +1,6 @@
 # E-ParkGO Implementation Plan
 
-> Status: living implementation plan. Only items marked **Complete** have passed their documented gate; **Implemented — verification pending** means the code exists but the full gate has not been executed successfully in the current environment.
+> Status: living implementation plan. `COMPLETE` means every documented gate passed and evidence was recorded. Implementation state and gate state are tracked separately so existing code is never mistaken for a completed phase.
 >
 > Product source: `initial-roadmap.md`. Business rules not fixed by that source are labeled **Assumption**.
 
@@ -8,43 +8,59 @@
 
 > **This section is the primary entry point for Composer 2.5.** Read it before any other section, every session.
 > The full product specification begins at §1. Keep §0 factual and concise; update implementation status only when supported by reproducible gate evidence.
+> The master specification has a documentation-only size exception recorded in `docs/adr/0000-plan-specification-size-exception.md`; executable phase playbooks remain below 400 lines.
 
 ---
 
 ### 0.1 How to Use This Plan
 
 1. **Always start with `AGENTS.md`** — it contains the boot sequence, anti-hallucination constraints, and the skills routing table. The workspace rules inject it automatically, but confirm it has been read.
-2. **Check §0.2** — find the current active phase and its gate status before touching any file.
+2. **Check §0.2** — read the machine-readable execution control and current status before touching any file. It is the only current-phase authority; a stale phase label elsewhere does not override it.
 3. **Load skills** — use the `Read` tool on every skill path listed for the active phase in `AGENTS.md §Phase Skills Routing Table` before writing a single line of implementation.
-4. **Execute the phase steps** — use the numbered steps in §0.4 (Phase 2) or the corresponding phase section for later phases. Follow them in sequence. Do not skip steps.
+4. **Read one playbook** — open only the `ACTIVE_PLAYBOOK` named in §0.2. Future playbooks are specification, not authorization. Phase 2's long guide in Appendix A is retained as historical scaffolding evidence, not a command to rerun scaffolding.
 5. **Verify each step** — each step ends with a verification command. Run it and confirm the expected result before moving to the next step.
-6. **Update §0.2 status** when a phase gate passes.
+6. **Stop at the boundary** — obey the visible `END OF PHASE` block and HTML hard-stop comment. Update §0.2 only from reproducible gate evidence, return the evidence summary, and wait for the next execution run.
 
-**Do not read ahead and implement future phases.** Complete the active phase gate first.
+**Do not read ahead and implement future phases. Do not create, modify, deploy, or push anything for a `PENDING` phase.**
 
 ---
 
-### 0.2 Current Implementation Status
+### 0.2 Execution Control and Current Status
 
-> Update the Status column when a phase gate passes. Never mark a phase Complete until its gate conditions are verified by running the stated commands.
+```text
+CURRENT_PHASE: 4
+CURRENT_STEP: 4.6 Phase gate evidence recorded
+EXECUTION_STATUS: COMPLETE
+EXECUTION_MODE: LOCAL_VERIFICATION_AND_REPAIR_ONLY
+ACTIVE_PLAYBOOK: contexts/plans/phases/phase-04-auth-authorization.md
+CURRENT_BLOCKER: none
+NEXT_UNLOCK: Phase 5 facility, spaces, and rates playbook
+DO_NOT_START: Phase 6 or any later phase
+LAST_IMPLEMENTATION_COMMIT_AUDITED: ddab5b5
+```
 
-| Phase | Status | Gate summary |
-|-------|--------|--------------|
-| 1. Discovery and Decisions | ✅ **Complete** | Default decisions in §3 are approved for development. Fee vectors in §17 are the approved test corpus. |
-| **2. Repository and Environments** | ✅ **Complete** | `npm run build` clean; `npm test` shows RED; `npx supabase --version` works; full directory tree exists. Next.js 16.2.10, Node 22.17.0, Supabase CLI 2.109.1. |
-| **3. Database Foundation** | ⚠️ **Implemented — verification pending** | Schema, tenant integrity, safe remote tooling, and 230 planned pgTAP assertions are implemented. Required gate remains `supabase db reset` + `supabase test db`; blocked locally until Docker is available. No remote deployment is implied. |
-| **4. Auth & Authorization** | ⚠️ **Implemented — database gate pending** | SSR auth, safe callbacks, recovery/update flow, inactive-account handling, protected shell, permissions, grants, and expanded RLS coverage are implemented. Typecheck, lint, production build, 55 unit tests with ≥80% coverage, and 10 Chromium/Firefox/WebKit desktop/mobile auth checks pass. Completion remains blocked only by the Phase 3 database gate. |
-| **5. Facility, Spaces, Rates** | ⏳ **Pending** | Database groundwork exists, but configuration RPCs, responsive UI flows, immutable publish tests, and the full phase gate are not implemented. |
-| 6. Entry & QR Ticket | ⏳ Pending | Concurrent plate/space tests pass; entry E2E passes. |
-| 7. Validation, Fee, Exit Preview | ⏳ Pending | Every fee vector and state transition in §17 passes. |
-| 8. Cash Payment & Confirmed Exit | ⏳ Pending | Network interruption and concurrency E2E passes. |
-| 9. Dashboard & Realtime | ⏳ Pending | Two-client convergence and reconnect tests pass. |
-| 10. Reports & Audit | ⏳ Pending | Totals reconcile to immutable payment/snapshot rows. |
-| 11. PWA & Offline | ⏳ Pending | Install/offline tests prove no mutation queue. |
-| 12. Security Hardening | ⏳ Pending | Security checklist (§21) passes; no critical/high finding. |
-| 13. Automated Release Suite | ⏳ Pending | ≥80% coverage on all four metrics; no skipped tests; CI green. |
-| 14. Staging, Deployment & Pilot | ⏳ Pending | §33 evidence bundle signed; go-live approval obtained. |
-| 15. Documentation & Handover | ⏳ Pending | New operator can deploy, run the flow, diagnose, and restore using docs alone. |
+Allowed status values are `COMPLETE`, `ACTIVE`, `BLOCKED`, and `PENDING`. Exactly one phase may be `ACTIVE` or `BLOCKED`; all future phases remain `PENDING`. An implementation can be `COMPLETE`, `PARTIAL`, or `NOT_STARTED` independently of its gate.
+
+| Phase | Execution | Implementation | Gate / blocker / exact next action | Playbook |
+| --- | --- | --- | --- | --- |
+| 0. Composer Guide | Maintained | Current | Control section, not a product phase and has no completion gate. | `PLAN.md §0` |
+| 1. Discovery and Decisions | **COMPLETE** | Complete specification inventory | Requirements, assumptions, state model, provisional fee fixtures, and downstream decision owners are documented. This status is not operator approval; Phase 5, 7, 8, and 14 retain explicit human-input gates. | `PLAN.md §§1–5, 17, 35` |
+| 2. Repository and Environments | **COMPLETE** | Complete scaffolding | Historical RED was demonstrated and replaced by GREEN tests. Current lint is `eslint .`; CI is explicitly owned by Phase 13, not this historical gate. | `PLAN.md Appendix A` |
+| **3. Database Foundation** | **COMPLETE** | Complete foundation | Eight migrations (including Phase 4 auth admin RPCs), 19 tables, RLS/grants, tenant hardening, seed, generated types, and 257 pgTAP assertions pass locally on Windows with Supabase ports `553xx`. Evidence: [2026-07-21 pass](contexts/plans/evidence/phase-03.md#phase-03-attempt-2026-07-21t0245000800). | `contexts/plans/phases/phase-03-database-foundation.md` |
+| **4. Auth & Authorization** | **COMPLETE** | Complete | Staff admin RPCs/UI, signup policy, live Auth E2E (35 tests / 5 browsers), integration coverage, and app quality gate pass. Evidence: [2026-07-21 pass](contexts/plans/evidence/phase-04.md#phase-04-attempt-2026-07-21t0245000800). | `contexts/plans/phases/phase-04-auth-authorization.md` |
+| 5. Facility, Spaces, Rates | **ACTIVE** | Not started beyond tables/RLS | Required gate: configuration RPCs, immutable publish/overlap/location/audit tests, responsive admin/staff flows, and full quality gate must pass. | `contexts/plans/phases/phase-05-facility-spaces-rates.md` |
+| 6. Entry & QR Ticket | **PENDING** | Not started beyond tables/indexes | Required gate: atomic entry, plate/space concurrency, idempotency, hash-only credential, print/reissue, E2E, and security checks must pass. | `contexts/plans/phases/phase-06-entry-qr-ticket.md` |
+| 7. Validation, Fee, Exit Preview | **PENDING** | Not started | Required gate: ticket lifecycle/rate limits, every §17 fee/state vector, scanner/manual fallback, quote, E2E, and token-redaction checks must pass. | `contexts/plans/phases/phase-07-validation-fee-exit-preview.md` |
+| 8. Cash Payment & Confirmed Exit | **PENDING** | Not started beyond tables/indexes | Required gate: shifts, exact-once payment, exceptions, separate exit/release, interruption/concurrency, append-only evidence, and E2E must pass. | `contexts/plans/phases/phase-08-cash-payment-confirmed-exit.md` |
+| 9. Dashboard & Realtime | **PENDING** | Auth placeholder only | Required gate: authoritative snapshot, private location Broadcast payload/policy, two-client convergence, cross-location denial, reconnect/refetch/poll/cleanup, accessibility, and quota evidence must pass. | `contexts/plans/phases/phase-09-dashboard-realtime.md` |
+| 10. Reports & Audit | **PENDING** | Not started beyond tables/RLS | Required gate: reconciliation, pagination, timezone/location scope, redaction, audited CSV export, accessibility, and E2E must pass. | `contexts/plans/phases/phase-10-reports-audit.md` |
+| 11. PWA & Offline | **PENDING** | Not started | Required gate: verified Next-compatible tooling, install/update, sanitized read cache, mutation prohibition, clearing, browser inspection, and E2E must pass. | `contexts/plans/phases/phase-11-pwa-offline.md` |
+| 12. Security Hardening | **PENDING** | Partial baseline | Required gate: Phase 12-owned §21 evidence, full DB/web matrix, MFA/device/origin/rate/log/health controls, lost-device/incident tabletop, and no critical/high finding. Backup/restore/continuity remains Phase 14-owned. | `contexts/plans/phases/phase-12-security-hardening.md` |
+| 13. Automated Release Suite | **PENDING** | Partial harness; no CI | Required gate: CI green, global ≥80% on all four metrics, no skip/focus, complete critical suites/reviews, stable coverage artifacts, and no critical/high finding. | `contexts/plans/phases/phase-13-release-suite-ci.md` |
+| 14. Staging, Deployment & Pilot | **PENDING** | Not started | Required gate: approved staging, release suite/smoke, alerts, backup/restore/rollback/continuity, devices/UAT/pilot, and signed go/no-go status. | `contexts/plans/phases/phase-14-staging-deployment-pilot.md` |
+| 15. Documentation & Handover | **PENDING** | Not started beyond source specs/drafts | Required gate: independently validated docs/runbooks/training/support, full evidence-linked §33, and signed handover. | `contexts/plans/phases/phase-15-documentation-handover.md` |
+
+Current 2026-07-21 local gate evidence: Docker running; `npm run db:reset`, `npm run db:test` (257 pgTAP), and `npm run db:types` pass; `npm run typecheck`, `npm run lint`, `npm test` (65 Vitest), `npm run test:coverage` (96.15% statements / 85.85% branches / 95.45% functions / 96.1% lines), `npm run build`, and Phase 4 live E2E (`35 passed` across chromium/firefox/webkit/mobile) all exit 0. Phase 3 and Phase 4 gates recorded in `contexts/plans/evidence/`.
 
 ---
 
@@ -71,7 +87,11 @@ Load these skill files with the `Read` tool at the start of each phase. Full pat
 
 ---
 
-### 0.4 Phase 2: Repository and Environments — Complete Scaffolding Steps
+## A. Archived Phase 2 Scaffolding Record — Complete, Do Not Read During Boot
+
+> **HISTORICAL ONLY.** These commands document how Phase 2 was scaffolded. They are not the current repository contract and must never be executed as a phase reset. Current commands come from `package.json`; current execution comes only from §0.2 and its active playbook.
+
+<!-- PHASE 2 HISTORICAL RECORD START — DO NOT EXECUTE OR RESCAFFOLD -->
 
 **Before writing any code, load these skills with the `Read` tool:**
 
@@ -95,14 +115,7 @@ k:\E-ParkGO\.agents\skills\design-system\SKILL.md
 node --version      # Must be >=20.x
 npm --version       # Must be >=10.x
 git --version
-supabase --version  # If missing, run: npm install -g supabase@latest
-```
-
-If `supabase` is not installed:
-
-```powershell
-npm install -g supabase@latest
-supabase --version  # Confirm it now prints a version
+npx supabase --version  # Use the repository-pinned CLI
 ```
 
 **Verify:** All four commands print version strings without errors.
@@ -256,7 +269,7 @@ Test-Path "src/lib/utils.ts"      # True
 #### Step 2.9 — Initialise Supabase local stack
 
 ```powershell
-supabase init
+npx supabase init
 ```
 
 **Verify:**
@@ -641,10 +654,10 @@ npx tsc --noEmit
 **Expected:** no output (zero type errors on the scaffolded files).
 
 ```powershell
-npx next lint
+npm run lint
 ```
 
-**Expected:** "No ESLint warnings or errors" or warnings only (no errors).
+**Expected:** ESLint exits 0 with no errors.
 
 If any errors appear, fix them before proceeding. Do not proceed with TypeScript or lint errors outstanding.
 
@@ -656,7 +669,7 @@ If any errors appear, fix them before proceeding. Do not proceed with TypeScript
 npm run build
 ```
 
-**Expected:** Build completes successfully. The only expected failure is that `.env.local` has placeholder values — if `env.ts` is imported during build and validation throws, temporarily comment out the `env` export line at module level for the build check, then restore it. Do not remove the validation logic.
+**Expected:** Build completes successfully using documented non-secret local values. Never comment out environment validation to make a build pass; correct the local test configuration or validation boundary instead.
 
 ---
 
@@ -666,14 +679,14 @@ Run each check in order. **All must pass** before starting Phase 3. Record resul
 
 ```powershell
 # 1. Required tools present
-node --version; npm --version; supabase --version; git --version
+node --version; npm --version; npx supabase --version; git --version
 
 # 2. TypeScript: zero errors
 npx tsc --noEmit
 # Expected: no output
 
 # 3. Lint: zero errors
-npx next lint
+npm run lint
 # Expected: no errors (warnings ok)
 
 # 4. RED test fails (correct)
@@ -720,6 +733,8 @@ Then start Phase 3 by:
 2. Running `npm run db:start` to start the local Supabase stack.
 3. Filling in `.env.local` with the values printed by `supabase start`.
 4. Proceeding with the database migration work in §10 (schema) and §8 (domain model).
+
+<!-- PHASE 2 HISTORICAL RECORD END — DO NOT RERUN; RETURN TO §0.2 -->
 
 ---
 
@@ -773,7 +788,7 @@ Automatic number-plate recognition, barrier gates, physical sensors, customer re
 | Accessibility | Critical flows meet WCAG 2.2 AA automated checks and keyboard/manual review. |
 | Availability | Graceful error/offline states; no promise beyond the selected providers' service tiers. |
 | Auditability | Every sensitive mutation records actor, location, action, target, timestamp, request correlation, and before/after facts where applicable. |
-| Quality | All required test suites pass; changed application code achieves at least 80% statement, branch, function, and line coverage. |
+| Quality | All required test suites pass; global authored application code achieves at least 80% statements, branches, functions, and lines. Only generated types, third-party UI source, tests, and configuration may use the explicit exclusions in `vitest.config.ts`. |
 | Recovery | Operators can identify failed requests by correlation ID and execute the documented retry or reconciliation path. |
 
 ## 3. Assumptions and Constraints
@@ -805,9 +820,9 @@ Automatic number-plate recognition, barrier gates, physical sensors, customer re
 | Retention | Financial, session, receipt, and audit records are retained for at least five years unless the operator approves a stricter legal policy. |
 | Infrastructure | Free tiers are suitable for development, demonstrations, and a limited pilot only; commercial launch requires a capacity, terms, backup, and uptime review. |
 
-### Pre-coding product decisions
+### Phase-owned product decisions
 
-The operator must approve the actual rate amounts, grace period, daily-cap interpretation, overnight policy, lost-ticket evidence, discount authority, receipt numbering prefix, data-retention term, and whether vehicle color is mandatory. The architecture and tests below define safe defaults and configuration points without presenting those commercial values as confirmed policy.
+The defaults and fee examples in this plan are provisional engineering fixtures, not operator sign-off. Before Phase 5, the operator must approve the development facility/rate fixture used for configuration tests. Before Phases 7–8 GREEN implementation, the operator must approve the behavioral tariff rules, grace/cap/overnight interpretation, lost-ticket evidence and penalty, discount/complimentary/correction authority, paid-exit window, and shift/cash rules and sign the resulting fee/state vectors. Before Phase 14, the operator must approve production amounts/effective dates, receipt prefix, retention, device/printer scope, recovery targets, support ownership, and go-live policy. Each owning playbook records that evidence; Phase 1 completion means the decisions were identified and routed, not that commercial policy was approved.
 
 ## 4. Functional Requirements
 
@@ -827,7 +842,7 @@ Each requirement is accepted only when its behavior is enforced at the appropria
 | ENTRY-002 | Repeating an entry request with the same idempotency key returns the original durable session/ticket result; the one-time raw QR token is never persisted in the replay record, so a lost issuance response requires controlled ticket reissue. Changing its payload returns `IDEMPOTENCY_CONFLICT`. |
 | TICKET-001 | Entry returns a unique printable ticket number and QR verification URL whose opaque token is shown once and only a hash is stored. |
 | TICKET-002 | Staff can print additional copies only while the one-time issuance token remains in the current secure browser session. A later reprint request revokes the old credential, issues a replacement ticket/token, and audits both records because hash-only storage cannot reconstruct the original token. |
-| TICKET-003 | Validation accepts a QR token or normalized ticket number, rejects revoked/completed/wrong-location tickets, and never changes session state by scanning alone. |
+| TICKET-003 | Validation accepts a QR token or normalized ticket number and rejects revoked/completed/wrong-location tickets. An authenticated exit-review scan may atomically move `ACTIVE` to `EXIT_PENDING`; it never calculates or records payment, confirms exit, completes the ticket, or releases the space. |
 | EXIT-001 | A valid scan or manual lookup opens an exit preview containing vehicle, entry time, duration, rate explanation, amount due, and server-calculated quote expiry. |
 | EXIT-002 | Exit preview moves eligible `ACTIVE` sessions to `EXIT_PENDING`; fee calculation moves unpaid sessions to `PAYMENT_PENDING` without releasing the space. |
 | PAY-001 | Staff with an open same-location shift can record an exact cash payment against a locked, current quote; the transaction creates payment/audit records and moves the session to `PAID_AWAITING_EXIT`. |
@@ -932,12 +947,12 @@ e-parkgo/
 │  │  ├─ auth/ entry/ exit/ payments/ rates/ shifts/ reports/
 │  │  └─ each with schemas, server service, queries, and components
 │  ├─ lib/
-│  │  ├─ supabase/{browser,server,middleware,types}.ts
+│  │  ├─ supabase/{browser,server,session,admin,database.types}.ts
 │  │  ├─ auth/ errors/ money/ time/ security/ observability/
 │  │  ├─ realtime/ offline/ pwa/ and query/
 │  │  └─ env.ts
 │  ├─ hooks/ and types/
-│  └─ middleware.ts
+│  └─ proxy.ts               # Next.js 16 request proxy/session refresh/CSP boundary
 ├─ public/
 │  ├─ icons/ and offline.html
 │  └─ sw.js                    # generated/managed by selected PWA tooling
@@ -946,7 +961,7 @@ e-parkgo/
 │  ├─ migrations/
 │  ├─ seed.sql
 │  ├─ tests/                  # pgTAP: constraints, RLS, RPC, concurrency
-│  └─ functions/{receipt,export}/
+│  └─ functions/{generate-receipt,export-report}/  # optional; only if a later phase explicitly unlocks them
 ├─ tests/
 │  ├─ unit/ integration/ e2e/ fixtures/ and helpers/
 ├─ docs/
@@ -1339,7 +1354,7 @@ Payment rows are immutable ledger entries. Voiding never updates the original co
 3. Vehicles, rates, sessions, tickets, snapshots, payments, receipts, shifts, corrections, idempotency, rate-limit buckets, audit.
 4. Checks, composite FKs, exclusion/partial indexes, immutable-row triggers.
 5. Authorization helpers, RLS policies, grants, and transactional RPCs.
-6. Realtime publication allowlist, storage policies, pgTAP tests, and deterministic seed data.
+6. Private location-scoped Realtime Broadcast triggers/topic authorization, storage policies, pgTAP tests, and deterministic seed data.
 
 Production migrations are forward-only and reviewed. Historical/financial rows are not soft-deleted; configuration uses `is_active` and compensating workflows. Idempotency rows may be purged after the approved retry window only after their referenced durable resource exists.
 
@@ -1348,7 +1363,7 @@ No generated column is required for the MVP: occupancy depends on related active
 ## 11. Supabase Authentication Design
 
 1. **Account creation:** public sign-up is disabled. An authenticated admin invokes an idempotent trusted server workflow that first invites/creates the Auth identity and then transactionally creates the protected profile, location assignment, and default permissions. Auth Admin API work and PostgreSQL do not share one transaction: until the profile transaction succeeds, missing-profile default denial blocks access. On failure, retry safely or disable/delete the new Auth identity as compensation, record reconciliation evidence, and surface identities without active profiles in an admin reconciliation view. The bootstrap admin is created through a documented one-time procedure and bootstrap authority is removed afterward.
-2. **Login:** email/password authentication uses generic failure text. Use the browser-compatible Supabase SSR cookie/session model so the browser client can authenticate RLS reads and Realtime while the server client can refresh the same session. Because browser JavaScript must access this session material, do not claim the cookies are `HttpOnly`; set `Secure` in HTTPS environments, an appropriate same-site policy, narrow path/domain, and short token lifetime with refresh rotation. Mitigate the additional XSS exposure with a strict nonce-based CSP, no raw HTML, dependency/SAST scanning, output escaping, no third-party scripts without review, and immediate session revocation on incident. Middleware performs only refresh, while each protected Server Component/Route Handler verifies the user and active protected profile.
+2. **Login:** email/password authentication uses generic failure text. Use the browser-compatible Supabase SSR cookie/session model so the browser client can authenticate RLS reads and Realtime while the server client can refresh the same session. Because browser JavaScript must access this session material, do not claim the cookies are `HttpOnly`; set `Secure` in HTTPS environments, an appropriate same-site policy, narrow path/domain, and short token lifetime with refresh rotation. Mitigate the additional XSS exposure with a strict nonce-based CSP, no raw HTML, dependency/SAST scanning, output escaping, no third-party scripts without review, and immediate session revocation on incident. The Next.js request proxy (`src/proxy.ts`) performs only refresh and request-level protections, while each protected Server Component/Route Handler verifies the user and active protected profile.
 3. **Authorization:** `profiles`, `staff_permissions`, and location assignment are authoritative. Server-managed `app_metadata` may cache stable claims but is never the only authority; editable `user_metadata` is never used. RPCs re-read protected authorization data inside the transaction.
 4. **Refresh and disable:** SSR helpers rotate refreshed tokens. A disabled profile fails every protected read/RPC immediately even if its JWT has not expired. Admin disable also revokes known sessions through a trusted server operation.
 5. **Recovery:** `resetPasswordForEmail` redirects only to an allowlisted callback. The callback verifies the recovery flow, forces one password update, signs out other sessions, clears local caches, and records a security event.
@@ -1410,7 +1425,7 @@ All privileged functions use `SECURITY DEFINER` only where necessary, set `searc
 | --- | --- | --- |
 | `generate-receipt` | Authenticated POST with payment ID and desired format; validates same-location access, reads immutable payment/session facts, renders PDF, writes a versioned private Storage object, inserts receipt metadata, and returns a short-lived signed URL. Per-user/location rate limit, correlation log, retry-safe content hash. | Optional; browser print is the MVP fallback. |
 | `export-report` | Admin or permitted staff POSTs a bounded report/date schema; creates a streamed CSV from a location-scoped database function, stores privately only if asynchronous, audits export, and returns/sends a short-lived result. | MVP only if synchronous Route Handler export exceeds platform limits. |
-| `public-ticket-verification` | Rate-limited POST accepting only the opaque token and returning minimal status without plate, fee, staff, or timestamps. Uses a narrow RPC and generic invalid response; strict CORS and abuse alerts. | Excluded unless the operator confirms a public verification need. |
+| `public-ticket-verification` | Rate-limited POST accepting only the opaque token and returning minimal status without plate, fee, staff, or timestamps. Uses a narrow RPC and generic invalid response; strict CORS and abuse alerts. | `OUT_OF_SCOPE_FOR_PHASES_5_TO_15`; requires a separate approved product/security plan even if the operator later requests it. |
 | `notification-dispatch`, `payment-webhook`, `hardware-webhook` | Provider signature verification, replay protection, allowlisted event schemas, idempotency, narrow RPC calls, redacted logs, and retry/dead-letter handling. | Post-MVP. |
 | `maintenance` | Scheduled expiry/cleanup for safe caches and idempotency rows plus monitoring checks; never deletes required audit/financial evidence. | Add only when measured need justifies it. |
 
@@ -1456,6 +1471,7 @@ interface ApiEnvelope<T> {
 
 ```ts
 type UUID = string;
+type Centavos = string; // canonical nonnegative base-10 integer string on the JSON wire
 type SessionStatus = "ACTIVE" | "EXIT_PENDING" | "PAYMENT_PENDING"
   | "PAID_AWAITING_EXIT" | "COMPLETED" | "CANCELLED"
   | "LOST_TICKET" | "MANUAL_REVIEW";
@@ -1467,19 +1483,19 @@ interface EntryResult { session_id: UUID; ticket_id: UUID; ticket_number: string
 interface TicketValidationRequest { token?: string; ticket_number?: string }
 interface TicketValidationResult { session_id: UUID; ticket_number: string; display_plate_number: string; vehicle_type: string; space_code: string; entry_time: string; status: SessionStatus }
 interface ExitPreviewRequest { session_id: UUID; expected_version: number }
-interface ExitPreviewResult { session_id: UUID; status: "PAYMENT_PENDING" | "PAID_AWAITING_EXIT"; billed_minutes: number; subtotal_centavos: number; discount_centavos: number; penalty_centavos: number; adjustment_centavos: number; total_centavos: number; fee_version: number; quote_expires_at: string }
-interface PaymentRequest { session_id: UUID; fee_version: number; cash_tendered_centavos: number; external_reference?: string }
-interface PaymentResult { payment_id: UUID; receipt_number: string; amount_centavos: number; cash_tendered_centavos: number; change_centavos: number; session_status: "PAID_AWAITING_EXIT" }
+interface ExitPreviewResult { session_id: UUID; status: "PAYMENT_PENDING" | "PAID_AWAITING_EXIT"; billed_minutes: number; subtotal_centavos: Centavos; discount_centavos: Centavos; penalty_centavos: Centavos; adjustment_centavos: Centavos; total_centavos: Centavos; fee_version: number; quote_expires_at: string }
+interface PaymentRequest { session_id: UUID; fee_version: number; cash_tendered_centavos: Centavos; external_reference?: string }
+interface PaymentResult { payment_id: UUID; receipt_number: string; amount_centavos: Centavos; cash_tendered_centavos: Centavos; change_centavos: Centavos; session_status: "PAID_AWAITING_EXIT" }
 interface ExitConfirmationRequest { session_id: UUID; expected_version: number }
 interface ExitConfirmationResult { session_id: UUID; exit_time: string; status: "COMPLETED"; released_space_id: UUID }
 interface LostTicketRequest { session_id: UUID; evidence: Record<string, string>; reason: string }
-interface RateDraftRequest { vehicle_type_id?: UUID; mode: "FLAT" | "TIERED"; grace_minutes: number; initial_minutes?: number; initial_fee_centavos?: number; succeeding_interval_minutes?: number; succeeding_fee_centavos?: number; flat_fee_centavos?: number; daily_max_centavos?: number; overnight_fee_centavos: number; lost_ticket_penalty_centavos: number; effective_from: string; effective_to?: string }
-interface DashboardResult { snapshot_at: string; capacity: number; available: number; occupied: number; out_of_service: number; active_sessions: number; payment_pending: number; paid_awaiting_exit: number; entries_today: number; exits_today: number; revenue_centavos: number }
+interface RateDraftRequest { vehicle_type_id?: UUID; mode: "FLAT" | "TIERED"; grace_minutes: number; initial_minutes?: number; initial_fee_centavos?: Centavos; succeeding_interval_minutes?: number; succeeding_fee_centavos?: Centavos; flat_fee_centavos?: Centavos; daily_max_centavos?: Centavos; overnight_fee_centavos: Centavos; lost_ticket_penalty_centavos: Centavos; effective_from: string; effective_to?: string }
+interface DashboardResult { snapshot_at: string; capacity: number; available: number; occupied: number; out_of_service: number; active_sessions: number; payment_pending: number; paid_awaiting_exit: number; entries_today: number; exits_today: number; revenue_centavos: Centavos }
 interface TransactionQuery { from: string; to: string; status?: SessionStatus; plate?: string; cursor?: string; limit?: number }
 interface ReportRequest { type: "DAILY_REVENUE" | "OCCUPANCY" | "MOVEMENTS" | "SHIFT_RECONCILIATION"; from: string; to: string; format: "JSON" | "CSV" }
 ```
 
-Unknown fields are rejected. Mutation bodies are size-capped and require authenticated same-origin requests, CSRF protection when cookie-authenticated, a UUID `Idempotency-Key`, and a UUID correlation ID generated if absent. The server ignores client actor, location, official time, session state, and calculated total fields.
+Unknown fields are rejected. Mutation bodies are size-capped and require authenticated same-origin requests, CSRF protection when cookie-authenticated, a UUID `Idempotency-Key`, and a UUID correlation ID generated if absent. The server ignores client actor, location, official time, session state, and calculated total fields. PostgreSQL stores and calculates money as `bigint` centavos. JSON uses canonical decimal strings; Zod rejects signs/decimals/leading junk and enforces approved bounds, then server code converts to `bigint`. JavaScript floating-point money arithmetic is prohibited.
 
 | Operation | Surface, request, response, and important behavior |
 | --- | --- |
@@ -1520,9 +1536,9 @@ HTTP mapping is consistent: 400 validation, 401 unauthenticated, 403 unauthorize
   "data": {
     "payment_id": "7c7dd674-272a-4b6a-863f-254ff038bb10",
     "receipt_number": "EPG-20260719-000123",
-    "amount_centavos": 9000,
-    "cash_tendered_centavos": 10000,
-    "change_centavos": 1000,
+    "amount_centavos": "9000",
+    "cash_tendered_centavos": "10000",
+    "change_centavos": "1000",
     "session_status": "PAID_AWAITING_EXIT"
   },
   "error": null,
@@ -1634,7 +1650,7 @@ Expose one location-scoped dashboard RPC or security-invoker view returning a sn
 
 ### Realtime behavior
 
-- Publish only required columns/events from `parking_spaces` and an operational session projection. Subscribe with the authenticated location filter; never subscribe to profiles, permissions, raw tickets, audit logs, or full payments.
+- Use authenticated private Broadcast topics `location:<parking_location_id>:dashboard`. Triggers on `parking_spaces`, `parking_sessions`, and `payments` send only `{ domain, aggregate_version }`; `realtime.messages` authorization binds receipt to the caller's active location. Postgres Changes/full-row subscriptions are prohibited.
 - Realtime events are invalidation hints. TanStack Query updates a small known row when safe, then refetches affected aggregates. The database remains canonical.
 - Entry updates the occupied space and active/session metrics. Reassignment invalidates both spaces and the session. Payment updates payment-related counts/revenue but does not free occupancy. Confirmed exit updates session, ticket-independent dashboard facts, and released space. Cancellation or authorized correction refetches affected spaces, metrics, and reports.
 - Display `Live`, `Reconnecting`, `Stale since <time>`, or `Offline`. On disconnect, use exponential backoff; on reconnect, refetch the entire authorized snapshot before clearing stale state because events may have been missed.
@@ -1699,7 +1715,8 @@ A future offline-entry design requires a separate threat model and architecture 
 - [ ] CSP, HSTS, `nosniff`, frame protection, referrer policy, least-privilege camera Permissions Policy, CORS, Origin/CSRF checks, and secure cookies are verified.
 - [ ] Login, recovery, scan, mutation, export, and Edge surfaces have adjustable rate limits and safe messages.
 - [ ] Dependency, SAST, secret, bundle, and Git-history scans have no unresolved critical/high finding.
-- [ ] Admin/approver MFA, device/session revocation, lost-device response, backup/restore, continuity, and incident runbooks are exercised.
+- [ ] **Phase 12:** Admin/approver MFA, device/session revocation, lost-device response, and a local incident-response tabletop are exercised.
+- [ ] **Phase 14:** Encrypted backup, isolated restore, rollback, downtime continuity, and audited reconciliation runbooks are exercised against approved nonproduction targets.
 - [ ] Audit records are immutable to application roles and sensitive logs are redacted.
 
 ## 22. Validation and Error-Handling Strategy
@@ -1814,7 +1831,7 @@ WEBHOOK_SIGNING_SECRET=replace-in-edge-secret-store
 6. [ ] Apply all migrations to a clean local database, then staging; run schema-drift checks.
 7. [ ] Seed only approved production location, zones, spaces, vehicle types, and published rate after product sign-off.
 8. [ ] Bootstrap/invite the first production admin, verify MFA/location/permissions, and remove bootstrap authority.
-9. [ ] Enable/verify RLS, explicit grants, function execution restrictions, and Realtime publication allowlist.
+9. [ ] Enable/verify RLS, explicit grants, function execution restrictions, private Realtime Broadcast triggers, and location-topic authorization.
 10. [ ] Deploy/version any required Edge Function and configure its narrow secrets/rate limits.
 11. [ ] Connect Vercel to GitHub and configure scoped Preview/Production variables.
 12. [ ] Configure the production domain, HTTPS, CSP and other security headers, and camera Permissions Policy.
@@ -1845,7 +1862,7 @@ Application rollback never assumes it can undo committed schema/data. Destructiv
 Provider quotas and commercial terms change; verify current official limits during environment provisioning and track usage at 60%, 80%, and 90% thresholds rather than hard-coding quotas here.
 
 - Select only needed columns, require bounded date ranges/cursor pagination, index and `EXPLAIN` hot queries, and monitor database/storage growth.
-- Publish only filtered operational Realtime changes; unsubscribe hidden tabs and use refetch/poll fallback rather than subscribing to every table.
+- Broadcast only minimal location-scoped invalidation hints; unsubscribe hidden tabs and use refetch/poll fallback rather than subscribing to table row changes.
 - Store no vehicle images in MVP. Generate receipts on demand; retain immutable receipt metadata and only required private artifacts under an approved lifecycle.
 - Cache static/versioned assets at Vercel; never cache authenticated transaction responses. Bound logs, request bodies, exports, and Edge execution.
 - Archive only under an approved retention policy; never purge payment/audit evidence ad hoc. Synthetic keepalive traffic is used only if provider terms explicitly permit it and is never represented as uptime protection.
@@ -1879,25 +1896,104 @@ Incident recovery order: contain affected writes; preserve evidence; classify in
 
 ## 28. Implementation Phases and Milestones
 
-Testing begins in every phase; Phase 13 consolidates release evidence rather than postponing quality. Each phase is mergeable only when its gate passes.
+Testing begins in every phase; Phase 13 consolidates release evidence rather than postponing quality. The detailed playbooks live in `contexts/plans/phases/` because this master specification already exceeds the normal file-size target. `PLAN.md §0.2` selects exactly one playbook. A future playbook never grants execution authority.
 
-| Phase | Objective, tasks, dependencies, deliverable/acceptance, risk, and tests |
-| --- | --- |
-| 1. Discovery and decisions | Approve tariff/rounding, lost-ticket evidence, discounts, shifts, retention, threat model, state machine. Dependency: none. Deliverable: signed decision register and fee vectors; gate: no coding-blocking ambiguity. Risk: stakeholder disagreement. Test: worked examples/transitions reviewed. |
-| 2. Repository and environments | Pin Next.js/tooling, Supabase CLI, Vitest, Playwright, lint/typecheck, env schema, CI. Depends 1. Gate: clean clone boots and a deliberately failing sample test demonstrates RED. Risk: version drift. |
-| 3. Database foundation | Enums, tables, constraints, indexes, migrations, synthetic seed, generated types. Depends 1-2. Gate: clean reset and pgTAP integrity suite. Risk: irreversible schema error. |
-| 4. Authentication and authorization | SSR Auth, recovery, profiles, permissions, location helpers, grants, RLS. Depends 3. Gate: full identity/role/location/verb matrix. Risk: privilege leak. |
-| 5. Facility, space, and rate admin | Protected configuration RPCs/UI, effective rates, audit. Depends 4. Gate: validated mobile flows and immutable publish behavior. Risk: configuration mistake. |
-| 6. Entry and QR ticket | Entry locks/idempotency, snapshot, ticket issue/reissue/print, space occupancy. Depends 3-5. Gate: concurrent plate/space tests and entry E2E. Risk: duplicate occupancy/token exposure. |
-| 7. Validation, exit preview, and fee | Scanner/manual lookup, state transition, deterministic fee RPC and breakdown. Depends 3, 6, approved rules. Gate: every fee/state vector passes. Risk: monetary defect. |
-| 8. Cash payment and confirmed exit | Shift requirement, exact-once payment/receipt, separate exit, atomic release. Depends 7. Gate: network interruption and concurrency E2E. Risk: partial settlement/release. |
-| 9. Dashboard and Realtime | Aggregate RPC, filtered events, cache reconciliation, stale/poll fallback. Depends 6, 8. Gate: two-client convergence/reconnect tests. Risk: stale UI/quota use. |
-| 10. Reports and audit | Paginated history, revenue/shift reports, protected audit review/export. Depends 8. Gate: totals reconcile to immutable payments/snapshots. Risk: data leakage. |
-| 11. PWA and offline states | Manifest, icons, service worker, versioned read cache, connectivity/update prompts, mutation gates. Depends stable routes 5-10. Gate: install/offline tests prove no mutation queue. Risk: stale/sensitive cache. |
-| 12. Security hardening | CSP/headers, CSRF/origin, MFA, rate limits, secret scans, device response, threat review. Depends complete surface. Gate: checklist passes with no critical/high finding. Risk: late design change. |
-| 13. Automated release suite | Coverage, RLS, races, E2E, cross-browser, camera, accessibility, performance, build. Depends 3-12. Gate: at least 80% each metric, complete critical matrices, no skipped test. Risk: flaky/nonrepresentative tests. |
-| 14. Staging, deployment, and pilot | Restore rehearsal, UAT, staff training, production deploy, rollback/continuity drill. Depends 13. Gate: Section 33 and signed go-live approval. Risk: operational readiness. |
-| 15. Documentation and handover | Data dictionary, ADRs, runbooks, training/support, release/decision records. Depends validated release. Gate: a new operator can deploy, complete the flow, diagnose, and restore using docs. Risk: knowledge concentration. |
+### 28.1 Universal Composer phase contract
+
+Every Phase 3–15 playbook contains:
+
+1. A machine-readable execution guard, exact prerequisites, authorized environment, required skills, stop conditions, and explicit non-goals.
+2. User-visible and database/server outcomes tied to existing requirement IDs and authoritative sections of this plan.
+3. A file manifest with exact create/modify/generate/forbidden paths. A timestamped migration is named by deterministic suffix and must be created through `npm run db:migrate -- <name>`; Composer records the CLI-generated filename rather than inventing one.
+4. RED tests before implementation, the minimal GREEN implementation, hardening/refactor work, and an exact verification command with expected results after every step.
+5. A phase-specific validation/security/failure matrix, full gate order, evidence fields, status update, visible `END OF PHASE` text, and an HTML hard-stop comment.
+
+Completion evidence is append-only at `contexts/plans/evidence/phase-NN.md` using `contexts/plans/evidence/README.md`. Each gate attempt records date/timezone, base and result SHA, environment/targets, tool versions, exact commands and exit codes, migrations, test/assertion/browser counts, four coverage metrics, security/review findings, artifacts/links, approvers, failures, and final status. Failed attempts are retained. `§0.2` stores only the current pointer/status and links the successful evidence file; it does not absorb or overwrite detailed history.
+
+Universal restrictions:
+
+- Never edit historical migration files to hide a failure; use a forward repair migration.
+- Never hand-edit `src/lib/supabase/database.types.ts`; regenerate it after a local reset.
+- Never write shadcn component source manually; use existing primitives or `npx shadcn@latest add <component>`.
+- PostgreSQL RPCs own official time, money, locks, lifecycle transitions, idempotency, audit, payment, and occupancy. Do not build generic CRUD mutation repositories around those transactions.
+- TypeScript values/state are treated immutably. Append-only payment, receipt, correction, and audit facts are never mutated. Designated operational session/space rows may change only inside audited atomic PostgreSQL transitions.
+- Local database work is the default. Remote link/push/reset/seed/deploy, secret/Auth settings, billing, branch protection, real invitations, destructive data operations, and external communications require the explicit human approval checkpoint in Phase 14 or a separate request.
+- Money is PostgreSQL `bigint` centavos. JSON/API centavos use canonical decimal strings, strict Zod parsing, safe bounds, and internal `bigint`; conversion is for display only. Floating-point money is prohibited.
+- Pending gates are written as requirements, never in present tense as if evidence already exists.
+
+### 28.2 Phase ownership, files, features, and required gates
+
+| Phase | Owned feature surface | Principal files created or modified | Required gate before unlock |
+| --- | --- | --- | --- |
+| 3 — Database verification | Existing enums/tables/constraints/indexes/RLS/seed/types and local safety tooling; verification/forward repair only. | Existing `supabase/migrations/*.sql`, `supabase/tests/00001..00004`, `supabase/seed.sql`, generated `src/lib/supabase/database.types.ts`; repair migration only if justified. | Docker/local Supabase, clean reset/seed, all 230 pgTAP assertions, type drift, typecheck/lint/unit/build, no remote operation. |
+| 4 — Auth completion | Existing SSR Auth plus staff invite/compensation, profile/location/permission management, disable/reactivate/revoke, signup policy, live Auth/RLS matrix. | `supabase/tests/00005_auth_admin_workflows.sql`, forward migration, `src/features/staff/*`, `/admin/staff`, `vitest.config.ts` integration discovery/coverage repair, Auth integration/E2E and bounded existing Auth changes. | Full DB/Auth/role/location/verb matrix, discovered local integration/live flows, 80% four-metric coverage with exit 0, build/browser/security review. |
+| 5 — Facility/spaces/rates | Facility settings, zones, vehicle types, spaces/out-of-service, versioned rate draft/preview/publish/retire/audit. | Configuration pgTAP/migration; `src/features/{facility,spaces,rates}/*`; `/spaces`, `/admin/{rates,settings}`; scoped API/tests. | Immutable publish, overlap race, validation, location/grants/audit, responsive E2E, full quality gate. |
+| 6 — Entry/QR | Atomic entry, locks/idempotency, rate snapshot, session/ticket/occupancy/audit, one-time hash-only QR, print/reissue. | Entry/concurrency pgTAP/migration; `src/features/{entry,tickets}/*`; `src/lib/security/qr-token.ts`; `/entry`, `/tickets/[ticketNumber]`, entry/reissue APIs/tests. | Plate/space races, rollback/replay/conflict, token redaction/storage, print/reissue, E2E, coverage/security. |
+| 7 — Validation/fee/preview | `/verify` fragment, scanner/manual lookup, review state, validation throttling, deterministic fee engine, quote/expiry/breakdown. | Validation/fee/preview pgTAP/migration; `src/features/{scanner,exit}/*`; `src/lib/{security/qr-parser,money,time}/*`; `/verify`, `/scanner`, `/exit/[sessionId]`, APIs/tests. | All ticket/state/§17 fee/quote/token/camera/manual/browser cases; scan cannot pay/exit/release. |
+| 8 — Payment/exceptions/exit | Minimum shifts, exact-once cash/receipt, top-up, separate exit/release, lost/cancel/correct/void/manual-review workflows. | Three pgTAP files and migration; `src/features/{shifts,payments,sessions}/*`; payment/exit additions; `/payments/[sessionId]`, exit confirm, `/shifts`, `/sessions`, APIs/tests. | Concurrency/interruption/replay/rollback, append-only evidence, permissions, payment-without-release, exit-once, E2E/security. |
+| 9 — Dashboard/Realtime | Canonical aggregate snapshot, metrics/space state, authenticated private Broadcast invalidation by location, Query reconciliation, stale/reconnect/poll/cleanup. | Dashboard pgTAP/migration with exact Broadcast topic/payload and `realtime.messages` policy; `src/lib/{query,realtime}/*`; hooks, dashboard components/API/tests. | Two-client entry/payment/exit convergence, cross-location topic denial, payload minimization, reconnect refetch, stale/poll/cleanup/quota/accessibility evidence. |
+| 10 — Reports/audit | Transactions, revenue/movement/occupancy/shift reports, audit search, bounded cursor/date scope, safe audited CSV. | Reports pgTAP/migration; `src/features/reports/*`, CSV security helper; `/transactions`, `/reports`, `/admin/audit`, report APIs/tests. | Immutable reconciliation, timezone/location/pagination, CSV injection/redaction/export audit, E2E/accessibility/performance. |
+| 11 — PWA/offline | Verified Next-compatible PWA tooling, manifest/icons/SW, shell, sanitized versioned read cache, connectivity/update/clear, write gates. | PWA ADR; package/config; manifest/icons/SW/offline page; `src/lib/{pwa,offline}/*`; connectivity/install UI/tests. | Install/update/offline/read cache, storage inspection, logout/location/version clear, no mutation outbox or sensitive cache. |
+| 12 — Security | Headers/CSP/origin/CSRF/rates, MFA/device/session controls, redacted logs/health, scans, DB/web matrix, incident/lost-device runbooks. | Security pgTAP/migration; bounded `src/proxy.ts`/config changes; `src/lib/{security,observability}/*`; health/security UI/tests/docs. | Every Phase 12-owned §21 item linked to evidence; scans/matrices/lost-device and local incident tabletop pass; zero unresolved critical/high finding. Phase 14 owns backup/restore/continuity rehearsal. |
+| 13 — Release suite/CI | Deterministic CI, stable coverage, type/schema drift, critical E2E/negative/a11y/PWA/camera/performance, independent reviews. | `.github/workflows/ci.yml`, test/release scripts, fixtures/helpers, critical suites, release evidence/security review docs. | Local release command and authorized CI green, global ≥80% each metric, no skip/focus/drift, complete matrices/reviews. |
+| 14 — Staging/deploy/pilot | Approval-gated environment promotion, staging parity/smoke, monitoring, backup/restore, rollback/continuity, real devices, UAT/pilot, go/no-go. | Deployment workflows/scripts plus `docs/operations/{environment-matrix,deployment,rollback,backup-restore,downtime-continuity,monitoring-alerts,pilot-uat,go-live-checklist,release-record}.md`. | Staging/pilot evidence, alert/restore/rollback/continuity/device/UAT results, no critical/high issue, signed production status. |
+| 15 — Docs/handover | README, architecture/data/API docs, ADRs, operator/admin/troubleshooting/support/training guides, decision/release records, §33 evidence. | `README.md`, `docs/architecture/*`, `docs/adr/*`, finalized `docs/operations/*`, `docs/decision-register.md`, `docs/handover-checklist.md`, evidence-backed `PLAN.md` updates. | Clean documented commands/links, unfamiliar-operator dry run, restore/troubleshooting/workflow rehearsal, full §33 and signed handover. |
+
+### 28.3 Detailed Composer playbook index
+
+<!-- PHASE 3 START/END BOUNDARY: execute only via the linked playbook when §0.2 selects Phase 3. -->
+- Phase 3: `contexts/plans/phases/phase-03-database-foundation.md`
+<!-- PHASE 3 END: stop at its gate; never flow into Phase 4. -->
+
+<!-- PHASE 4 START/END BOUNDARY: execute only via the linked playbook when §0.2 selects Phase 4. -->
+- Phase 4: `contexts/plans/phases/phase-04-auth-authorization.md`
+<!-- PHASE 4 END: stop at its gate; never flow into Phase 5. -->
+
+<!-- PHASE 5 START/END BOUNDARY -->
+- Phase 5: `contexts/plans/phases/phase-05-facility-spaces-rates.md`
+<!-- PHASE 5 END: stop at its gate. -->
+
+<!-- PHASE 6 START/END BOUNDARY -->
+- Phase 6: `contexts/plans/phases/phase-06-entry-qr-ticket.md`
+<!-- PHASE 6 END: stop at its gate. -->
+
+<!-- PHASE 7 START/END BOUNDARY -->
+- Phase 7: `contexts/plans/phases/phase-07-validation-fee-exit-preview.md`
+<!-- PHASE 7 END: stop at its gate. -->
+
+<!-- PHASE 8 START/END BOUNDARY -->
+- Phase 8: `contexts/plans/phases/phase-08-cash-payment-confirmed-exit.md`
+<!-- PHASE 8 END: stop at its gate. -->
+
+<!-- PHASE 9 START/END BOUNDARY -->
+- Phase 9: `contexts/plans/phases/phase-09-dashboard-realtime.md`
+<!-- PHASE 9 END: stop at its gate. -->
+
+<!-- PHASE 10 START/END BOUNDARY -->
+- Phase 10: `contexts/plans/phases/phase-10-reports-audit.md`
+<!-- PHASE 10 END: stop at its gate. -->
+
+<!-- PHASE 11 START/END BOUNDARY -->
+- Phase 11: `contexts/plans/phases/phase-11-pwa-offline.md`
+<!-- PHASE 11 END: stop at its gate. -->
+
+<!-- PHASE 12 START/END BOUNDARY -->
+- Phase 12: `contexts/plans/phases/phase-12-security-hardening.md`
+<!-- PHASE 12 END: stop at its gate. -->
+
+<!-- PHASE 13 START/END BOUNDARY -->
+- Phase 13: `contexts/plans/phases/phase-13-release-suite-ci.md`
+<!-- PHASE 13 END: stop at its gate. -->
+
+<!-- PHASE 14 START/END BOUNDARY -->
+- Phase 14: `contexts/plans/phases/phase-14-staging-deployment-pilot.md`
+<!-- PHASE 14 END: stop at its gate. -->
+
+<!-- PHASE 15 START/END BOUNDARY -->
+- Phase 15: `contexts/plans/phases/phase-15-documentation-handover.md`
+<!-- PHASE 15 END: final stop; post-MVP needs a new plan. -->
+
+> **PHASE INDEX STOP.** Composer must return to §0.2, open only the selected playbook, and never continue from this index into another phase.
 
 ## 29. Prioritized Development Backlog
 
@@ -1962,7 +2058,7 @@ Priority is P0 release-blocking core, P1 MVP operational completeness, P2 option
             [Deploy + pilot]
 ```
 
-The critical path is decision approval → schema/invariants → Auth/RLS → space/rate configuration → entry/ticket → validation/fee preview → payment → confirmed exit → release/security tests → deployment. CI, UI primitives, observability, and runbooks can begin in parallel once contracts stabilize. Dashboard, reports, and PWA do not block implementation of the transaction core, but all are required for complete MVP acceptance.
+The dependency path is decision ownership → schema/invariants → Auth/RLS → space/rate configuration → entry/ticket → validation/fee preview → payment → confirmed exit → dashboard/reports/PWA → security/release → deployment/handover. This diagram is architecture rationale, not permission for parallel phase execution. Shared primitives, observability, CI, and runbooks are implemented only in the phase that owns them in §28 and the active playbook. Dashboard, reports, and PWA do not block design of the transaction core, but all are required for complete MVP acceptance.
 
 ## 31. Risk Register
 
@@ -2063,11 +2159,13 @@ Each wave requires its own product rules, privacy/security review, load/cost mod
 4. Network/provider limitations interrupting online-only payment and exit at operational peaks.
 5. Inadequate backup, monitoring, device testing, and staff procedures turning recoverable failures into operational incidents.
 
-### First ten implementation tasks
+### Original build-order rationale — superseded for execution by §0.2
+
+The list below explains how the architecture was decomposed. It is not an executable queue, and completed/historical entries must not be rerun. Composer follows only the `CURRENT_PHASE`, `CURRENT_STEP`, and `ACTIVE_PLAYBOOK` in §0.2.
 
 1. Obtain written approval for tariff, rounding, overnight, lost-ticket, discount, shift, retention, and recovery rules.
 2. Freeze the state machine, invariants, API envelope, error codes, and transaction boundaries as reviewed contracts.
-3. Scaffold the pinned Next.js/Supabase/Vitest/Playwright toolchain and CI with strict TypeScript and environment validation.
+3. Scaffold the pinned Next.js/Supabase/Vitest/Playwright toolchain with strict TypeScript and environment validation; CI is now owned by Phase 13.
 4. Write failing pgTAP tests for schema constraints, active-session uniqueness, idempotency, and immutable evidence.
 5. Implement migrations for location, profiles/permissions, spaces, vehicles, rates/snapshots, sessions, tickets, payments, shifts, corrections, audit, and idempotency.
 6. Write and pass the full Auth/RLS/grant/privileged-function security matrix.
@@ -2076,7 +2174,7 @@ Each wave requires its own product rules, privacy/security review, load/cost mod
 9. Implement ticket validation, exit preview, cash payment, and separate exit confirmation with interruption/replay tests.
 10. Build the accessible mobile-first operational UI and complete the critical Playwright entry-to-exit flow before dashboard/report polish.
 
-### Recommended MVP build order
+### Architectural MVP dependency order — not an execution pointer
 
 Decisions and threat model → repository/CI → schema/invariants → Auth/RLS → facility/spaces/rates → entry/QR → validation/fee preview → cash payment → confirmed exit/release → exception workflows → dashboard/Realtime → reports/audit/shifts → PWA/offline states → hardening/release suite → staging/pilot/handover.
 
@@ -2084,12 +2182,12 @@ Decisions and threat model → repository/CI → schema/invariants → Auth/RLS 
 
 Do not build digital payments, public customer verification unless approved, offline authoritative transactions, reservations, memberships/subscriptions, multi-branch administration, ALPR, barriers, sensors, customer apps, predictive models, fraud scoring, or provider/hardware abstractions without an accepted capability plan.
 
-### Decisions that must be finalized before coding
+### Decisions that must be finalized before their owning phase
 
-- Production tariff values and effective dates; grace, interval rounding, daily cap, overnight, tax, discount, complimentary, and paid-exit rules.
-- Lost-ticket evidence/penalty, cancellation/void/correction approval, and detailed cash reconciliation/shift-closing policy beyond the default open-shift requirement.
-- Facility zones/spaces, vehicle types, expected peak volume/devices, supported printers, receipt/ticket format, and public ticket-verification need.
-- Data retention/privacy notices, export authority, backup retention, commercial RPO/RTO, manual continuity, support ownership, and infrastructure tier.
+- **Before Phase 5:** development facility zones/spaces, vehicle types, and effective-dated tariff fixtures. Production values remain separate approval inputs.
+- **Before Phases 7–8:** grace, interval rounding, cap, overnight, tax, discount, complimentary, paid-exit, lost-ticket evidence/penalty, cancellation/void/correction approval, and cash shift/reconciliation rules.
+- **Before Phase 6:** approve only the generic ticket/receipt information layout and browser print sizes used for CSS/print-preview tests. **Before Phase 14:** approve actual printer models, representative devices, physical print acceptance, and peak volume. Public ticket verification remains out of scope unless a separate product/security decision explicitly adds it.
+- **Before Phase 14:** production tariff/effective dates, privacy/retention, export authority, backup retention, commercial RPO/RTO, manual continuity, support ownership, infrastructure tier, and go-live approvers.
 
 ### Realism assessment
 

@@ -19,8 +19,9 @@ const {
 }));
 
 vi.mock("next/navigation", () => ({ redirect: redirectMock }));
-vi.mock("@/lib/supabase/server", () => ({
-  createServerSupabaseClient: vi.fn(async () => ({
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("@/lib/supabase/server-action", () => ({
+  createServerActionSupabaseClient: vi.fn(async () => ({
     auth: {
       signInWithPassword: signInWithPasswordMock,
       signOut: signOutMock,

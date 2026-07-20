@@ -110,13 +110,13 @@ export function ProtectedShell({
 
           {profile.role === "ADMIN" ? (
             <>
-              <span
-                aria-disabled="true"
-                className="flex min-h-11 cursor-not-allowed items-center gap-4 rounded-lg px-4 text-sm font-medium text-[#263955] opacity-70 dark:text-slate-300"
+              <Link
+                href="/admin/staff"
+                className="flex min-h-11 items-center gap-4 rounded-lg px-4 text-sm font-medium text-[#263955] transition-colors hover:bg-[#f3f7fc] dark:text-slate-300 dark:hover:bg-slate-800/70"
               >
                 <Users aria-hidden="true" className="size-[18px]" />
                 Staff &amp; Users
-              </span>
+              </Link>
               <span
                 aria-disabled="true"
                 className="flex min-h-11 cursor-not-allowed items-center gap-4 rounded-lg px-4 text-sm font-medium text-[#263955] opacity-70 dark:text-slate-300"

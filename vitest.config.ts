@@ -9,13 +9,16 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     test: {
-      include: ['tests/unit/**/*.{test,spec}.{ts,tsx}'],
+      include: [
+        'tests/unit/**/*.{test,spec}.{ts,tsx}',
+        'tests/integration/**/*.{test,spec}.{ts,tsx}',
+      ],
       environment: 'jsdom',
       globals: true,
       setupFiles: ['./tests/setup.ts'],
       env: {
         NEXT_PUBLIC_SUPABASE_URL:
-          env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:54321',
+          env.NEXT_PUBLIC_SUPABASE_URL ?? 'http://127.0.0.1:55321',
         NEXT_PUBLIC_SUPABASE_ANON_KEY:
           env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? 'test-anon-key',
         NEXT_PUBLIC_APP_URL: env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',

@@ -4,8 +4,8 @@ const { exchangeCodeForSessionMock } = vi.hoisted(() => ({
   exchangeCodeForSessionMock: vi.fn(),
 }));
 
-vi.mock("@/lib/supabase/server", () => ({
-  createServerSupabaseClient: vi.fn(async () => ({
+vi.mock("@/lib/supabase/server-action", () => ({
+  createServerActionSupabaseClient: vi.fn(async () => ({
     auth: { exchangeCodeForSession: exchangeCodeForSessionMock },
   })),
 }));

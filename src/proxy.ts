@@ -7,7 +7,7 @@ const PUBLIC_PATHS = ["/", "/login", "/forgot-password", "/auth/callback"];
 function createContentSecurityPolicy(nonce: string): string {
   const isDevelopment = process.env.NODE_ENV === "development";
   const supabaseOrigin = new URL(
-    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:54321",
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "http://127.0.0.1:55321",
   ).origin;
 
   return `

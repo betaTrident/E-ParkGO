@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import {
@@ -13,7 +14,7 @@ import {
   hasRecoveryIntent,
 } from "@/lib/auth/recovery-intent";
 import { env } from "@/lib/env";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServerActionSupabaseClient } from "@/lib/supabase/server-action";
 
 export interface AuthActionState {
   error: string | null;
@@ -42,12 +43,14 @@ export async function signInAction(
     };
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createServerActionSupabaseClient();
   const { error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     return { error: "Invalid email or password" };
   }
+
+  revalidatePath("/", "layout");
 
   const nextPath = formData.get("next");
   const destination = getSafeRedirectPath(
@@ -59,7 +62,7 @@ export async function signInAction(
 }
 
 export async function signOutAction() {
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createServerActionSupabaseClient();
   const { error } = await supabase.auth.signOut();
 
   if (error) {
@@ -90,7 +93,7 @@ export async function requestPasswordRecoveryAction(
   callbackUrl.searchParams.set("next", "/update-password");
   callbackUrl.searchParams.set("type", "recovery");
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createServerActionSupabaseClient();
   await supabase.auth.resetPasswordForEmail(parsed.data.email, {
     redirectTo: callbackUrl.toString(),
   });
@@ -118,7 +121,7 @@ export async function updatePasswordAction(
     };
   }
 
-  const supabase = await createServerSupabaseClient();
+  const supabase = await createServerActionSupabaseClient();
   const { error } = await supabase.auth.updateUser({
     password: parsed.data.password,
   });

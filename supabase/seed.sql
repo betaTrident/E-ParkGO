@@ -142,8 +142,17 @@ INSERT INTO auth.users (
   email,
   encrypted_password,
   email_confirmed_at,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change_token_current,
+  email_change,
+  phone_change_token,
+  reauthentication_token,
   raw_app_meta_data,
   raw_user_meta_data,
+  is_sso_user,
+  is_anonymous,
   created_at,
   updated_at
 )
@@ -155,12 +164,29 @@ VALUES (
   'admin@eparkgo.local',
   crypt('Admin123!@#', gen_salt('bf')),
   now(),
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
   '{"provider":"email","providers":["email"]}'::jsonb,
   '{}'::jsonb,
+  false,
+  false,
   now(),
   now()
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE
+SET
+  confirmation_token = '',
+  recovery_token = '',
+  email_change_token_new = '',
+  email_change_token_current = '',
+  email_change = '',
+  phone_change_token = '',
+  reauthentication_token = '';
 
 INSERT INTO auth.identities (
   id,
@@ -177,7 +203,7 @@ VALUES (
   'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
   jsonb_build_object('sub', 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', 'email', 'admin@eparkgo.local'),
   'email',
-  'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+  'admin@eparkgo.local',
   now(),
   now(),
   now()
@@ -242,8 +268,17 @@ INSERT INTO auth.users (
   email,
   encrypted_password,
   email_confirmed_at,
+  confirmation_token,
+  recovery_token,
+  email_change_token_new,
+  email_change_token_current,
+  email_change,
+  phone_change_token,
+  reauthentication_token,
   raw_app_meta_data,
   raw_user_meta_data,
+  is_sso_user,
+  is_anonymous,
   created_at,
   updated_at
 )
@@ -255,12 +290,29 @@ VALUES (
   'staff@eparkgo.local',
   crypt('Staff123!@#', gen_salt('bf')),
   now(),
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
+  '',
   '{"provider":"email","providers":["email"]}'::jsonb,
   '{}'::jsonb,
+  false,
+  false,
   now(),
   now()
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE
+SET
+  confirmation_token = '',
+  recovery_token = '',
+  email_change_token_new = '',
+  email_change_token_current = '',
+  email_change = '',
+  phone_change_token = '',
+  reauthentication_token = '';
 
 INSERT INTO auth.identities (
   id,
@@ -277,7 +329,7 @@ VALUES (
   'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
   jsonb_build_object('sub', 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb', 'email', 'staff@eparkgo.local'),
   'email',
-  'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+  'staff@eparkgo.local',
   now(),
   now(),
   now()

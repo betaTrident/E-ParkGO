@@ -7,6 +7,7 @@ This directory is the team-facing home for project-specific AI workflow assets.
 - `agents/` — human-maintained agent definitions
 - `rules/` — reusable policy and implementation guidance by stack/domain
 - `plans/phases/` — Composer 2.5 phase playbooks selected by `PLAN.md §0.2`
+- `plans/evidence/` — append-only phase gate attempts and completion evidence
 
 ## Runtime Note
 

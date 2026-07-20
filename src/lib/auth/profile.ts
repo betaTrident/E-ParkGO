@@ -47,7 +47,7 @@ export async function getActiveProfile(): Promise<ActiveProfile | null> {
       full_name,
       is_active,
       disabled_at,
-      staff_permissions (
+      staff_permissions!staff_permissions_profile_id_fkey (
         can_approve_overrides,
         can_void_payments,
         can_process_lost_tickets,
