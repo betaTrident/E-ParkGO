@@ -1,8 +1,8 @@
 "use client";
 
+import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useActionState, useState } from "react";
-import { Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,10 +27,12 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       {nextPath ? <input type="hidden" name="next" value={nextPath} /> : null}
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email address</Label>
+        <Label htmlFor="email" className="text-sm font-medium">
+          Email address
+        </Label>
         <div className="relative">
           <Mail
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute left-4 top-1/2 size-[1.125rem] -translate-y-1/2 text-slate-400"
             aria-hidden="true"
           />
           <Input
@@ -38,8 +40,9 @@ export function LoginForm({ nextPath }: LoginFormProps) {
             name="email"
             type="email"
             autoComplete="email"
+            inputMode="email"
             placeholder="you@example.com"
-            className="h-12 pl-10"
+            className="h-14 rounded-lg border-slate-200 bg-white pl-12 text-base shadow-none placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-950"
             required
             disabled={isPending}
           />
@@ -47,18 +50,12 @@ export function LoginForm({ nextPath }: LoginFormProps) {
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            href="/forgot-password"
-            className="text-sm font-medium text-primary underline-offset-4 hover:underline"
-          >
-            Forgot password?
-          </Link>
-        </div>
+        <Label htmlFor="password" className="text-sm font-medium">
+          Password
+        </Label>
         <div className="relative">
           <LockKeyhole
-            className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+            className="pointer-events-none absolute left-4 top-1/2 size-[1.125rem] -translate-y-1/2 text-slate-400"
             aria-hidden="true"
           />
           <Input
@@ -67,34 +64,54 @@ export function LoginForm({ nextPath }: LoginFormProps) {
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             placeholder="Enter your password"
-            className="h-12 px-10"
+            className="h-14 rounded-lg border-slate-200 bg-white px-12 text-base shadow-none placeholder:text-slate-400 dark:border-slate-700 dark:bg-slate-950"
             required
             disabled={isPending}
           />
           <button
             type="button"
             onClick={() => setShowPassword((current) => !current)}
-            className="absolute right-1 top-1/2 flex size-10 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="absolute right-2 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-md text-slate-400 transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             aria-label={showPassword ? "Hide password" : "Show password"}
             aria-pressed={showPassword}
             disabled={isPending}
           >
             {showPassword ? (
-              <EyeOff className="size-4" aria-hidden="true" />
+              <EyeOff className="size-[1.125rem]" aria-hidden="true" />
             ) : (
-              <Eye className="size-4" aria-hidden="true" />
+              <Eye className="size-[1.125rem]" aria-hidden="true" />
             )}
           </button>
         </div>
       </div>
 
+      <div className="flex items-center justify-between gap-4">
+        <span className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <ShieldCheck className="size-4 text-emerald-500" aria-hidden="true" />
+          Secure sign-in
+        </span>
+        <Link
+          href="/forgot-password"
+          className="flex min-h-11 items-center text-sm font-medium text-blue-600 underline-offset-4 hover:underline dark:text-blue-400"
+        >
+          Forgot password?
+        </Link>
+      </div>
+
       {state.error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p
+          className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive"
+          role="alert"
+        >
           {state.error}
         </p>
       ) : null}
 
-      <Button type="submit" className="h-12 w-full" disabled={isPending}>
+      <Button
+        type="submit"
+        className="h-14 w-full rounded-lg bg-blue-600 text-base font-semibold shadow-[0_8px_20px_rgba(37,99,235,0.20)] hover:bg-blue-700"
+        disabled={isPending}
+      >
         {isPending ? "Signing in…" : "Sign in"}
       </Button>
     </form>

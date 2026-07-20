@@ -1,6 +1,7 @@
-import Image from "next/image";
+import type { CSSProperties } from "react";
 
-import logoMark from "@/app/assets/logo/1.svg";
+import darkModeLogo from "@/app/assets/logo/Dark-mode-logo.svg";
+import lightModeLogo from "@/app/assets/logo/Light-mode-logo.svg";
 import { cn } from "@/lib/utils";
 
 interface BrandLogoProps {
@@ -12,24 +13,22 @@ interface BrandLogoProps {
 export function BrandLogo({
   className,
   compact = false,
-  priority = false,
 }: BrandLogoProps) {
+  const logoVariables = {
+    "--brand-logo-light": `url("${lightModeLogo.src}")`,
+    "--brand-logo-dark": `url("${darkModeLogo.src}")`,
+  } as CSSProperties;
+
   return (
     <span
+      role="img"
+      aria-label="E-ParkGO"
+      style={logoVariables}
       className={cn(
-        "relative inline-flex h-10 shrink-0 items-center overflow-hidden",
-        compact ? "w-24" : "w-32",
+        "brand-logo inline-flex shrink-0",
+        compact ? "h-9 w-[7.25rem]" : "h-12 w-[9.5rem]",
         className,
       )}
-    >
-      <Image
-        src={logoMark}
-        alt="E-ParkGO"
-        fill
-        sizes={compact ? "96px" : "128px"}
-        priority={priority}
-        className="scale-[2.6] object-contain"
-      />
-    </span>
+    />
   );
 }

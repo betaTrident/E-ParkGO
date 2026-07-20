@@ -1,5 +1,7 @@
 import { AuthShell } from "@/features/auth/components/auth-shell";
 import { LoginForm } from "@/features/auth/components/login-form";
+import { BrandLogo } from "@/components/shared/brand-logo";
+import { UsersRound } from "lucide-react";
 
 interface LoginPageProps {
   searchParams: Promise<{
@@ -15,10 +17,13 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
   return (
     <AuthShell>
-      <div className="mb-7 space-y-2 text-center">
-        <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
-        <p className="text-sm text-muted-foreground">
-          Sign in to access your E-ParkGO account.
+      <div className="mb-8 text-center">
+        <BrandLogo compact className="mx-auto mb-6" priority />
+        <h1 className="text-[1.75rem] font-bold tracking-[-0.025em] text-slate-950 dark:text-white">
+          Welcome back
+        </h1>
+        <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+          Sign in to access your E-ParkGO account
         </p>
       </div>
 
@@ -52,9 +57,15 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
       <LoginForm nextPath={params.next} />
 
-      <p className="mt-6 border-t pt-5 text-center text-xs text-muted-foreground">
-        Need access? Contact your facility administrator.
-      </p>
+      <div className="-mx-5 mt-9 border-t border-slate-200 px-5 pt-6 text-center sm:-mx-11 sm:px-11 dark:border-slate-800">
+        <p className="flex items-center justify-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+          <UsersRound className="size-[1.125rem]" aria-hidden="true" />
+          Staff &amp; Admin Access
+        </p>
+        <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
+          Need access? Contact your facility administrator.
+        </p>
+      </div>
     </AuthShell>
   );
 }

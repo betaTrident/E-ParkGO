@@ -21,17 +21,21 @@ const profile: ActiveProfile = {
 };
 
 describe("DashboardView", () => {
-  it("shows a truthful Phase 4 readiness state without fabricated metrics", () => {
+  it("renders the reference dashboard as clearly labeled preview data", () => {
     render(<DashboardView profile={profile} />);
 
     expect(
       screen.getByRole("heading", { name: "Dashboard" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Authentication")).toBeInTheDocument();
-    expect(screen.getByText("Active")).toBeInTheDocument();
-    expect(screen.getByText("Location access")).toBeInTheDocument();
-    expect(screen.getByText("Assigned")).toBeInTheDocument();
-    expect(screen.queryByText("$4,315.75")).not.toBeInTheDocument();
+    expect(screen.getByText("Active Sessions")).toBeInTheDocument();
+    expect(screen.getByText("Occupancy Overview")).toBeInTheDocument();
+    expect(screen.getByText("Recent Entries")).toBeInTheDocument();
+    expect(
+      screen.getByText(/Preview metrics are illustrative/),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: /Seven day revenue preview/ }),
+    ).toBeInTheDocument();
   });
 
   it("announces a safe sign-out failure to the authenticated user", () => {
