@@ -44,13 +44,31 @@ const navigation = [
     label: "Parking Spaces",
     href: "/spaces",
     icon: MapPinned,
-    available: false,
+    available: true,
   },
   { label: "Reports", href: "/reports", icon: BarChart3, available: false },
-  { label: "Rates", href: "/rates", icon: SlidersHorizontal, available: false },
+  {
+    label: "Rates",
+    href: "/admin/rates",
+    icon: SlidersHorizontal,
+    available: true,
+    adminOnly: true,
+  },
 ] as const;
 
-const mobileNavigation = navigation.slice(0, 4);
+type NavigationItem = (typeof navigation)[number];
+
+function isNavigationVisible(item: NavigationItem, role: ActiveProfile["role"]) {
+  if (!item.available) {
+    return false;
+  }
+
+  if ("adminOnly" in item && item.adminOnly && role !== "ADMIN") {
+    return false;
+  }
+
+  return true;
+}
 
 function getInitials(name: string) {
   return name
@@ -71,6 +89,10 @@ export function ProtectedShell({
   profile,
 }: ProtectedShellProps) {
   const initials = getInitials(profile.full_name);
+  const visibleNavigation = navigation.filter((item) =>
+    isNavigationVisible(item, profile.role),
+  );
+  const mobileNavigation = visibleNavigation.slice(0, 4);
 
   return (
     <div className="min-h-dvh bg-[#f7f9fc] text-[#10213d] dark:bg-[#07111f] dark:text-slate-100">
@@ -84,29 +106,38 @@ export function ProtectedShell({
         </Link>
 
         <nav aria-label="Primary navigation" className="space-y-1 px-3 py-5">
-          {navigation.map(({ label, href, icon: Icon, available }) =>
-            available ? (
+          {navigation.map((item) => {
+            const { label, href, icon: Icon } = item;
+
+            if (!isNavigationVisible(item, profile.role)) {
+              if (!item.available) {
+                return (
+                  <span
+                    key={href}
+                    aria-disabled="true"
+                    title={`${label} becomes available in a later implementation phase`}
+                    className="flex min-h-11 cursor-not-allowed items-center gap-4 rounded-lg px-4 text-sm font-medium text-[#263955] opacity-70 dark:text-slate-300"
+                  >
+                    <Icon aria-hidden="true" className="size-[18px]" />
+                    {label}
+                  </span>
+                );
+              }
+
+              return null;
+            }
+
+            return (
               <Link
                 key={href}
                 href={href}
-                aria-current="page"
-                className="flex min-h-11 items-center gap-4 rounded-lg bg-[#eaf2ff] px-4 text-sm font-semibold text-[#0969f9] transition-colors hover:bg-[#dceaff] dark:bg-blue-500/15 dark:text-blue-300"
+                className="flex min-h-11 items-center gap-4 rounded-lg px-4 text-sm font-medium text-[#263955] transition-colors hover:bg-[#f3f7fc] dark:text-slate-300 dark:hover:bg-slate-800/70"
               >
                 <Icon aria-hidden="true" className="size-[18px]" />
                 {label}
               </Link>
-            ) : (
-              <span
-                key={href}
-                aria-disabled="true"
-                title={`${label} becomes available in a later implementation phase`}
-                className="flex min-h-11 cursor-not-allowed items-center gap-4 rounded-lg px-4 text-sm font-medium text-[#263955] opacity-70 dark:text-slate-300"
-              >
-                <Icon aria-hidden="true" className="size-[18px]" />
-                {label}
-              </span>
-            ),
-          )}
+            );
+          })}
 
           {profile.role === "ADMIN" ? (
             <>
@@ -117,13 +148,13 @@ export function ProtectedShell({
                 <Users aria-hidden="true" className="size-[18px]" />
                 Staff &amp; Users
               </Link>
-              <span
-                aria-disabled="true"
-                className="flex min-h-11 cursor-not-allowed items-center gap-4 rounded-lg px-4 text-sm font-medium text-[#263955] opacity-70 dark:text-slate-300"
+              <Link
+                href="/admin/settings"
+                className="flex min-h-11 items-center gap-4 rounded-lg px-4 text-sm font-medium text-[#263955] transition-colors hover:bg-[#f3f7fc] dark:text-slate-300 dark:hover:bg-slate-800/70"
               >
                 <Settings aria-hidden="true" className="size-[18px]" />
                 Settings
-              </span>
+              </Link>
             </>
           ) : null}
         </nav>
@@ -236,28 +267,16 @@ export function ProtectedShell({
         aria-label="Mobile navigation"
         className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-4 border-t border-slate-200 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-slate-800 dark:bg-[#0b1626]/95 lg:hidden"
       >
-        {mobileNavigation.map(({ label, href, icon: Icon, available }) =>
-          available ? (
-            <Link
-              key={href}
-              href={href}
-              aria-current="page"
-              className="flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-semibold text-blue-600"
-            >
-              <Icon aria-hidden="true" className="size-5" />
-              {label}
-            </Link>
-          ) : (
-            <span
-              key={href}
-              aria-disabled="true"
-              className="flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium text-slate-400"
-            >
-              <Icon aria-hidden="true" className="size-5" />
-              {label}
-            </span>
-          ),
-        )}
+        {mobileNavigation.map(({ label, href, icon: Icon }) => (
+          <Link
+            key={href}
+            href={href}
+            className="flex min-h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-300"
+          >
+            <Icon aria-hidden="true" className="size-5" />
+            {label}
+          </Link>
+        ))}
       </nav>
     </div>
   );

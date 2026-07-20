@@ -28,15 +28,15 @@
 ### 0.2 Execution Control and Current Status
 
 ```text
-CURRENT_PHASE: 4
-CURRENT_STEP: 4.6 Phase gate evidence recorded
+CURRENT_PHASE: 5
+CURRENT_STEP: 5.4 Phase gate evidence recorded
 EXECUTION_STATUS: COMPLETE
 EXECUTION_MODE: LOCAL_VERIFICATION_AND_REPAIR_ONLY
-ACTIVE_PLAYBOOK: contexts/plans/phases/phase-04-auth-authorization.md
+ACTIVE_PLAYBOOK: contexts/plans/phases/phase-05-facility-spaces-rates.md
 CURRENT_BLOCKER: none
-NEXT_UNLOCK: Phase 5 facility, spaces, and rates playbook
-DO_NOT_START: Phase 6 or any later phase
-LAST_IMPLEMENTATION_COMMIT_AUDITED: ddab5b5
+NEXT_UNLOCK: Phase 6 entry and QR ticket playbook
+DO_NOT_START: Phase 7 or any later phase
+LAST_IMPLEMENTATION_COMMIT_AUDITED: pending
 ```
 
 Allowed status values are `COMPLETE`, `ACTIVE`, `BLOCKED`, and `PENDING`. Exactly one phase may be `ACTIVE` or `BLOCKED`; all future phases remain `PENDING`. An implementation can be `COMPLETE`, `PARTIAL`, or `NOT_STARTED` independently of its gate.
@@ -48,8 +48,8 @@ Allowed status values are `COMPLETE`, `ACTIVE`, `BLOCKED`, and `PENDING`. Exactl
 | 2. Repository and Environments | **COMPLETE** | Complete scaffolding | Historical RED was demonstrated and replaced by GREEN tests. Current lint is `eslint .`; CI is explicitly owned by Phase 13, not this historical gate. | `PLAN.md Appendix A` |
 | **3. Database Foundation** | **COMPLETE** | Complete foundation | Eight migrations (including Phase 4 auth admin RPCs), 19 tables, RLS/grants, tenant hardening, seed, generated types, and 257 pgTAP assertions pass locally on Windows with Supabase ports `553xx`. Evidence: [2026-07-21 pass](contexts/plans/evidence/phase-03.md#phase-03-attempt-2026-07-21t0245000800). | `contexts/plans/phases/phase-03-database-foundation.md` |
 | **4. Auth & Authorization** | **COMPLETE** | Complete | Staff admin RPCs/UI, signup policy, live Auth E2E (35 tests / 5 browsers), integration coverage, and app quality gate pass. Evidence: [2026-07-21 pass](contexts/plans/evidence/phase-04.md#phase-04-attempt-2026-07-21t0245000800). | `contexts/plans/phases/phase-04-auth-authorization.md` |
-| 5. Facility, Spaces, Rates | **ACTIVE** | Not started beyond tables/RLS | Required gate: configuration RPCs, immutable publish/overlap/location/audit tests, responsive admin/staff flows, and full quality gate must pass. | `contexts/plans/phases/phase-05-facility-spaces-rates.md` |
-| 6. Entry & QR Ticket | **PENDING** | Not started beyond tables/indexes | Required gate: atomic entry, plate/space concurrency, idempotency, hash-only credential, print/reissue, E2E, and security checks must pass. | `contexts/plans/phases/phase-06-entry-qr-ticket.md` |
+| **5. Facility, Spaces, Rates** | **COMPLETE** | Complete | Configuration RPCs, immutable publish/overlap tests, responsive admin/staff flows, and full quality gate pass. Evidence: [2026-07-21 pass](contexts/plans/evidence/phase-05.md#phase-05-attempt-2026-07-21t0309000800). | `contexts/plans/phases/phase-05-facility-spaces-rates.md` |
+| 6. Entry & QR Ticket | **ACTIVE** | Not started beyond tables/indexes | Required gate: atomic entry, plate/space concurrency, idempotency, hash-only credential, print/reissue, E2E, and security checks must pass. | `contexts/plans/phases/phase-06-entry-qr-ticket.md` |
 | 7. Validation, Fee, Exit Preview | **PENDING** | Not started | Required gate: ticket lifecycle/rate limits, every §17 fee/state vector, scanner/manual fallback, quote, E2E, and token-redaction checks must pass. | `contexts/plans/phases/phase-07-validation-fee-exit-preview.md` |
 | 8. Cash Payment & Confirmed Exit | **PENDING** | Not started beyond tables/indexes | Required gate: shifts, exact-once payment, exceptions, separate exit/release, interruption/concurrency, append-only evidence, and E2E must pass. | `contexts/plans/phases/phase-08-cash-payment-confirmed-exit.md` |
 | 9. Dashboard & Realtime | **PENDING** | Auth placeholder only | Required gate: authoritative snapshot, private location Broadcast payload/policy, two-client convergence, cross-location denial, reconnect/refetch/poll/cleanup, accessibility, and quota evidence must pass. | `contexts/plans/phases/phase-09-dashboard-realtime.md` |

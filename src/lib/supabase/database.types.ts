@@ -1231,6 +1231,43 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_create_parking_space: {
+        Args: {
+          p_code: string
+          p_correlation_id: string
+          p_vehicle_type_id: string
+          p_zone_id: string
+        }
+        Returns: string
+      }
+      admin_create_parking_zone: {
+        Args: {
+          p_code: string
+          p_correlation_id: string
+          p_name: string
+          p_sort_order: number
+        }
+        Returns: string
+      }
+      admin_create_rate_draft: {
+        Args: {
+          p_correlation_id: string
+          p_daily_max_centavos: number
+          p_effective_from: string
+          p_effective_to: string
+          p_flat_fee_centavos: number
+          p_grace_minutes: number
+          p_initial_fee_centavos: number
+          p_initial_minutes: number
+          p_lost_ticket_penalty_centavos: number
+          p_mode: Database["public"]["Enums"]["rate_mode"]
+          p_overnight_fee_centavos: number
+          p_succeeding_fee_centavos: number
+          p_succeeding_interval_minutes: number
+          p_vehicle_type_id: string
+        }
+        Returns: string
+      }
       admin_create_staff_profile: {
         Args: {
           p_can_approve_overrides: boolean
@@ -1245,6 +1282,22 @@ export type Database = {
         }
         Returns: string
       }
+      admin_create_vehicle_type: {
+        Args: { p_code: string; p_correlation_id: string; p_name: string }
+        Returns: string
+      }
+      admin_deactivate_parking_space: {
+        Args: { p_correlation_id: string; p_space_id: string }
+        Returns: undefined
+      }
+      admin_deactivate_parking_zone: {
+        Args: { p_correlation_id: string; p_zone_id: string }
+        Returns: undefined
+      }
+      admin_deactivate_vehicle_type: {
+        Args: { p_correlation_id: string; p_vehicle_type_id: string }
+        Returns: undefined
+      }
       admin_disable_staff: {
         Args: {
           p_correlation_id: string
@@ -1253,6 +1306,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_publish_rate: {
+        Args: { p_correlation_id: string; p_rate_id: string }
+        Returns: string
+      }
       admin_reactivate_staff: {
         Args: {
           p_correlation_id: string
@@ -1260,6 +1317,71 @@ export type Database = {
           p_target_id: string
         }
         Returns: undefined
+      }
+      admin_retire_published_rate: {
+        Args: {
+          p_correlation_id: string
+          p_effective_to: string
+          p_rate_id: string
+        }
+        Returns: undefined
+      }
+      admin_set_parking_space_status: {
+        Args: {
+          p_correlation_id: string
+          p_expected_version: number
+          p_space_id: string
+          p_status: Database["public"]["Enums"]["space_status"]
+        }
+        Returns: number
+      }
+      admin_update_facility_settings: {
+        Args: {
+          p_correlation_id: string
+          p_name: string
+          p_receipt_prefix: string
+          p_settings: Json
+          p_timezone: string
+        }
+        Returns: string
+      }
+      admin_update_parking_space: {
+        Args: {
+          p_correlation_id: string
+          p_space_id: string
+          p_vehicle_type_id: string
+          p_zone_id: string
+        }
+        Returns: string
+      }
+      admin_update_parking_zone: {
+        Args: {
+          p_correlation_id: string
+          p_name: string
+          p_sort_order: number
+          p_zone_id: string
+        }
+        Returns: string
+      }
+      admin_update_rate_draft: {
+        Args: {
+          p_correlation_id: string
+          p_daily_max_centavos: number
+          p_effective_from: string
+          p_effective_to: string
+          p_flat_fee_centavos: number
+          p_grace_minutes: number
+          p_initial_fee_centavos: number
+          p_initial_minutes: number
+          p_lost_ticket_penalty_centavos: number
+          p_mode: Database["public"]["Enums"]["rate_mode"]
+          p_overnight_fee_centavos: number
+          p_rate_id: string
+          p_succeeding_fee_centavos: number
+          p_succeeding_interval_minutes: number
+          p_vehicle_type_id: string
+        }
+        Returns: string
       }
       admin_update_staff_permissions: {
         Args: {
@@ -1279,6 +1401,18 @@ export type Database = {
           p_role: Database["public"]["Enums"]["app_role"]
           p_target_id: string
         }
+        Returns: undefined
+      }
+      admin_update_vehicle_type: {
+        Args: {
+          p_correlation_id: string
+          p_name: string
+          p_vehicle_type_id: string
+        }
+        Returns: string
+      }
+      admin_withdraw_rate_draft: {
+        Args: { p_correlation_id: string; p_rate_id: string }
         Returns: undefined
       }
     }
