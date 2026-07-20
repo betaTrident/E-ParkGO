@@ -92,7 +92,7 @@ Load skills with the `Read` tool on the listed absolute paths **before writing a
 
 | Phase | Objective | Project skills | IDE plugin skills |
 |-------|-----------|---------------|-------------------|
-| **2** | **Scaffolding** (active) | `nextjs-turbopack`, `repository-conventions`, `supabase`, `git-workflow`, `coding-standards`, `tdd-workflow`, `design-system` | `v-nextjs`, `v-turbopack`, `v-shadcn`, `v-env-vars`, `sp-executing` |
+| 2 | Scaffolding | `nextjs-turbopack`, `repository-conventions`, `supabase`, `git-workflow`, `coding-standards`, `tdd-workflow`, `design-system` | `v-nextjs`, `v-turbopack`, `v-shadcn`, `v-env-vars`, `sp-executing` |
 | 3 | Database foundation | `supabase`, `supabase-postgres-best-practices`, `backend-patterns` | `plug-supabase`, `plug-supabase-pg`, `context7-mcp` |
 | 4 | Auth & authorization | `supabase`, `security-review`, `backend-patterns` | `plug-supabase`, `v-auth`, `v-routing-middleware` |
 | 5 | Facility, spaces, rates | `backend-patterns`, `api-design`, `supabase` | `v-vercel-functions`, `plug-supabase`, `sp-executing` |
