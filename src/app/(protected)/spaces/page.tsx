@@ -22,7 +22,8 @@ export default async function SpacesPage() {
         <h1 className="text-3xl font-bold tracking-tight">Parking spaces</h1>
         <p className="max-w-2xl text-slate-600 dark:text-slate-400">
           Same-location availability board for staff and administrators. Status
-          text is provided in addition to color for accessibility.
+          text is provided in addition to color for accessibility. Changes sync
+          to the operational dashboard through the location-scoped realtime channel.
         </p>
       </header>
 

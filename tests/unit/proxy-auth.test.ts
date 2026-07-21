@@ -84,4 +84,17 @@ describe("auth proxy routing", () => {
       /script-src 'self' 'nonce-[^']+' 'strict-dynamic'/,
     );
   });
+
+  it("allows authenticated users through protected routes", async () => {
+    updateSessionMock.mockResolvedValue({
+      response: NextResponse.next(),
+      user: { id: "staff-user" },
+    });
+
+    const response = await proxy(
+      new NextRequest("https://parking.example/sessions"),
+    );
+
+    expect(response.headers.get("location")).toBeNull();
+  });
 });

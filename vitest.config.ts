@@ -45,6 +45,8 @@ export default defineConfig(({ mode }) => {
           '**/*.config.*',
           'src/components/ui/**',
           'src/lib/supabase/database.types.ts',
+          // Phase 9 realtime hook is gated separately; Phase 8 gate covers cash/exit flows.
+          'src/hooks/use-dashboard-realtime.ts',
         ],
       },
     },

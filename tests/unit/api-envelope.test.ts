@@ -64,4 +64,53 @@ describe('api envelope', () => {
 
     expect(body.error?.field_errors).toEqual({ plate_number: ['Required'] })
   })
+
+  it('maps null rpc errors to retryable internal errors', async () => {
+    const response = mapRpcError(null, 'corr-null')
+    const body = await response.json()
+
+    expect(response.status).toBe(500)
+    expect(body.error?.code).toBe('INTERNAL_ERROR')
+    expect(body.error?.retryable).toBe(true)
+  })
+
+  it('maps phase 8 payment and shift domain errors', async () => {
+    const cases = [
+      ['QUOTE_EXPIRED', 422, 'QUOTE_EXPIRED'],
+      ['INSUFFICIENT_CASH', 422, 'INSUFFICIENT_CASH'],
+      ['SHIFT_REQUIRED', 422, 'SHIFT_REQUIRED'],
+      ['PAYMENT_ALREADY_RECORDED', 409, 'PAYMENT_ALREADY_RECORDED'],
+      ['SESSION_CANCELLED', 409, 'SESSION_CANCELLED'],
+      ['DUPLICATE_PAYMENT_REFERENCE', 409, 'DUPLICATE_PAYMENT_REFERENCE'],
+      ['PAYMENT_REQUIRED', 422, 'PAYMENT_REQUIRED'],
+      ['INVALID_STATUS_TRANSITION', 409, 'INVALID_STATUS_TRANSITION'],
+      ['INSUFFICIENT_PERMISSION', 403, 'INSUFFICIENT_PERMISSION'],
+    ] as const
+
+    for (const [message, status, code] of cases) {
+      const response = mapRpcError({ message }, `corr-${code}`)
+      const body = await response.json()
+      expect(response.status).toBe(status)
+      expect(body.error?.code).toBe(code)
+    }
+  })
+
+  it('humanizes additional domain-specific messages', async () => {
+    const space = await mapRpcError({ message: 'SPACE_NOT_AVAILABLE' }, 'corr-space')
+    const rate = await mapRpcError({ message: 'RATE_NOT_CONFIGURED' }, 'corr-rate')
+    const conflict = await mapRpcError({ message: 'IDEMPOTENCY_CONFLICT' }, 'corr-conflict')
+
+    expect((await space.json()).error?.message).toContain('not available')
+    expect((await rate.json()).error?.message).toContain('published rate')
+    expect((await conflict.json()).error?.message).toContain('idempotency key')
+  })
+
+  it('falls back to internal errors for unknown rpc messages', async () => {
+    const response = mapRpcError({ message: 'SOMETHING_UNEXPECTED' }, 'corr-unknown')
+    const body = await response.json()
+
+    expect(response.status).toBe(500)
+    expect(body.error?.code).toBe('INTERNAL_ERROR')
+    expect(body.error?.retryable).toBe(true)
+  })
 })

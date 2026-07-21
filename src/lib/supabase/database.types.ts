@@ -1423,6 +1423,44 @@ export type Database = {
         }
         Returns: Json
       }
+      cancel_parking_session: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_reason: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      close_staff_shift: {
+        Args: {
+          p_correlation_id: string
+          p_declared_cash_centavos: number
+          p_idempotency_key: string
+          p_notes: string
+          p_shift_id: string
+        }
+        Returns: Json
+      }
+      confirm_vehicle_exit: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      correct_parking_session: {
+        Args: {
+          p_correction_type: string
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_reason: string
+          p_session_id: string
+          p_values: Json
+        }
+        Returns: Json
+      }
       create_parking_entry: {
         Args: {
           p_color: string
@@ -1431,6 +1469,30 @@ export type Database = {
           p_plate: string
           p_space_id: string
           p_vehicle_type_id: string
+        }
+        Returns: Json
+      }
+      get_dashboard_snapshot: {
+        Args: { p_business_date?: string }
+        Returns: Json
+      }
+      process_lost_ticket: {
+        Args: {
+          p_correlation_id: string
+          p_evidence: Json
+          p_idempotency_key: string
+          p_reason: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      record_parking_payment: {
+        Args: {
+          p_cash_tendered_centavos: number
+          p_correlation_id: string
+          p_external_reference: string
+          p_idempotency_key: string
+          p_session_id: string
         }
         Returns: Json
       }
@@ -1443,12 +1505,30 @@ export type Database = {
         }
         Returns: Json
       }
+      start_staff_shift: {
+        Args: {
+          p_correlation_id: string
+          p_device_id: string
+          p_idempotency_key: string
+          p_opening_float_centavos: number
+        }
+        Returns: Json
+      }
       validate_parking_ticket: {
         Args: {
           p_correlation_id: string
           p_idempotency_key: string
           p_ticket_number: string
           p_token: string
+        }
+        Returns: Json
+      }
+      void_parking_payment: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_payment_id: string
+          p_reason: string
         }
         Returns: Json
       }

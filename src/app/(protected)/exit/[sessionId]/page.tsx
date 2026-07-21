@@ -21,8 +21,8 @@ export default async function ExitPage({ params }: ExitPageProps) {
         <p className="text-sm font-medium text-blue-600 dark:text-blue-300">Operations</p>
         <h1 className="text-3xl font-bold tracking-tight">Exit preview</h1>
         <p className="max-w-2xl text-slate-600 dark:text-slate-400">
-          Review the parked session and request an authoritative fee quote. Payment and confirmed
-          exit happen in later phases.
+          Review the parked session and request an authoritative fee quote, then continue to payment or exit
+          confirmation.
         </p>
       </header>
       <ExitPageClient facts={facts} quoteExpired={facts.quoteExpired} />

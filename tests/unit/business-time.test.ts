@@ -21,4 +21,11 @@ describe('business-time', () => {
     const zoned = toBusinessZonedTime('2026-07-21T10:00:00.000Z')
     expect(zoned).toBeInstanceOf(Date)
   })
+
+  it('accepts Date objects for formatting helpers', () => {
+    const instant = new Date('2026-07-21T10:00:00.000Z')
+    expect(formatBusinessDateTime(instant)).toContain('2026')
+    expect(formatQuoteExpiry(instant)).toMatch(/on/)
+    expect(toBusinessZonedTime(instant)).toBeInstanceOf(Date)
+  })
 })

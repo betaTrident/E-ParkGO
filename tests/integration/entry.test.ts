@@ -75,6 +75,7 @@ describe('entry integration', () => {
 
     if (!spaces?.length) {
       context.skip()
+      return
     }
 
     const idempotencyKey = crypto.randomUUID()
@@ -103,6 +104,7 @@ describe('entry integration', () => {
 
     if (!first || !spaceId) {
       context.skip()
+      return
     }
 
     expect(first.error).toBeNull()

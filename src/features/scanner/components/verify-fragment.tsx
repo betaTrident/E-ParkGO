@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { Button } from '@/components/ui/button'
@@ -19,31 +19,33 @@ type VerificationState =
   | { kind: 'ready'; token: string }
   | { kind: 'error'; message: string }
 
+function readInitialVerificationState(): VerificationState {
+  if (typeof window === 'undefined') {
+    return { kind: 'pending' }
+  }
+
+  const fragment = readFragmentFromWindow()
+  removeFragmentFromHistory('/verify')
+
+  const parsed = parseQrFragment(fragment)
+  if (!parsed) {
+    return {
+      kind: 'error',
+      message: 'The scanned link is invalid or incomplete.',
+    }
+  }
+
+  return { kind: 'ready', token: parsed.token }
+}
+
 export function VerifyFragment({ onTokenReady }: VerifyFragmentProps) {
   const router = useRouter()
   const submittedRef = useRef(false)
-  const [initialState, setInitialState] = useState<VerificationState>({
-    kind: 'pending',
-  })
+  const [initialState] = useState(readInitialVerificationState)
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  useLayoutEffect(() => {
-    const fragment = readFragmentFromWindow()
-    removeFragmentFromHistory('/verify')
-
-    const parsed = parseQrFragment(fragment)
-    if (!parsed) {
-      setInitialState({
-        kind: 'error',
-        message: 'The scanned link is invalid or incomplete.',
-      })
-      setError('The scanned link is invalid or incomplete.')
-      return
-    }
-
-    setInitialState({ kind: 'ready', token: parsed.token })
-  }, [])
+  const [error, setError] = useState<string | null>(
+    initialState.kind === 'error' ? initialState.message : null,
+  )
 
   useEffect(() => {
     if (initialState.kind !== 'ready' || submittedRef.current) {

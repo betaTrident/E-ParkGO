@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useActionState, useMemo } from 'react'
 
 import { FeeBreakdown } from '@/features/exit/components/fee-breakdown'
@@ -57,11 +58,28 @@ export function ExitPageClient({ facts, quoteExpired }: ExitPageClientProps) {
       </section>
 
       {state.data ? (
-        <FeeBreakdown
-          preview={state.data}
-          entryTime={facts.entryTime}
-          quoteExpired={quoteExpired}
-        />
+        <div className="space-y-4">
+          <FeeBreakdown
+            preview={state.data}
+            entryTime={facts.entryTime}
+            quoteExpired={quoteExpired}
+          />
+          {state.data.status === 'PAYMENT_PENDING' ? (
+            <Link
+              href={`/payments/${facts.sessionId}`}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
+            >
+              Record cash payment
+            </Link>
+          ) : (
+            <Link
+              href={`/exit/${facts.sessionId}/confirm`}
+              className="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-primary px-4 text-sm font-medium text-primary-foreground"
+            >
+              Continue to exit confirmation
+            </Link>
+          )}
+        </div>
       ) : (
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="sessionId" value={facts.sessionId} />

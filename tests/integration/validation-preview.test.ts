@@ -75,6 +75,7 @@ describe('validation and exit preview integration', () => {
 
     if (!spaces?.length) {
       context.skip()
+      return
     }
 
     const plate = `VP${Date.now().toString().slice(-6)}`
@@ -98,6 +99,7 @@ describe('validation and exit preview integration', () => {
 
     if (!entry) {
       context.skip()
+      return
     }
 
     expect(entry.error).toBeNull()

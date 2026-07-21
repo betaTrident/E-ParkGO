@@ -33,4 +33,8 @@ describe('centavos', () => {
     expect(() => parseCentavosString('9'.repeat(20))).toThrow()
     expect(() => centavosToString(BigInt(-1))).toThrow()
   })
+
+  it('rejects malformed bigint strings safely', () => {
+    expect(isCentavosString('1'.repeat(16))).toBe(false)
+  })
 })

@@ -28,14 +28,14 @@
 ### 0.2 Execution Control and Current Status
 
 ```text
-CURRENT_PHASE: 8
-CURRENT_STEP: 8.0 Execution guard
+CURRENT_PHASE: 10
+CURRENT_STEP: 10.0 Execution guard
 EXECUTION_STATUS: ACTIVE
 EXECUTION_MODE: LOCAL_VERIFICATION_AND_REPAIR_ONLY
-ACTIVE_PLAYBOOK: contexts/plans/phases/phase-08-cash-payment-confirmed-exit.md
+ACTIVE_PLAYBOOK: contexts/plans/phases/phase-10-reports-audit.md
 CURRENT_BLOCKER: none
-NEXT_UNLOCK: Load Phase 8 skills and complete Step 8.0 human-input gates before implementation
-DO_NOT_START: Phase 9 or any later phase
+NEXT_UNLOCK: Load Phase 10 skills and complete Step 10.0 before implementation
+DO_NOT_START: Phase 11 or any later phase
 LAST_IMPLEMENTATION_COMMIT_AUDITED: pending
 ```
 
@@ -51,16 +51,16 @@ Allowed status values are `COMPLETE`, `ACTIVE`, `BLOCKED`, and `PENDING`. Exactl
 | **5. Facility, Spaces, Rates** | **COMPLETE** | Complete | Configuration RPCs, immutable publish/overlap tests, responsive admin/staff flows, and full quality gate pass. Evidence: [2026-07-21 pass](contexts/plans/evidence/phase-05.md#phase-05-attempt-2026-07-21t0309000800). | `contexts/plans/phases/phase-05-facility-spaces-rates.md` |
 | **6. Entry & QR Ticket** | **COMPLETE** | Complete | Atomic entry RPCs, hash-only credentials, print/reissue UI, pgTAP concurrency/idempotency, and E2E across five browsers. Evidence: [2026-07-21 pass](contexts/plans/evidence/phase-06.md#phase-06-attempt-2026-07-21t0450000800). | `contexts/plans/phases/phase-06-entry-qr-ticket.md` |
 | **7. Validation, Fee, Exit Preview** | **COMPLETE** | Complete | Validation RPCs, deterministic fee engine, scanner/verify/exit preview UI, pgTAP fee vectors, and E2E across five browsers. Evidence: [2026-07-21 pass](contexts/plans/evidence/phase-07.md#attempt-2026-07-21t2305000800). | `contexts/plans/phases/phase-07-validation-fee-exit-preview.md` |
-| **8. Cash Payment & Confirmed Exit** | **ACTIVE** | Not started beyond tables/indexes | Required gate: shifts, exact-once payment, exceptions, separate exit/release, interruption/concurrency, append-only evidence, and E2E must pass. | `contexts/plans/phases/phase-08-cash-payment-confirmed-exit.md` |
-| 9. Dashboard & Realtime | **PENDING** | Auth placeholder only | Required gate: authoritative snapshot, private location Broadcast payload/policy, two-client convergence, cross-location denial, reconnect/refetch/poll/cleanup, accessibility, and quota evidence must pass. | `contexts/plans/phases/phase-09-dashboard-realtime.md` |
-| 10. Reports & Audit | **PENDING** | Not started beyond tables/RLS | Required gate: reconciliation, pagination, timezone/location scope, redaction, audited CSV export, accessibility, and E2E must pass. | `contexts/plans/phases/phase-10-reports-audit.md` |
+| **8. Cash Payment & Confirmed Exit** | **COMPLETE** | Complete | Shift/payment/exit RPCs, exception workflows, operational UI, pgTAP concurrency suites, and Phase 8 E2E pass. Evidence: [2026-07-22 pass](contexts/plans/evidence/phase-08.md#attempt-2026-07-22t0045000800). | `contexts/plans/phases/phase-08-cash-payment-confirmed-exit.md` |
+| **9. Dashboard & Realtime** | **COMPLETE** | Complete | Authoritative snapshot RPC, private Broadcast invalidation, Query/realtime UI, pgTAP + E2E convergence. Evidence: [2026-07-22 pass](contexts/plans/evidence/phase-09.md#attempt-2026-07-22t0140000800). | `contexts/plans/phases/phase-09-dashboard-realtime.md` |
+| **10. Reports & Audit** | **ACTIVE** | Not started beyond tables/RLS | Required gate: reconciliation, pagination, timezone/location scope, redaction, audited CSV export, accessibility, and E2E must pass. | `contexts/plans/phases/phase-10-reports-audit.md` |
 | 11. PWA & Offline | **PENDING** | Not started | Required gate: verified Next-compatible tooling, install/update, sanitized read cache, mutation prohibition, clearing, browser inspection, and E2E must pass. | `contexts/plans/phases/phase-11-pwa-offline.md` |
 | 12. Security Hardening | **PENDING** | Partial baseline | Required gate: Phase 12-owned §21 evidence, full DB/web matrix, MFA/device/origin/rate/log/health controls, lost-device/incident tabletop, and no critical/high finding. Backup/restore/continuity remains Phase 14-owned. | `contexts/plans/phases/phase-12-security-hardening.md` |
 | 13. Automated Release Suite | **PENDING** | Partial harness; no CI | Required gate: CI green, global ≥80% on all four metrics, no skip/focus, complete critical suites/reviews, stable coverage artifacts, and no critical/high finding. | `contexts/plans/phases/phase-13-release-suite-ci.md` |
 | 14. Staging, Deployment & Pilot | **PENDING** | Not started | Required gate: approved staging, release suite/smoke, alerts, backup/restore/rollback/continuity, devices/UAT/pilot, and signed go/no-go status. | `contexts/plans/phases/phase-14-staging-deployment-pilot.md` |
 | 15. Documentation & Handover | **PENDING** | Not started beyond source specs/drafts | Required gate: independently validated docs/runbooks/training/support, full evidence-linked §33, and signed handover. | `contexts/plans/phases/phase-15-documentation-handover.md` |
 
-Current 2026-07-21 local gate evidence: Docker running; Phase 7 gate recorded in `contexts/plans/evidence/phase-07.md` (**383** pgTAP, **126** Vitest, coverage ≥81% branches, **10** scanner/exit-preview E2E across five browsers with `--workers=1`). Phase 6 evidence remains in `contexts/plans/evidence/phase-06.md`. Prior Phase 3–5 evidence remains in `contexts/plans/evidence/`.
+Current 2026-07-22 local gate evidence: Docker running; Phase 9 gate recorded in `contexts/plans/evidence/phase-09.md` (**449** pgTAP, **170** Vitest, coverage ≥83% branches, **10** dashboard-realtime E2E across five browsers with `--workers=1`). Phase 8 evidence remains in `contexts/plans/evidence/phase-08.md`. Prior Phase 3–7 evidence remains in `contexts/plans/evidence/`.
 
 ---
 

@@ -34,12 +34,12 @@ const navigation = [
   },
   { label: "Entries", href: "/entry", icon: CarFront, available: true },
   { label: "Scan & Exit", href: "/scanner", icon: QrCode, available: true },
-  { label: "Payments", href: "/payments", icon: CreditCard, available: false },
+  { label: "Shifts", href: "/shifts", icon: CreditCard, available: true },
   {
     label: "Active Sessions",
     href: "/sessions",
     icon: CalendarDays,
-    available: false,
+    available: true,
   },
   {
     label: "Parking Spaces",
