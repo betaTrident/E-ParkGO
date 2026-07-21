@@ -1415,6 +1415,43 @@ export type Database = {
         Args: { p_correlation_id: string; p_rate_id: string }
         Returns: undefined
       }
+      calculate_parking_exit: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      create_parking_entry: {
+        Args: {
+          p_color: string
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_plate: string
+          p_space_id: string
+          p_vehicle_type_id: string
+        }
+        Returns: Json
+      }
+      reissue_parking_ticket: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_reason: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      validate_parking_ticket: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_ticket_number: string
+          p_token: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role: "ADMIN" | "STAFF"

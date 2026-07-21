@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
         'tests/unit/**/*.{test,spec}.{ts,tsx}',
         'tests/integration/**/*.{test,spec}.{ts,tsx}',
       ],
+      fileParallelism: false,
       environment: 'jsdom',
       globals: true,
       setupFiles: ['./tests/setup.ts'],

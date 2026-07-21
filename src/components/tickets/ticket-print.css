@@ -1,0 +1,61 @@
+.print-only {
+  display: none;
+}
+
+@media print {
+  @page {
+    margin: 8mm;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  .screen-only {
+    display: none !important;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+
+  .ticket-print-shell {
+    width: 80mm;
+    max-width: 80mm;
+    margin: 0 auto;
+    font-family: "Courier New", Courier, monospace;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .ticket-print-shell.a4 {
+    width: 190mm;
+    max-width: 190mm;
+    font-size: 14px;
+  }
+
+  .ticket-print-qr {
+    margin: 8px auto;
+    width: 42mm;
+    height: 42mm;
+  }
+
+  .ticket-print-shell.a4 .ticket-print-qr {
+    width: 55mm;
+    height: 55mm;
+  }
+}
+
+@media print and (max-width: 58mm) {
+  .ticket-print-shell {
+    width: 58mm;
+    max-width: 58mm;
+    font-size: 10px;
+  }
+
+  .ticket-print-qr {
+    width: 36mm;
+    height: 36mm;
+  }
+}

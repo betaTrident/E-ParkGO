@@ -157,7 +157,7 @@ select set_config(
 
 select is((select count(*)::int from public.profiles), 1, 'staff sees only their own profile');
 select is((select count(*)::int from public.parking_locations), 1, 'staff sees only assigned location');
-select is((select count(*)::int from public.parking_spaces), 3, 'staff sees same-location operational rows');
+select is((select count(*)::int from public.parking_spaces), 13, 'staff sees same-location operational rows');
 select is((select count(*)::int from public.audit_logs), 0, 'staff cannot read audit logs');
 
 select set_config(

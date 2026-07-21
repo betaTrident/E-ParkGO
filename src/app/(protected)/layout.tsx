@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import { TicketCredentialProvider } from "@/lib/security/ticket-credential-context";
 import { BrandLogo } from "@/components/shared/brand-logo";
 import { ThemeToggle } from "@/components/shared/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -31,8 +32,8 @@ const navigation = [
     icon: LayoutDashboard,
     available: true,
   },
-  { label: "Entries", href: "/entry", icon: CarFront, available: false },
-  { label: "Scan & Exit", href: "/scanner", icon: QrCode, available: false },
+  { label: "Entries", href: "/entry", icon: CarFront, available: true },
+  { label: "Scan & Exit", href: "/scanner", icon: QrCode, available: true },
   { label: "Payments", href: "/payments", icon: CreditCard, available: false },
   {
     label: "Active Sessions",
@@ -95,7 +96,8 @@ export function ProtectedShell({
   const mobileNavigation = visibleNavigation.slice(0, 4);
 
   return (
-    <div className="min-h-dvh bg-[#f7f9fc] text-[#10213d] dark:bg-[#07111f] dark:text-slate-100">
+    <TicketCredentialProvider>
+      <div className="min-h-dvh bg-[#f7f9fc] text-[#10213d] dark:bg-[#07111f] dark:text-slate-100">
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[228px] border-r border-[#dde5ef] bg-white dark:border-slate-800 dark:bg-[#0b1626] lg:flex lg:flex-col">
         <Link
           href="/dashboard"
@@ -279,6 +281,7 @@ export function ProtectedShell({
         ))}
       </nav>
     </div>
+    </TicketCredentialProvider>
   );
 }
 

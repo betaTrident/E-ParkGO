@@ -1,7 +1,10 @@
-const MAX_CENTAVOS = BigInt(999_999_999_999)
+const CENTAVOS_PATTERN = /^(?:0|[1-9]\d{0,14})$/
+export const MAX_CENTAVOS = BigInt(999_999_999_999)
+
+export type CentavosString = string
 
 export function isCanonicalCentavosString(value: string): boolean {
-  if (!/^[0-9]+$/.test(value)) {
+  if (!CENTAVOS_PATTERN.test(value)) {
     return false
   }
 
@@ -13,6 +16,10 @@ export function isCanonicalCentavosString(value: string): boolean {
   }
 }
 
+export function isCentavosString(value: string): boolean {
+  return isCanonicalCentavosString(value)
+}
+
 export function parseCentavosString(value: string): bigint {
   if (!isCanonicalCentavosString(value)) {
     throw new Error('Invalid centavos amount')
@@ -21,7 +28,7 @@ export function parseCentavosString(value: string): bigint {
   return BigInt(value)
 }
 
-export function centavosToString(value: bigint): string {
+export function centavosToString(value: bigint): CentavosString {
   if (value < BigInt(0) || value > MAX_CENTAVOS) {
     throw new Error('Centavos amount out of bounds')
   }
@@ -38,4 +45,7 @@ export function formatCentavosPhp(value: bigint | number | string): string {
   }).format(pesos)
 }
 
-export { MAX_CENTAVOS }
+export function formatCentavosForDisplay(value: bigint | CentavosString): string {
+  const centavos = typeof value === 'bigint' ? value : parseCentavosString(value)
+  return formatCentavosPhp(centavos)
+}
