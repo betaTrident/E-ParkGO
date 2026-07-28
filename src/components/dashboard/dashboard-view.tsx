@@ -2,12 +2,14 @@
 
 import type { ActiveProfile } from "@/lib/auth/types";
 import type { DashboardSnapshot } from "@/features/dashboard/types";
-import { MetricGrid } from "@/components/dashboard/metric-grid";
+import { KPIStatCards } from "@/components/dashboard/kpi-stat-cards";
+import { OccupancyOverview } from "@/components/dashboard/occupancy-overview";
+import { RevenueTrend } from "@/components/dashboard/revenue-trend";
+import { RecentEntriesTable } from "@/components/dashboard/recent-entries-table";
+import { SpaceMapGrid } from "@/components/dashboard/space-map-grid";
 import { RealtimeStatus } from "@/components/dashboard/realtime-status";
-import { ZoneOccupancy } from "@/components/dashboard/zone-occupancy";
 import { useConnectivity } from "@/hooks/use-connectivity";
 import { useDashboardRealtime } from "@/hooks/use-dashboard-realtime";
-import { formatBusinessDateTime } from "@/lib/time/business-time";
 import { Button } from "@/components/ui/button";
 
 interface DashboardViewProps {
@@ -28,7 +30,6 @@ export function DashboardView({
     snapshot,
     connectionState,
     isFetching,
-    error,
     lastUpdatedAt,
     refresh,
   } = useDashboardRealtime({
@@ -40,7 +41,9 @@ export function DashboardView({
   const data = snapshot ?? initialSnapshot;
 
   return (
-    <div className="space-y-4 p-4 sm:p-6 xl:p-7">
+    <div className="space-y-5 p-4 sm:p-6 xl:p-7">
+      <h1 className="sr-only">Dashboard</h1>
+
       {signOutError ? (
         <p
           role="alert"
@@ -56,90 +59,46 @@ export function DashboardView({
         </p>
       ) : null}
 
-      <header className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-            Welcome, {profile.full_name}
-          </p>
-          <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          {data ? (
-            <p className="text-xs text-slate-500">
-              Business date {data.business_date} ·{" "}
-              {formatBusinessDateTime(data.snapshot_at)}
-            </p>
-          ) : null}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex-1">
+          <RealtimeStatus
+            state={connectionState}
+            {...(lastUpdatedAt ? { lastUpdatedAt } : {})}
+            onRefresh={() => void refresh()}
+            isRefreshing={isFetching}
+            connectivity={connectivity}
+          />
         </div>
-        <Button type="button" variant="outline" size="sm" onClick={() => void probe()}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => void probe()}
+          className="hidden shrink-0 sm:inline-flex"
+        >
           Check connection
         </Button>
-      </header>
+      </div>
 
-      <RealtimeStatus
-        state={connectionState}
-        {...(lastUpdatedAt ? { lastUpdatedAt } : {})}
-        onRefresh={() => void refresh()}
-        isRefreshing={isFetching}
-        connectivity={connectivity}
-      />
+      {/* Row 1: KPI Stat Cards */}
+      <KPIStatCards metrics={data?.metrics} />
 
-      {!data ? (
-        <p className="text-sm text-slate-600">
-          {error instanceof Error
-            ? error.message
-            : "Dashboard metrics are unavailable right now."}
-        </p>
-      ) : (
-        <>
-          <MetricGrid metrics={data.metrics} />
-          <div className="grid gap-4 xl:grid-cols-2">
-            <ZoneOccupancy zones={data.zones} />
-            <section
-              aria-label="Recent movements"
-              className="rounded-xl border border-[#dce5f0] bg-white dark:border-slate-800 dark:bg-[#0d192a]"
-            >
-              <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-800">
-                <h2 className="text-base font-semibold">Recent movements</h2>
-              </div>
-              {data.recent_movements.length === 0 ? (
-                <p className="px-5 py-8 text-sm text-slate-500">
-                  No entries or exits recorded for this business date yet.
-                </p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[520px] text-left text-xs">
-                    <thead className="bg-slate-50/70 text-slate-500 dark:bg-slate-900/50">
-                      <tr>
-                        {["Time", "Kind", "Plate", "Space", "Status"].map(
-                          (heading) => (
-                            <th key={heading} scope="col" className="px-4 py-3 font-medium">
-                              {heading}
-                            </th>
-                          ),
-                        )}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {data.recent_movements.map((movement) => (
-                        <tr key={`${movement.session_id}-${movement.kind}-${movement.occurred_at}`}>
-                          <td className="whitespace-nowrap px-4 py-3">
-                            {formatBusinessDateTime(movement.occurred_at, "h:mm a")}
-                          </td>
-                          <td className="px-4 py-3 capitalize">{movement.kind}</td>
-                          <td className="px-4 py-3 font-mono">{movement.plate_display}</td>
-                          <td className="px-4 py-3">
-                            {movement.zone_code}-{movement.space_code}
-                          </td>
-                          <td className="px-4 py-3">{movement.session_status}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-            </section>
-          </div>
-        </>
-      )}
+      {/* Row 2: Analytics & Overview (Occupancy Donut + Revenue Line Chart) */}
+      <div className="grid gap-5 xl:grid-cols-2">
+        <OccupancyOverview zones={data?.zones} />
+        <RevenueTrend />
+      </div>
+
+      {/* Row 3: Operational Data (Recent Entries Table + Space Map Grid) */}
+      <div className="grid gap-5 xl:grid-cols-2">
+        <RecentEntriesTable snapshot={data} />
+        <SpaceMapGrid />
+      </div>
+
+      {/* Footer */}
+      <footer className="mt-8 border-t border-slate-200/60 pt-6 text-center text-xs font-medium text-slate-400 dark:border-slate-800 dark:text-slate-500">
+        © 2025 E-ParkGO. All rights reserved.
+      </footer>
     </div>
   );
 }
