@@ -7,10 +7,14 @@ Run only when PLAN.md §0.2 declares CURRENT_PHASE: 10 and Phase 9 is COMPLETE.
 
 ## 10.0 Execution guard
 
-- `STATUS: PENDING`; `IMPLEMENTATION_STATE: NOT_STARTED`.
-- Load project `backend-patterns`, `frontend-patterns`; plugins
+- `STATUS: ACTIVE`; `IMPLEMENTATION_STATE: NOT_STARTED`.
+- Load project `backend-patterns`, `frontend-patterns`, `design-system`,
+  `accessibility`; plugins
   `v-react-best-practices`, `c-canvas`; load `context7-mcp` for uncertain APIs.
 - Dependencies: immutable Phase 8 financial/exception evidence and Phase 9 gate.
+- New report, transaction, audit, and shift-history surfaces must comply with
+  the explicit Phase 10 compatibility subset in `DESIGN.md §1.2`; Phase 10 does
+  not edit shared tokens/shell/compositions or widen into the Phase 10A redesign.
 - MVP decision: implement bounded synchronous CSV through a Route Handler. The
   optional `export-report` Edge Function remains out of scope unless measured
   platform limits and explicit approval reopen it.
@@ -127,10 +131,11 @@ CSV injection/redaction pass, ≥80% all coverage metrics, accessibility/mobile
 pass, bounded query evidence, and no critical/high finding.
 
 Append the required attempt to `contexts/plans/evidence/phase-10.md`, link its
-successful anchor from §0.2, set Phase 10 complete and Phase 11 active, update the
-playbook, and stop.
+successful anchor from §0.2, set Phase 10 complete and Phase 10A active, update
+the playbook, and stop.
 
-> **END OF PHASE 10 — STOP.** Do not add PWA caching here.
+> **END OF PHASE 10 — STOP.** Do not start Phase 10A redesign or add PWA
+> caching in this execution run.
 
 <!-- ============================================================
 PHASE 10 END — HARD STOP

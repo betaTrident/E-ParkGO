@@ -35,7 +35,7 @@ EXECUTION_MODE: LOCAL_VERIFICATION_AND_REPAIR_ONLY
 ACTIVE_PLAYBOOK: contexts/plans/phases/phase-10-reports-audit.md
 CURRENT_BLOCKER: none
 NEXT_UNLOCK: Load Phase 10 skills and complete Step 10.0 before implementation
-DO_NOT_START: Phase 11 or any later phase
+DO_NOT_START: Phase 10A or any later phase
 LAST_IMPLEMENTATION_COMMIT_AUDITED: pending
 ```
 
@@ -54,7 +54,8 @@ Allowed status values are `COMPLETE`, `ACTIVE`, `BLOCKED`, and `PENDING`. Exactl
 | **8. Cash Payment & Confirmed Exit** | **COMPLETE** | Complete | Shift/payment/exit RPCs, exception workflows, operational UI, pgTAP concurrency suites, and Phase 8 E2E pass. Evidence: [2026-07-22 pass](contexts/plans/evidence/phase-08.md#attempt-2026-07-22t0045000800). | `contexts/plans/phases/phase-08-cash-payment-confirmed-exit.md` |
 | **9. Dashboard & Realtime** | **COMPLETE** | Complete | Authoritative snapshot RPC, private Broadcast invalidation, Query/realtime UI, pgTAP + E2E convergence. Evidence: [2026-07-22 pass](contexts/plans/evidence/phase-09.md#attempt-2026-07-22t0140000800). | `contexts/plans/phases/phase-09-dashboard-realtime.md` |
 | **10. Reports & Audit** | **ACTIVE** | Not started beyond tables/RLS | Required gate: reconciliation, pagination, timezone/location scope, redaction, audited CSV export, accessibility, and E2E must pass. | `contexts/plans/phases/phase-10-reports-audit.md` |
-| 11. PWA & Offline | **PENDING** | Not started | Required gate: verified Next-compatible tooling, install/update, sanitized read cache, mutation prohibition, clearing, browser inspection, and E2E must pass. | `contexts/plans/phases/phase-11-pwa-offline.md` |
+| **10A. Premium UI/UX Refinement** | **PENDING** | Documentation contract ready; application refinement not started | Required gate: Phase 10 complete, Precision Operations UI across all implemented pages, no fake data/affordances, responsive/theme/print parity, WCAG 2.2 AA, visual regression, full functional/security gate. | `contexts/plans/phases/phase-10a-premium-ui-ux-refinement.md` |
+| 11. PWA & Offline | **PENDING** | Not started | Requires Phase 10A complete. Required gate: verified Next-compatible tooling, install/update, sanitized read cache, mutation prohibition, clearing, browser inspection, and E2E must pass. | `contexts/plans/phases/phase-11-pwa-offline.md` |
 | 12. Security Hardening | **PENDING** | Partial baseline | Required gate: Phase 12-owned §21 evidence, full DB/web matrix, MFA/device/origin/rate/log/health controls, lost-device/incident tabletop, and no critical/high finding. Backup/restore/continuity remains Phase 14-owned. | `contexts/plans/phases/phase-12-security-hardening.md` |
 | 13. Automated Release Suite | **PENDING** | Partial harness; no CI | Required gate: CI green, global ≥80% on all four metrics, no skip/focus, complete critical suites/reviews, stable coverage artifacts, and no critical/high finding. | `contexts/plans/phases/phase-13-release-suite-ci.md` |
 | 14. Staging, Deployment & Pilot | **PENDING** | Not started | Required gate: approved staging, release suite/smoke, alerts, backup/restore/rollback/continuity, devices/UAT/pilot, and signed go/no-go status. | `contexts/plans/phases/phase-14-staging-deployment-pilot.md` |
@@ -78,7 +79,8 @@ Load these skill files with the `Read` tool at the start of each phase. Full pat
 | 7 — Fee/Preview | `backend-patterns`, `supabase-postgres-best-practices` |
 | 8 — Payment/Exit | `backend-patterns`, `security-review`, `supabase` |
 | 9 — Dashboard/RT | `frontend-patterns`, `supabase`, `accessibility` |
-| 10 — Reports | `backend-patterns`, `frontend-patterns` |
+| 10 — Reports | `backend-patterns`, `frontend-patterns`, `design-system`, `accessibility` |
+| 10A — Premium UI/UX | `redesign-existing-projects`, `design-system`, `frontend-patterns`, `accessibility`, `browser-qa`, `tdd-workflow`, `verification-loop`, `security-review`, `coding-standards` |
 | 11 — PWA | `frontend-patterns`, `supabase` |
 | 12 — Hardening | `security-review`, `supabase-postgres-best-practices` |
 | 13 — Tests | `tdd-workflow`, `ai-regression-testing`, `verification-loop` |
@@ -1608,28 +1610,28 @@ Grace: 15 minutes; initial 3 hours: `₱50.00`; each started succeeding hour: `�
 
 ### Route map and page contract
 
-All protected pages use a Server Component for authentication, authorization, and initial data. Client Components are introduced only for forms, camera/media APIs, printing, realtime widgets, interactive filters/maps, connectivity state, and confirmation dialogs. Every page includes a skeleton, useful empty state, recoverable error panel with correlation ID, responsive navigation, semantic headings, visible keyboard focus, labeled controls, non-color status text, and reduced-motion support.
+`DESIGN.md` is the authoritative page-by-page visual and UX contract. This
+section owns route scope and execution status only; do not duplicate or improvise
+visual rules here.
 
-| Route/page | Purpose, users, data, components, actions, and validation | Responsive states, accessibility, and component boundary |
+All protected pages use a Server Component for authentication, authorization,
+and initial data. Client Components are introduced only for forms, camera/media
+APIs, printing, Realtime, interactive filters/maps, connectivity, and required
+confirmation. Server authorization remains mandatory even when an action is
+hidden in the UI.
+
+| Status | Routes | Owning design blueprint |
 | --- | --- | --- |
-| `/login` | Staff/admin login with email and password; auth card, password visibility, recovery link; normalize email and require bounded password. | Centered mobile card/wide split layout; generic auth errors and lockout guidance; Server shell plus Client form with announced errors. |
-| `/dashboard` | Operational overview for staff/admin; aggregate metrics, zone occupancy, active alerts, recent movements; date/zone filters and refresh. | Stacked mobile cards and desktop grid; skeleton/zero-activity/stale/offline states; Server snapshot plus Client realtime cards. |
-| `/entry` | Create vehicle entry; plate, vehicle type, color, zone/space; availability picker and final summary; shared Zod schema, but RPC revalidates under lock. | Step-like mobile form and side-by-side desktop form/map; preserve input on safe failure; Client form inside protected Server page. |
-| `/tickets/[ticketNumber]` | Display newly issued/active ticket, entry facts, QR, print/reprint; staff only, same location. | High-contrast QR and 80 mm/A4 print CSS; screen-reader text describes ticket number, not QR pixels; Server data plus Client print/reprint. |
-| `/scanner` | Scan QR or enter ticket number; camera selector, torch if supported, framing guide, manual fallback. | Full-screen mobile scanner and constrained desktop camera panel; permission/unsupported/low-light/invalid states; Client camera with Server-protected route. |
-| `/exit/[sessionId]` | Review vehicle/session and request authoritative fee preview; itemized duration/rate/penalty and quote expiry; no editable total. | Sticky mobile primary action and desktop summary columns; expired/stale/conflict states; Server facts plus Client quote/confirmation actions. |
-| `/payments/[sessionId]` | Record cash; amount due read-only, tender input, computed change, shift context, explicit confirmation. | Numeric keypad-friendly mobile input; insufficient-cash, duplicate, expired-quote, offline states announced; Client form calls exact-once server mutation. |
-| `/exit/[sessionId]/confirm` | Separate final exit action for paid session; displays payment, ticket, space, expiry, and release warning. | One destructive-looking but clearly labeled confirm action; stale/top-up/already-completed handling; Server verification plus Client idempotent confirmation. |
-| `/sessions` | Search active/exception sessions by plate, ticket, state, zone, and age; open scan/exit/lost-ticket flows. | Mobile cards and desktop paginated table; debounced filters, empty and stale cache labels; Server first page plus Client filters/realtime invalidation. |
-| `/spaces` | Zone map/list of available, occupied, out-of-service spaces; admin configuration entry points. | Mobile list/toggle and desktop grid; status text/icons in addition to color, logical focus order; Server snapshot plus Client filters/realtime. |
-| `/transactions` | Paginated historical sessions/payments; date, plate, status, receipt filters; view receipt and export if permitted. | Compact mobile rows, desktop table; bounded dates and cursor pagination; Server query with Client filter form/export. |
-| `/admin/rates` | Admin drafts, previews, publishes, and retires effective-dated rate versions. | Mobile accordion/desktop comparison table; invalid overlap, unsaved draft, empty state; Server list plus Client validated editor and approval dialog. |
-| `/admin/staff` | Admin invites, disables, assigns location, and grants permissions; email/name/role/flags validated. | Mobile staff cards/desktop table; self-elevation and last-admin safeguards; Server list plus Client invite/permission dialogs. |
-| `/shifts` | Start/close own shift; admins review open/closed shifts and variances; float/declared cash are integer-centavo inputs. | Mobile cash workflow and desktop reconciliation table; no-open-shift/variance/duplicate-close states; Server history plus Client actions. |
-| `/reports` | Daily revenue, movements, occupancy, shift reconciliation; bounded date/type filters and controlled CSV export. | Mobile summary/cards and desktop charts/tables; no-data/large-range/export-processing states; Server report with Client filters/charts/export. |
-| `/admin/audit` | Admin searches actor/action/target/result/correlation/date and inspects redacted before/after evidence. | Mobile event details/desktop table; immutable/read-only UI and accessible JSON disclosure; Server pagination plus Client filters. |
-| `/admin/settings` | Admin edits facility name, timezone display, receipt prefix, operational flags, and safe defaults. | Single-column mobile/two-column desktop; startup validation, saved/error announcements; Server values plus Client form. |
-| `/offline` and error boundaries | Explain connectivity/cache age, allowed read-only actions, retry, support correlation ID, and update availability. | Works from cached shell, no dead-end controls, automatic online announcement; Client connectivity/update UI with static fallback. |
+| Live public/auth | `/`, `/login`, `/forgot-password`, `/update-password` | `DESIGN.md §6.1` |
+| Live shell/monitoring | protected shell, `/dashboard` | `DESIGN.md §6.2` |
+| Live entry/ticket/scan | `/entry`, `/tickets/[ticketNumber]`, `/scanner`, `/verify` | `DESIGN.md §6.3` |
+| Live exit/payment | `/exit/[sessionId]`, `/payments`, `/payments/[sessionId]`, `/exit/[sessionId]/confirm` | `DESIGN.md §6.4` |
+| Live operations/admin | `/sessions`, `/spaces`, `/shifts`, `/admin/rates`, `/admin/staff`, `/admin/settings` | `DESIGN.md §6.5` |
+| Phase 10 new | `/transactions`, `/reports`, `/admin/audit` | `DESIGN.md §6.6`; implement in Phase 10, regress in Phase 10A |
+| Phase 10A system | not-found and bounded route error/loading surfaces | `DESIGN.md §6.7` |
+| Phase 11 deferred | `/offline`, install/update/cache-clear surfaces | `DESIGN.md §6.7`; specification is not authorization |
+| Phase 12 deferred | MFA/device/session security surfaces if approved | `DESIGN.md §6.7`; do not invent routes |
+| Non-visual | `/auth/callback`, API Route Handlers | Preserve redirect/error/security contracts; style only destinations |
 
 Forms disable repeat submission only as UX assistance; idempotency provides real duplicate protection. Destructive/sensitive actions show consequence, require a reason where applicable, return focus to the triggering control on cancellation, and use a confirmation dialog that is fully keyboard operable.
 
@@ -1780,7 +1782,7 @@ Every story follows RED (write a failing requirement test), GREEN (minimal imple
 | Integration | Auth cookie refresh/logout/disable/recovery, API-to-RPC envelope/status mapping, Realtime entry/payment/exit/reconnect, optional receipt failure/retry, report reconciliation, PWA online/offline gates. |
 | E2E happy path | Login → open shift → entry → ticket/print → scan → preview → exact-once cash payment → separate exact-once exit → space release → dashboard/report/audit evidence. |
 | E2E negative | Duplicate scan, invalid/revoked/completed QR, wrong/unavailable space, duplicate vehicle, lost ticket with/without permission, cancellation, unauthorized correction, network loss before/after each mutation, cross-midnight fee, camera denied/manual lookup. |
-| Nonfunctional | axe, keyboard/focus/contrast, reduced motion, 360/375/768/1024/1440/1920 widths, Chromium/Firefox/WebKit, representative Android/iOS camera, security headers/CSP, secret/dependency scans, hot-RPC load/concurrency, PWA install/update. |
+| Nonfunctional | axe, keyboard/focus/contrast, reduced motion, 400% reflow, light/dark and 375/768/1440 visual baselines, Chromium/Firefox/WebKit/mobile projects, representative Android/iOS camera, print layouts, overflow/console/hydration/request checks, security headers/CSP, secret/dependency scans, hot-RPC load/concurrency, PWA install/update. |
 
 CI order: frozen dependency install; formatting check; lint; typecheck; unit/component coverage; Supabase reset/migrations/pgTAP; RLS/concurrency/integration; production build; Playwright smoke/full; accessibility/performance/security scans. Fail on coverage regression, skipped/focused tests, migration drift, missing RLS, secret detection, or unresolved critical/high vulnerability. Test data is synthetic and isolated; waits use observable state rather than arbitrary sleeps.
 
@@ -1900,7 +1902,7 @@ Testing begins in every phase; Phase 13 consolidates release evidence rather tha
 
 ### 28.1 Universal Composer phase contract
 
-Every Phase 3–15 playbook contains:
+Every Phase 3–15 playbook, including inserted Phase 10A, contains:
 
 1. A machine-readable execution guard, exact prerequisites, authorized environment, required skills, stop conditions, and explicit non-goals.
 2. User-visible and database/server outcomes tied to existing requirement IDs and authoritative sections of this plan.
@@ -1933,7 +1935,8 @@ Universal restrictions:
 | 8 — Payment/exceptions/exit | Minimum shifts, exact-once cash/receipt, top-up, separate exit/release, lost/cancel/correct/void/manual-review workflows. | Three pgTAP files and migration; `src/features/{shifts,payments,sessions}/*`; payment/exit additions; `/payments/[sessionId]`, exit confirm, `/shifts`, `/sessions`, APIs/tests. | Concurrency/interruption/replay/rollback, append-only evidence, permissions, payment-without-release, exit-once, E2E/security. |
 | 9 — Dashboard/Realtime | Canonical aggregate snapshot, metrics/space state, authenticated private Broadcast invalidation by location, Query reconciliation, stale/reconnect/poll/cleanup. | Dashboard pgTAP/migration with exact Broadcast topic/payload and `realtime.messages` policy; `src/lib/{query,realtime}/*`; hooks, dashboard components/API/tests. | Two-client entry/payment/exit convergence, cross-location topic denial, payload minimization, reconnect refetch, stale/poll/cleanup/quota/accessibility evidence. |
 | 10 — Reports/audit | Transactions, revenue/movement/occupancy/shift reports, audit search, bounded cursor/date scope, safe audited CSV. | Reports pgTAP/migration; `src/features/reports/*`, CSV security helper; `/transactions`, `/reports`, `/admin/audit`, report APIs/tests. | Immutable reconciliation, timezone/location/pagination, CSV injection/redaction/export audit, E2E/accessibility/performance. |
-| 11 — PWA/offline | Verified Next-compatible PWA tooling, manifest/icons/SW, shell, sanitized versioned read cache, connectivity/update/clear, write gates. | PWA ADR; package/config; manifest/icons/SW/offline page; `src/lib/{pwa,offline}/*`; connectivity/install UI/tests. | Install/update/offline/read cache, storage inspection, logout/location/version clear, no mutation outbox or sensitive cache. |
+| 10A — Premium UI/UX | Precision Operations tokens, shell, shared compositions, every implemented public/auth/operational/admin/print/system page, real-data presentation, responsive/theme/state/a11y/visual regression. | `DESIGN.md`, `docs/adr/0002-design-contract-size-exception.md`; exact paths in `contexts/plans/phases/phase-10a-allowed-files.txt`; reviewed Chromium/mobile-Chrome snapshots. | Phase 10 complete; no fake data/affordances or domain drift; five-project functional E2E, approved visual baselines, WCAG 2.2 AA, print/reflow/theme/security/full regression gate. |
+| 11 — PWA/offline | Verified Next-compatible PWA tooling, manifest/icons/SW, shell, sanitized versioned read cache, connectivity/update/clear, write gates. | PWA ADR; package/config; manifest/icons/SW/offline page; `src/lib/{pwa,offline}/*`; connectivity/install UI/tests. | Phase 10A complete; install/update/offline/read cache, storage inspection, logout/location/version clear, no mutation outbox or sensitive cache. |
 | 12 — Security | Headers/CSP/origin/CSRF/rates, MFA/device/session controls, redacted logs/health, scans, DB/web matrix, incident/lost-device runbooks. | Security pgTAP/migration; bounded `src/proxy.ts`/config changes; `src/lib/{security,observability}/*`; health/security UI/tests/docs. | Every Phase 12-owned §21 item linked to evidence; scans/matrices/lost-device and local incident tabletop pass; zero unresolved critical/high finding. Phase 14 owns backup/restore/continuity rehearsal. |
 | 13 — Release suite/CI | Deterministic CI, stable coverage, type/schema drift, critical E2E/negative/a11y/PWA/camera/performance, independent reviews. | `.github/workflows/ci.yml`, test/release scripts, fixtures/helpers, critical suites, release evidence/security review docs. | Local release command and authorized CI green, global ≥80% each metric, no skip/focus/drift, complete matrices/reviews. |
 | 14 — Staging/deploy/pilot | Approval-gated environment promotion, staging parity/smoke, monitoring, backup/restore, rollback/continuity, real devices, UAT/pilot, go/no-go. | Deployment workflows/scripts plus `docs/operations/{environment-matrix,deployment,rollback,backup-restore,downtime-continuity,monitoring-alerts,pilot-uat,go-live-checklist,release-record}.md`. | Staging/pilot evidence, alert/restore/rollback/continuity/device/UAT results, no critical/high issue, signed production status. |
@@ -1972,6 +1975,11 @@ Universal restrictions:
 <!-- PHASE 10 START/END BOUNDARY -->
 - Phase 10: `contexts/plans/phases/phase-10-reports-audit.md`
 <!-- PHASE 10 END: stop at its gate. -->
+
+<!-- PHASE 10A START/END BOUNDARY -->
+- Phase 10A: `contexts/plans/phases/phase-10a-premium-ui-ux-refinement.md`
+- Program index: `contexts/plans/ui-ux-design-program.md`
+<!-- PHASE 10A END: stop at its gate; never flow directly into Phase 11. -->
 
 <!-- PHASE 11 START/END BOUNDARY -->
 - Phase 11: `contexts/plans/phases/phase-11-pwa-offline.md`
@@ -2047,10 +2055,16 @@ Priority is P0 release-blocking core, P1 MVP operational completeness, P2 option
                     |
                     v
           [Confirm exit + release]
-             /          |          \
-            v           v           v
- [Realtime dashboard] [Reports] [PWA read-only offline]
-             \          |          /
+             /                     \
+            v                       v
+ [Realtime dashboard]          [Reports + audit]
+             \                     /
+                    v
+       [Premium UI/UX refinement]
+                    |
+                    v
+         [PWA read-only offline]
+                    |
                     v
        [E2E + security + restore gates]
                     |
@@ -2058,7 +2072,13 @@ Priority is P0 release-blocking core, P1 MVP operational completeness, P2 option
             [Deploy + pilot]
 ```
 
-The dependency path is decision ownership → schema/invariants → Auth/RLS → space/rate configuration → entry/ticket → validation/fee preview → payment → confirmed exit → dashboard/reports/PWA → security/release → deployment/handover. This diagram is architecture rationale, not permission for parallel phase execution. Shared primitives, observability, CI, and runbooks are implemented only in the phase that owns them in §28 and the active playbook. Dashboard, reports, and PWA do not block design of the transaction core, but all are required for complete MVP acceptance.
+The dependency path is decision ownership → schema/invariants → Auth/RLS →
+space/rate configuration → entry/ticket → validation/fee preview → payment →
+confirmed exit → dashboard/reports/audit → premium UI/UX refinement → PWA →
+security/release → deployment/handover. This diagram is architecture rationale,
+not permission for parallel phase execution. Shared primitives, observability,
+CI, and runbooks are implemented only in the phase that owns them in §28 and the
+active playbook.
 
 ## 31. Risk Register
 
@@ -2087,7 +2107,7 @@ Universal gate: requirements and contracts reviewed; validation and authorizatio
 | Database tables/migrations | Rebuild from empty DB, constraints/indexes/FKs, synthetic seed, pgTAP, drift check, compatibility/corrective plan. |
 | RLS/grants | Enabled, least grants, unauthenticated/role/location/verb matrix, no client bypass or self-elevation. |
 | RPCs | Caller/location/permission checks, fixed search path, narrow execute grant, locks, idempotency, atomic rollback, stable errors, concurrency tests. |
-| UI pages | Correct Server/Client split, semantic responsive design, labels/keyboard/focus, all states, no client authority/secret. |
+| UI pages | `DESIGN.md` route contract; correct Server/Client split; Precision Operations tokens/geometry; one primary job/action; no fake data or affordance; light/dark and 375/768/1440 evidence; 400% reflow; loading/empty/error/success/stale/offline/permission states; keyboard/focus/44px targets; visual regression; no client authority or sensitive leakage. |
 | QR tickets | Entropy, hash-only storage, immediate print and later revoke/reissue, camera denial/manual fallback, tamper/replay/duplicate tests. |
 | Fee engine | Approved rules, integer centavos, immutable snapshot, server authority, exact boundary/cross-day/multi-day/discount/penalty vectors. |
 | Payment/receipt | Exact-once server-derived due, open-shift rule, unique reference, cancelled-session denial, audit, retry/interruption tests. |
@@ -2114,6 +2134,7 @@ Universal gate: requirements and contracts reviewed; validation and authorizatio
 - [ ] Lost tickets, cancellation, voids, time/fee corrections, and overrides require exact permission and reason, append evidence, and deny ordinary staff.
 - [ ] Dashboard metrics reconcile to database queries; Realtime reflects entry/payment/exit and reconnect performs authoritative refresh with a stale indicator.
 - [ ] Transaction, revenue, occupancy, shift, and audit reports are paginated, location-scoped, timezone-correct, and export-audited.
+- [ ] Every implemented page satisfies `DESIGN.md`: no fake data or dead affordance; refined non-generic geometry; intentional light/dark and 375/768/1440 layouts; 400% reflow; keyboard/focus/44px targets; stable visual regression; zero serious/critical axe finding.
 - [ ] Login, entry, scanner/manual fallback, payment, exit, admin, and report flows work on supported mobile/desktop sizes and browser engines with keyboard and screen-reader-compatible semantics.
 - [ ] PWA installs/updates; cached shell/read-only data works offline; no auth, QR token, payment, mutation, sensitive history, or transaction outbox is cached.
 - [ ] Client bundle, env files, logs, Git history, and monitoring contain no service key, QR token, JWT/cookie, password, or other secret.
@@ -2176,7 +2197,11 @@ The list below explains how the architecture was decomposed. It is not an execut
 
 ### Architectural MVP dependency order — not an execution pointer
 
-Decisions and threat model → repository/CI → schema/invariants → Auth/RLS → facility/spaces/rates → entry/QR → validation/fee preview → cash payment → confirmed exit/release → exception workflows → dashboard/Realtime → reports/audit/shifts → PWA/offline states → hardening/release suite → staging/pilot/handover.
+Decisions and threat model → repository/CI → schema/invariants → Auth/RLS →
+facility/spaces/rates → entry/QR → validation/fee preview → cash payment →
+confirmed exit/release → exception workflows → dashboard/Realtime →
+reports/audit/shifts → premium UI/UX refinement → PWA/offline states →
+hardening/release suite → staging/pilot/handover.
 
 ### Do not build yet
 

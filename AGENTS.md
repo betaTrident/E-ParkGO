@@ -100,12 +100,19 @@ Load skills with the `Read` tool on the listed absolute paths **before writing a
 | 7 | Validation, fee, exit preview | `backend-patterns`, `supabase-postgres-best-practices` | `plug-supabase-pg`, `sp-executing` |
 | 8 | Cash payment & confirmed exit | `backend-patterns`, `security-review`, `supabase` | `plug-supabase`, `sp-executing` |
 | 9 | Dashboard & Realtime | `frontend-patterns`, `supabase`, `accessibility` | `v-react-best-practices`, `v-next-cache-components`, `plug-supabase`, `c-canvas` |
-| 10 | Reports & audit | `backend-patterns`, `frontend-patterns` | `v-react-best-practices`, `c-canvas` |
+| 10 | Reports & audit | `backend-patterns`, `frontend-patterns`, `design-system`, `accessibility` | `v-react-best-practices`, `c-canvas` |
+| 10A | Premium UI/UX refinement | `redesign-existing-projects`, `design-system`, `frontend-patterns`, `accessibility`, `browser-qa`, `tdd-workflow`, `verification-loop`, `security-review`, `coding-standards` | `v-react-best-practices`, `v-shadcn`, `pl-browser-automation`, `sp-executing`, `sp-requesting-review`, `c-review-bugbot`, `c-security-review` |
 | 11 | PWA & offline | `frontend-patterns`, `supabase` | `v-runtime-cache`, `v-next-cache-components` |
 | 12 | Security hardening | `security-review`, `supabase-postgres-best-practices` | `plug-supabase-pg`, `c-security-review` |
 | 13 | Release test suite | `tdd-workflow`, `ai-regression-testing`, `verification-loop` | `pl-browser-automation`, `c-review-bugbot`, `sp-finish-branch`, `v-verification` |
 | 14 | Staging & deploy | `deployment-patterns`, `supabase`, `docker-patterns` | `v-deployments-cicd`, `v-vercel-cli`, `v-vercel-agent`, `v-verification`, `sp-finish-branch`, `c-split-prs` |
 | 15 | Docs & handover | `documentation-lookup` | `context7-mcp` |
+
+Phase 10A is an inserted, gate-bound refinement phase. It is not authorized
+while Phase 10 remains active. When selected by `PLAN.md §0.2`, use one fresh
+Composer 2.5 session per numbered step; do not edit shared tokens, shell files,
+or shared primitives concurrently. Independent agents may perform read-only
+audits and the required review passes.
 
 ### Cross-Phase Plugin Skills
 
@@ -139,6 +146,8 @@ These skills apply broadly across multiple phases. Load them whenever the named 
 | `coding-standards` | `k:\E-ParkGO\.agents\skills\coding-standards\SKILL.md` |
 | `tdd-workflow` | `k:\E-ParkGO\.agents\skills\tdd-workflow\SKILL.md` |
 | `design-system` | `k:\E-ParkGO\.agents\skills\design-system\SKILL.md` |
+| `redesign-existing-projects` | `k:\E-ParkGO\.agents\skills\redesign-skill\SKILL.md` |
+| `browser-qa` | `k:\E-ParkGO\.agents\skills\browser-qa\SKILL.md` |
 | `backend-patterns` | `k:\E-ParkGO\.agents\skills\backend-patterns\SKILL.md` |
 | `api-design` | `k:\E-ParkGO\.agents\skills\api-design\SKILL.md` |
 | `frontend-patterns` | `k:\E-ParkGO\.agents\skills\frontend-patterns\SKILL.md` |

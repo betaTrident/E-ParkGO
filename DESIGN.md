@@ -1,2095 +1,798 @@
-# E-ParkGO Design System
+# E-ParkGO Precision Operations UI/UX Contract
 
-> **Product:** E-ParkGO
-> **Document:** `DESIGN.md`
-> **Application Type:** Serverless Parking Management Progressive Web Application
-> **Primary Platforms:** Mobile, tablet, laptop, desktop, and future kiosk displays
-> **Theme Support:** Light, dark, system, and customizable accent themes
-> **Design Direction:** Clean, minimalistic, visually polished, organized, modern, professional, responsive, and operationally efficient
+> Status: authoritative product design specification.
+>
+> Executor: Composer 2.5.
+>
+> Visual direction: **Precision Operations UI**.
+>
+> Execution authority remains `PLAN.md §0.2`. This document defines how approved
+> product surfaces must look and behave; it does not activate a pending phase or
+> override database, authorization, security, money, timestamp, QR, or workflow
+> contracts.
 
----
+## 1. How Composer 2.5 must use this document
 
-# 1. Design Overview
+### 1.1 Precedence
 
-E-ParkGO is a parking management system designed to automate the complete parking workflow, including:
+When instructions conflict, use this order:
 
-* Vehicle entry registration
-* Parking-space assignment
-* QR ticket generation
-* Parking-session monitoring
-* QR ticket scanning
-* Parking-duration calculation
-* Payment recording
-* Vehicle exit confirmation
-* Parking-space availability updates
-* Administrative monitoring and reporting
+1. `PLAN.md §0.2` current execution control and active playbook.
+2. Security, data, authorization, state-machine, and server-authority contracts
+   in `PLAN.md`, `AGENTS.md`, migrations, RPCs, schemas, and tests.
+3. This design contract.
+4. Reference screenshots and visual inspiration.
 
-The interface should feel like a modern transportation operations platform rather than a generic administration dashboard.
+Reference images under `src/app/assets/pages/` are composition references only.
+They do not authorize fake data, unsupported controls, combined workflows,
+invented routes, or new business capabilities.
 
-The design must prioritize speed, clarity, reliability, security, and ease of use.
+### 1.2 Route status labels
 
-Staff members may operate the system while vehicles are waiting, so all high-frequency workflows must be simple, focused, and fast.
+- `LIVE_REDESIGN`: route exists and may be refined only when Phase 10A is active.
+- `CURRENT_PHASE_NEW`: Phase 10 owns initial implementation; use this contract
+  when creating it, then include it in the Phase 10A regression pass.
+- `PHASE_10A_NEW`: user-visible presentation surface does not exist yet but is
+  explicitly authorized for creation by the Phase 10A playbook.
+- `FUTURE_PHASE_DEFERRED`: specified for consistency but forbidden until its
+  owning phase is active.
+- `NON_VISUAL`: handler or redirect contract; only the user-visible destination
+  receives design treatment.
 
----
+While Phase 10 is active, its new report surfaces apply this document’s
+truthfulness, hierarchy, one-primary-action, current-component reuse, responsive
+state, accessibility, redaction, and security rules. Exact Phase 10A tokens,
+shell changes, and shared compositions remain Phase 10A-owned; Phase 10 must not
+edit those shared foundations or duplicate them locally.
 
-# 2. Design Goals
+### 1.3 Composer working method
 
-The E-ParkGO interface should be:
+For each authorized step:
 
-## 2.1 Clear
+1. Load every routed skill before editing.
+2. Inspect the actual route, data contract, tests, and existing primitives.
+3. Classify reference elements as `SUPPORTED`, `ADAPTED`, `DEFERRED`, or
+   `EXCLUDED`.
+4. Write the required RED behavior or regression test.
+5. Refine the smallest coherent page family with existing components.
+6. Verify behavior, accessibility, responsive layout, theme parity, security,
+   and performance before continuing.
+7. Record evidence and stop at the playbook boundary.
 
-Every screen must clearly communicate:
+Use a fresh Composer session for every numbered Phase 10A step. At 70% context
+utilization, stop at the nearest completed step boundary, record an exact receipt,
+and continue in a fresh session. Do not edit shared tokens, the shell, or shared
+primitives concurrently.
 
-1. What the staff member is currently doing
-2. What information is required
-3. What action should be performed next
-4. Whether the action succeeded or failed
+## 2. Product UX principles
 
-## 2.2 Fast
+### 2.1 Operator-first
 
-Common tasks should require minimal steps.
+E-ParkGO is an operational parking system, not a generic analytics dashboard.
+Optimize for quick recognition, low error rates, repeatable keyboard/touch use,
+and clear recovery during busy entry and exit periods.
 
-| Task                         | Target                        |
-| ---------------------------- | ----------------------------- |
-| Register a vehicle           | One focused form              |
-| Assign a parking space       | One selection                 |
-| Generate a ticket            | Automatic after submission    |
-| Scan a ticket                | One primary action            |
-| Review parking charges       | One screen                    |
-| Record payment               | One confirmation              |
-| Confirm vehicle exit         | One explicit confirmation     |
-| Search for a parking session | Plate number or ticket number |
+Every operational page must answer:
 
-## 2.3 Reliable
+- Where am I?
+- What record or facility am I working on?
+- What is its current authoritative state?
+- What is the next permitted action?
+- What will happen after I take it?
+- How do I recover if the action fails?
 
-The interface must prevent errors through:
+### 2.2 One dominant job per page
 
-* Clear validation
-* Duplicate-session warnings
-* Disabled occupied parking spaces
-* Server-generated timestamps
-* Explicit payment states
-* Explicit exit confirmation
-* Read-only calculated fees
-* Clear operational statuses
-* Audit reasons for sensitive actions
+Every page has one primary user job and no more than one visually dominant
+primary action. Secondary actions use outline, quiet, or text treatments.
+Destructive or irreversible actions state their consequence explicitly.
 
-## 2.4 Professional
+### 2.3 Truth over decoration
 
-The visual direction should feel appropriate for:
+No notification, trend, chart, metric, search, selector, menu, status, or button
+may look functional unless real behavior and authorized data back it.
 
-* Parking facilities
-* Commercial establishments
-* Office buildings
-* Universities
-* Hospitals
-* Shopping centers
-* Hotels
-* Government facilities
-* Private parking operators
+Production UI must not contain:
 
-## 2.5 Responsive
+- fabricated metrics, fallback counts, trends, revenue, dates, facilities, or
+  parking-space data;
+- dead `href="#"` links, inert menus, fake overflow actions, or read-only fields
+  presented as controls;
+- invented testimonials, clients, integrations, reservations, features, or
+  claims;
+- raw internal evidence presented as user-facing product data.
 
-The same application should work on:
+When data is unavailable, use an honest loading, empty, stale, permission, or
+error state.
 
-* Mobile phones
-* Tablets
-* Laptops
-* Desktop computers
-* Large monitoring displays
-* Future entry and exit kiosks
+### 2.4 Server authority
 
----
+The browser never determines authoritative fees, money totals, timestamps,
+availability, permissions, payment state, or session state. It displays
+server-provided results and may calculate presentation-only values such as a
+safe tender/change preview when the owning contract permits it.
 
-# 3. Brand Direction
+PostgreSQL RPCs continue to own official time, integer-centavo money, locks,
+idempotency, state transitions, audit evidence, occupancy, payment, and release.
 
-## 3.1 Product Name
+### 2.5 Progressive disclosure
 
-**E-ParkGO**
+Keep the default view focused. Put supporting history, evidence, advanced
+filters, and exceptional actions behind an inline disclosure, drawer, details
+region, or permission-aware menu. Use dialogs only for destructive,
+irreversible, security-sensitive, or cross-record actions.
 
-Possible meaning:
+### 2.6 User-centered recovery
 
-* **E** — electronic, efficient, and easy
-* **Park** — parking operations
-* **GO** — fast and seamless movement
+Preserve safe form input after validation and recoverable server errors. State
+what failed, whether anything was recorded, and the exact next action. Never use
+“Oops,” blame the operator, or expose stack traces.
 
-## 3.2 Brand Personality
+## 3. Precision Operations visual direction
 
-E-ParkGO should feel:
+### 3.1 Character
 
-* Modern
-* Efficient
-* Reliable
-* Secure
-* Calm
-* Precise
-* Friendly
-* Professional
+The interface is:
 
-It should not feel:
+- clean and planar;
+- calm under operational pressure;
+- compact without feeling cramped;
+- premium through typography, alignment, rhythm, and detail;
+- visually distinctive without ornamental SaaS styling;
+- equally intentional in light and dark modes.
 
-* Overly futuristic
-* Childlike
-* Gaming-inspired
-* Crypto-themed
-* Visually noisy
-* Complicated
-* Generic
-* Excessively decorative
+The design is not:
 
-## 3.3 Suggested Tagline
+- a wall of identical rounded cards;
+- a purple/blue gradient template;
+- glassmorphism, blurred blobs, glowing borders, or decorative noise;
+- a rainbow of KPI icons;
+- a marketing layout copied into protected operational pages;
+- motion-heavy, cinematic, or scroll-driven inside staff workflows.
 
-> Smarter parking from entry to exit.
+### 3.2 Color roles
 
-Alternative:
+Use semantic tokens rather than page-local color utilities.
 
-> One ticket. One scan. Complete parking control.
+| Role                   | Intended use                                                                  |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| Application background | Cool off-white in light mode; deep blue-charcoal in dark mode.                |
+| Work surface           | White or lightly tinted planar surface; distinct charcoal plane in dark mode. |
+| Foreground             | Graphite/slate with high contrast.                                            |
+| Primary cobalt         | Primary action, selected navigation, focus, active data series.               |
+| Emerald                | Available, verified, paid, successful, healthy.                               |
+| Amber                  | Attention, pending, stale, expiring, variance, manual review.                 |
+| Red                    | Destructive action, failed state, blocked state, critical exception.          |
+| Neutral graphite       | Completed, inactive, secondary, historical.                                   |
 
-## 3.4 Logo Direction
+Violet, cyan, and additional hues are not ordinary decoration. A status always
+uses visible text and, where useful, an icon; color alone never carries meaning.
 
-Recommended logo concepts:
-
-* Abstract `P` symbol
-* Combined `E` and `P` monogram
-* Parking lane
-* Entry-to-exit route
-* Directional movement
-* Ticket path
-* Parking gate
-* Minimal parking marker
-
-The logo must:
-
-* Remain readable at favicon size
-* Work in light and dark mode
-* Use simple geometry
-* Avoid excessive detail
-* Avoid literal vehicle illustrations
-* Avoid heavy gradients in the primary version
-
----
-
-# 4. Visual Style
-
-The E-ParkGO interface should combine:
+Phase 10A starts from these exact OKLCH targets. It may adjust a value only as
+much as measured WCAG contrast requires, and must record the before/after value:
 
 ```text
-Modern SaaS structure
-+
-Transportation clarity
-+
-Fintech-level transaction trust
-+
-Fast operational workflows
-+
-Minimalistic visual design
+LIGHT background 0.982/0.006/255; foreground 0.200/0.025/260; card+popover 0.998/0.002/255; muted+secondary 0.955/0.008/255
+LIGHT muted-foreground 0.480/0.025/260; border+input 0.885/0.012/255; primary 0.530/0.170/258; ring 0.580/0.170/258
+DARK background 0.160/0.022/260; foreground 0.940/0.010/255; card+popover 0.205/0.025/260; muted+secondary 0.255/0.022/260
+DARK muted-foreground 0.720/0.018/255; border+input 0.340/0.025/260; primary 0.670/0.160/257; ring 0.700/0.150/257
+LIGHT/DARK destructive 0.550/0.190/27 and 0.680/0.170/25; success 0.550/0.140/154 and 0.690/0.130/154
+LIGHT/DARK warning 0.690/0.140/75 and 0.780/0.130/78; info 0.560/0.140/245 and 0.710/0.130/245
 ```
 
-## 4.1 Visual Characteristics
+Each triplet is `oklch(lightness chroma hue)` for the named CSS variable.
 
-Use:
+Set `--radius: 0.5rem`; keep derived primitive radii aligned to §3.6. Chart
+tokens use primary, success, warning, destructive, then neutral foreground. Do
+not add a decorative series hue without a demonstrated data requirement.
 
-* Spacious but efficient layouts
-* Clean card surfaces
-* Strong typography
-* Soft borders
-* Subtle shadows
-* Controlled rounded corners
-* Clear information hierarchy
-* Compact status badges
-* Purposeful icons
-* Restrained colors
-* Consistent spacing
-* Minimal motion
+### 3.3 Theme parity
 
-## 4.2 Avoid
+Dark mode is not an inverted light mode. It must preserve:
 
-Avoid:
+- distinct background, work-surface, raised-overlay, and input planes;
+- readable muted text and borders;
+- semantic status contrast;
+- visible focus and selected states;
+- charts and parking states that remain distinguishable without high saturation.
 
-* Heavy glassmorphism
-* Excessive gradients
-* Neon effects
-* Decorative 3D illustrations inside operational screens
-* Low-contrast gray text
-* Oversized empty cards
-* Excessive rounded pills
-* Too many status colors
-* Continuous animated backgrounds
-* Overly dense forms
-* Decorative UI elements with no functional purpose
+Do not use pure black or stack many translucent layers.
 
----
+### 3.4 Typography
 
-# 5. Design Technology
+- Interface: Geist.
+- Identifiers and operational figures: Geist Mono.
+- Use tabular figures for money, counts, durations, timestamps, receipt numbers,
+  ticket numbers, plates, and chart axes.
+- Use sentence case for headings, labels, buttons, table headers, and statuses.
+- Body: regular; controls and labels: medium; headings/actions: semibold; bold
+  only for page titles and priority figures.
+- Operational titles stay compact. Large display type is reserved for the public
+  landing and major auth messaging.
+- Descriptions should generally remain within 65–75 characters per line.
+- Use balanced wrapping for large headings and pretty wrapping for prose.
 
-Recommended design and frontend tools:
+Suggested hierarchy:
 
-* Next.js
-* TypeScript
-* Tailwind CSS
-* shadcn/ui
-* Radix UI
-* Lucide React
-* Geist Sans
-* Geist Mono
-* next-themes
-* React Hook Form
-* Zod
-* Recharts
-* Framer Motion for limited purposeful animations
+| Element                | Intent                                              |
+| ---------------------- | --------------------------------------------------- |
+| Public display         | 40–64px responsive, 1–3 lines, tight tracking.      |
+| Operational page title | 24–32px responsive, compact line height.            |
+| Section heading        | 16–20px semibold.                                   |
+| Body/control           | 14–16px.                                            |
+| Metadata/caption       | 12–13px, never a substitute for required body text. |
 
----
+### 3.5 Spacing and density
 
-# 6. Theme System
+Use a 4px base rhythm.
 
-E-ParkGO must support:
+- Inline gaps: 4–8px.
+- Related control gaps: 8–12px.
+- Work-surface padding: 16px compact, 20–24px default.
+- Operational section gaps: 24–32px.
+- Page inset: 16px mobile, 24px tablet, 28–40px desktop.
+- Public sections may use 64–112px vertical spacing.
+- Tables are compact and scannable, but controls retain 44px product targets.
 
-```text
-system
-light
-dark
-```
+Avoid mathematically identical padding everywhere. Align shared baselines and
+adjust optical spacing where icons, labels, and values require it.
 
-Optional accent themes:
+### 3.6 Geometry
 
-```text
-emerald
-blue
-graphite
-purple
-amber
-high-contrast
-```
+| Component                                       | Radius                                    |
+| ----------------------------------------------- | ----------------------------------------- |
+| Inline marker or segmented detail               | 2–4px                                     |
+| Status label                                    | 4px                                       |
+| Button, input, navigation item, parking tile    | 6px                                       |
+| Card, work panel, grouped form, table container | 8px                                       |
+| Dialog, drawer, sheet                           | 10–12px                                   |
+| Avatar, radio, switch, progress point           | True circle when the metaphor requires it |
 
-Themes must use semantic tokens rather than hard-coded component colors.
+Do not use pills for ordinary buttons, filters, status labels, or navigation.
+Do not apply one radius to every nested layer. Inner geometry must be equal to or
+tighter than its container.
 
-Changing the theme must not affect component layout, behavior, accessibility, or business logic.
+### 3.7 Surfaces and elevation
 
----
+A card must communicate grouping, selection, elevation, or hierarchy. Prefer
+open sections, dividers, tonal planes, grouped rows, and shared alignment over
+wrapping every block in a bordered card.
 
-# 7. Color System
+Normal page surfaces use borders or tonal contrast. Shadows are reserved for
+menus, dialogs, drawers, sticky layers, and temporary elevation. Use one
+consistent light direction and no decorative glow.
 
-## 7.1 Default Brand Colors
+### 3.8 Icons and data visualization
 
-| Color             | Value     | Usage                                   |
-| ----------------- | --------- | --------------------------------------- |
-| Primary Blue      | `#2563EB` | Main buttons, active navigation, links  |
-| Primary Blue Dark | `#1D4ED8` | Hover and active button states          |
-| Emerald           | `#10B981` | Available spaces, successful actions    |
-| Cyan              | `#06B6D4` | Scanner and realtime accent             |
-| Amber             | `#F59E0B` | Pending and reserved states             |
-| Red               | `#EF4444` | Occupied, destructive, and error states |
-| Violet            | `#8B5CF6` | Manual review or special states         |
-| Slate 950         | `#020617` | Dark mode page background               |
-| Slate 900         | `#0F172A` | Dark mode cards                         |
-| Slate 50          | `#F8FAFC` | Light mode page background              |
-| White             | `#FFFFFF` | Light mode cards                        |
+Retain the installed Lucide set and standardize size, stroke, and alignment. Do
+not add a second icon library during Phase 10A.
 
-## 7.2 Parking Status Colors
+Use icons to aid scanning, not decorate every heading. Icon-only controls require
+an accessible name and tooltip where meaning is not universally clear.
 
-| Parking State | Color        |
-| ------------- | ------------ |
-| Available     | Emerald      |
-| Occupied      | Red          |
-| Reserved      | Amber        |
-| Maintenance   | Gray         |
-| Accessible    | Blue         |
-| Selected      | Primary blue |
+Charts are allowed only when authorized bounded data makes comparison easier.
+Every chart needs:
 
-## 7.3 Session Status Colors
+- a neutral descriptive title;
+- visible units and time/business-date scope;
+- a legend for multiple series;
+- tabular or textual equivalent;
+- accessible colors and non-color differentiation;
+- loading, empty, stale, and error states.
 
-| Session State      | Color            |
-| ------------------ | ---------------- |
-| Active             | Emerald          |
-| Exit pending       | Amber            |
-| Payment pending    | Amber            |
-| Paid awaiting exit | Blue             |
-| Completed          | Slate or emerald |
-| Cancelled          | Red              |
-| Manual review      | Violet           |
-| Lost ticket        | Red or amber     |
+## 4. Shared application composition
 
-Status information must never depend only on color.
+### 4.1 Protected shell
 
-Each status should include:
+The desktop shell uses a compact left navigation and an open main work area.
+The shell provides facility identity, navigation, account controls, and
+connectivity context; page-specific filters belong inside pages.
 
-* Text label
-* Optional icon
-* Semantic color
-* Accessible contrast
+Required refinements:
 
----
+- remove the “Serverless & Scalable” promotion and dead link;
+- show the current facility as honest non-interactive context until switching is
+  implemented;
+- remove the hardcoded global date control;
+- remove global search until a real scoped search contract exists;
+- remove hardcoded notifications until real notifications exist;
+- make the account affordance functional with identity, role, theme, and the
+  existing sign-out action;
+- render only implemented and authorized destinations;
+- use a precise active indicator and minimum 44px targets.
 
-# 8. Semantic Design Tokens
+Desktop navigation may collapse to icons with tooltips; tablet may use a rail or
+drawer. Mobile bottom navigation is Dashboard, Entry, Scanner, Sessions, and
+More; unavailable/unauthorized items stay hidden, and More opens the remaining
+navigation/account sheet. It respects safe-area insets and never obscures actions.
 
-```css
-:root {
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+### 4.2 Public and auth shells
 
-  --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+Public and auth surfaces share brand tokens but may use more whitespace and
+editorial composition. They must not inherit operational navigation or
+dashboard card patterns.
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
+### 4.3 Page header
 
-  --primary: 221 83% 53%;
-  --primary-foreground: 0 0% 100%;
+Repeated implementation should converge on:
 
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 20%;
-
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-
-  --accent: 160 84% 39%;
-  --accent-foreground: 0 0% 100%;
-
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 221 83% 53%;
-
-  --destructive: 0 72% 51%;
-  --success: 160 84% 39%;
-  --warning: 38 92% 50%;
-  --info: 199 89% 48%;
-
-  --space-available: 160 84% 39%;
-  --space-occupied: 0 84% 60%;
-  --space-reserved: 38 92% 50%;
-  --space-maintenance: 215 16% 65%;
-  --space-accessible: 217 91% 60%;
-
-  --radius: 0.875rem;
-}
-
-.dark {
-  --background: 222 47% 6%;
-  --foreground: 210 40% 98%;
-
-  --card: 222 47% 9%;
-  --card-foreground: 210 40% 98%;
-
-  --popover: 222 47% 9%;
-  --popover-foreground: 210 40% 98%;
-
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 7%;
-
-  --secondary: 217 33% 14%;
-  --secondary-foreground: 210 40% 96%;
-
-  --muted: 217 33% 14%;
-  --muted-foreground: 215 20% 65%;
-
-  --accent: 158 64% 52%;
-  --accent-foreground: 222 47% 7%;
-
-  --border: 217 33% 18%;
-  --input: 217 33% 18%;
-  --ring: 217 91% 60%;
-
-  --destructive: 0 63% 55%;
-  --success: 158 64% 52%;
-  --warning: 43 96% 56%;
-  --info: 199 89% 58%;
+```ts
+interface PageHeaderProps {
+  title: string;
+  description?: string;
+  metadata?: React.ReactNode;
+  actions?: React.ReactNode;
 }
 ```
 
-All final token values must be validated for WCAG contrast.
+The page header contains a single `h1`, optional concise explanation, contextual
+facility/date/state metadata, and a right-aligned action area. On mobile, actions
+stack below the title without reordering semantics.
 
----
+The protected shell must not emit another `h1`. Its current route title becomes
+non-heading navigation context; the route-level `PageHeader` owns the page `h1`.
 
-# 9. Light Mode
+### 4.4 Work surface
 
-Light mode should use:
-
-* Soft slate page background
-* White cards
-* Dark slate text
-* Light gray borders
-* Blue primary actions
-* Emerald success states
-* Minimal shadows
-* Soft secondary surfaces
-
-Recommended hierarchy:
-
-```text
-Page background: Slate 50
-Primary card: White
-Secondary surface: Slate 100
-Primary text: Slate 950
-Secondary text: Slate 600
-Muted text: Slate 500
-Border: Slate 200
+```ts
+interface WorkSurfaceProps {
+  heading?: string;
+  description?: string;
+  actions?: React.ReactNode;
+  density?: "compact" | "default";
+  children: React.ReactNode;
+}
 ```
 
----
+Use this composition only where a bordered or tonal grouping improves
+comprehension. Do not use it as a mandatory wrapper for every section.
 
-# 10. Dark Mode
+### 4.5 Status label
 
-Dark mode should feel like a professional operations command center.
-
-Use:
-
-* Deep slate page background
-* Slightly lighter cards
-* High-contrast text
-* Blue primary actions
-* Emerald success indicators
-* Muted borders
-* Minimal shadows
-* Restrained glow effects
-
-Recommended hierarchy:
-
-```text
-Page background: Slate 950
-Primary card: Slate 900
-Secondary surface: Slate 900/70
-Primary text: Slate 50
-Secondary text: Slate 300
-Muted text: Slate 400
-Border: Slate 800
+```ts
+interface StatusLabelProps {
+  tone: "neutral" | "info" | "success" | "warning" | "danger";
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}
 ```
 
-Avoid using pure black for every surface.
+Status labels use compact rectangular geometry and visible text. Similar states
+use the same tone across pages.
 
----
+### 4.6 Page state
 
-# 11. Typography
-
-## 11.1 Font Families
-
-Use:
-
-* **Geist Sans** for general interface text
-* **Geist Mono** for ticket numbers, plate numbers, timestamps, identifiers, and financial metrics
-
-Fallback:
-
-```css
-font-family: Geist, Inter, ui-sans-serif, system-ui, sans-serif;
+```ts
+interface PageStateProps {
+  kind:
+    | "loading"
+    | "empty"
+    | "error"
+    | "success"
+    | "conflict"
+    | "stale"
+    | "reconnecting"
+    | "permission"
+    | "offline";
+  title: string;
+  message: string;
+  action?: React.ReactNode;
+  correlationId?: string;
+}
 ```
 
-## 11.2 Type Scale
+Page states preserve the surrounding page structure to reduce layout shift.
+Correlation IDs are safe, optional, copyable references—not stack traces.
 
-| Style         | Size     | Weight   | Usage                      |
-| ------------- | -------- | -------- | -------------------------- |
-| Display       | 40–48 px | Bold     | Marketing or setup screens |
-| Page title    | 28–32 px | Bold     | Main page heading          |
-| Section title | 20–24 px | Semibold | Main card sections         |
-| Card title    | 16–18 px | Semibold | Cards and panels           |
-| Body          | 14–16 px | Regular  | Standard content           |
-| Small         | 12–13 px | Regular  | Supporting information     |
-| Metric        | 24–36 px | Bold     | Dashboard values           |
-| Mono code     | 14–22 px | Medium   | Ticket and plate values    |
+### 4.7 Metric strip
 
-## 11.3 Typography Rules
-
-* Use sentence case for interface labels.
-* Use uppercase for plate numbers.
-* Use monospace for ticket codes.
-* Use semibold for actions and headings.
-* Use muted colors only for secondary information.
-* Avoid long uppercase labels.
-* Avoid small low-contrast text.
-
----
-
-# 12. Spacing System
-
-Use a 4-pixel base spacing scale.
-
-```text
-4px
-8px
-12px
-16px
-20px
-24px
-32px
-40px
-48px
-64px
+```ts
+interface MetricStripProps {
+  primary: { label: string; value: string; detail?: string };
+  supporting: ReadonlyArray<{ label: string; value: string; detail?: string }>;
+}
 ```
 
-Recommended usage:
-
-| Spacing | Usage                              |
-| ------- | ---------------------------------- |
-| 4 px    | Icon and label adjustment          |
-| 8 px    | Tight component spacing            |
-| 12 px   | Form label to input                |
-| 16 px   | Standard card content              |
-| 24 px   | Card sections                      |
-| 32 px   | Page sections                      |
-| 48 px   | Major layout separation            |
-| 64 px   | Marketing or large page separation |
+Use one dominant metric with aligned supporting facts instead of equal KPI-card
+walls. Trends appear only when a real comparison period and data source exist.
 
----
-
-# 13. Border Radius
+### 4.8 Tables and responsive records
 
-| Component           | Radius        |
-| ------------------- | ------------- |
-| Small controls      | 8 px          |
-| Buttons             | 10–12 px      |
-| Inputs              | 10–12 px      |
-| Cards               | 14–18 px      |
-| Dialogs             | 18–22 px      |
-| Parking-space tiles | 10–14 px      |
-| Status badges       | Fully rounded |
+Desktop tables require:
 
-Avoid mixing sharp and highly rounded components without a clear reason.
+- semantic headers and captions where useful;
+- aligned numeric columns with tabular figures;
+- cursor pagination and bounded page sizes;
+- row actions that remain keyboard accessible;
+- sticky headers only when they do not obscure focus.
 
----
+Mobile may use compact record groups rather than horizontal scrolling. Preserve
+the same information priority, actions, and source order. Do not hide required
+evidence merely to simplify mobile layout.
 
-# 14. Shadows and Elevation
+### 4.9 Forms
 
-## Light Mode
+- Labels remain visible; placeholders are examples, not labels.
+- Required/optional state is explicit.
+- Help appears before errors where it prevents failure.
+- Validation appears near the field and in an error summary when submission
+  fails across multiple fields.
+- Focus moves to the error summary only after submission failure.
+- Safe inputs remain populated after recoverable errors.
+- Pending actions prevent accidental repeats, but server idempotency remains the
+  real protection.
+- Money, plate, ticket, receipt, and code inputs use appropriate input modes and
+  autocomplete attributes.
 
-Use subtle shadows:
+### 4.10 Dialogs, drawers, menus, and toast
 
-```css
-box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
-box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
-```
-
-Use stronger shadows only for:
+Dialogs contain focus, close with Escape where safe, restore focus, and state
+their consequence. Drawers are preferred for supportive detail and mobile
+filters. Menus contain real available actions only.
 
-* Dialogs
-* Dropdown menus
-* Floating scanner controls
-* Side panels
+Toasts provide brief confirmation; they never carry the only copy of an error,
+receipt, credential, or required next action. Persistent outcomes remain visible
+in the page.
 
-## Dark Mode
-
-Prefer:
-
-* Borders
-* Surface contrast
-* Low-opacity highlights
-
-Avoid heavy black shadows.
-
----
-
-# 15. Responsive Layout
-
-## 15.1 Desktop
-
-```text
-┌─────────────────────────────────────────────────────────────┐
-│ Top bar: page title, facility, date, search, theme, user   │
-├─────────────────┬───────────────────────────────────────────┤
-│ Sidebar         │ Main content                              │
-│                 │                                           │
-│ Dashboard       │                                           │
-│ Entries         │                                           │
-│ Scan & Exit     │                                           │
-│ Payments        │                                           │
-│ Active Sessions │                                           │
-│ Parking Map     │                                           │
-│ Reports         │                                           │
-│ Rates           │                                           │
-│ Staff           │                                           │
-│ Settings        │                                           │
-└─────────────────┴───────────────────────────────────────────┘
-```
-
-Desktop sidebar:
-
-* Collapsible
-* Icon and label
-* Clear active state
-* Facility branding at top
-* Account and shift information near bottom
-
-## 15.2 Tablet
-
-Use:
-
-* Compact sidebar
-* Icon rail
-* Large touch targets
-* Two-column operational layouts
-* Large scanner camera area
-* Sticky main actions
-
-## 15.3 Mobile
-
-Recommended bottom navigation:
-
-```text
-Dashboard
-Entry
-Scan
-Sessions
-More
-```
-
-The Scan action may be highlighted in the center.
-
-Use:
-
-* Stacked content
-* Sticky bottom actions
-* Bottom sheets
-* Cards instead of wide tables
-* Full-width scanner
-
----
-
-# 16. Navigation Structure
-
-## 16.1 Staff Navigation
-
-```text
-Dashboard
-New Entry
-Scan & Exit
-Payments
-Active Sessions
-Parking Map
-Transactions
-Shift
-```
-
-## 16.2 Administrator Navigation
-
-```text
-Dashboard
-Operations
-Transactions
-Parking Management
-Rates
-Staff
-Reports
-Audit Logs
-Settings
-```
-
-## 16.3 Route Structure
-
-```text
-/login
-/dashboard
-/entry
-/entry/success/[sessionId]
-/scan
-/exit/[sessionId]
-/payments
-/sessions
-/sessions/[sessionId]
-/parking-map
-/transactions
-/transactions/[sessionId]
-/shift
-
-/admin/spaces
-/admin/zones
-/admin/rates
-/admin/staff
-/admin/reports
-/admin/audit-logs
-/admin/settings
-
-/offline
-/error
-```
-
----
-
-# 17. Application Shell
-
-## 17.1 Sidebar
-
-The sidebar should include:
-
-* E-ParkGO logo
-* Navigation items
-* Active-route indicator
-* Role-aware menu items
-* Facility information
-* Collapse button
-* Account or shift summary
-
-Sidebar behavior:
-
-* Expanded on large screens
-* Collapsible on desktop
-* Icon rail on tablet
-* Hidden behind a sheet on mobile
-
-## 17.2 Top Bar
-
-The top bar should include:
-
-* Page title
-* Facility selector
-* Date or date range
-* Global search
-* Notifications
-* Theme toggle
-* User account menu
-
-## 17.3 Account Menu
-
-Include:
-
-* Staff name
-* Role
-* Shift state
-* Appearance
-* Account settings
-* Sign out
-
----
-
-# 18. Component Library
-
-Core components:
-
-```text
-AppShell
-Sidebar
-TopBar
-MobileBottomNavigation
-PageHeader
-ThemeSwitcher
-FacilitySelector
-ShiftStatus
-
-KpiCard
-OccupancyChart
-RevenueChart
-RecentActivity
-OperationalAlert
-ZoneSummary
-
-PlateNumberInput
-VehicleTypeSelect
-ColorSelect
-ParkingSpacePicker
-ParkingSpaceTile
-ParkingZoneGrid
-
-TicketPreview
-QRCodePanel
-PrintTicketButton
-ShareTicketButton
-
-QRScanner
-ScannerFrame
-FlashlightButton
-ManualTicketLookup
-CameraPermissionState
-
-SessionStatusBadge
-PaymentStatusBadge
-SessionSummary
-FeeBreakdown
-PaymentForm
-ExitConfirmation
-
-DataTable
-MobileDataCard
-FilterBar
-SearchInput
-DateRangePicker
-Pagination
-
-EmptyState
-ErrorState
-OfflineBanner
-UpdatePrompt
-ConfirmDialog
-ApprovalDialog
-ReasonForm
-AuditTimeline
-```
-
----
-
-# 19. Button Design
-
-Required variants:
-
-* Primary
-* Secondary
-* Outline
-* Ghost
-* Destructive
-* Success
-* Icon
-* Loading
-* Large operational action
-
-Examples:
-
-```text
-Generate Ticket
-Scan Ticket
-Preview Exit
-Record Payment
-Confirm Vehicle Exit
-Reprint Ticket
-Cancel Session
-```
-
-Button rules:
-
-* Minimum touch size: 44 × 44 px
-* Primary mobile actions: 48–56 px height
-* Use icons only when their purpose is clear
-* Destructive actions require confirmation
-* Loading actions must prevent duplicate submission
-* Disabled buttons must remain readable
-
----
-
-# 20. Form Design
-
-Forms should use:
-
-* Visible labels
-* Supporting descriptions
-* Clear required markers
-* Inline validation
-* Error summaries where necessary
-* Consistent spacing
-* Logical field grouping
-
-## Plate Number Input
-
-Behavior:
-
-* Automatically uppercase text
-* Trim unnecessary spaces
-* Use monospace
-* Search existing vehicle records
-* Check for active sessions
-* Display a warning before submission
-
-Example:
-
-```text
-ABC-1234
-```
-
-## Currency Input
-
-Behavior:
-
-* Use Philippine peso formatting
-* Display two decimal places
-* Prevent negative values
-* Validate amount received
-* Calculate change automatically
-
-Example:
-
-```text
-₱100.00
-```
-
----
-
-# 21. Login Page
-
-## Purpose
-
-Allow administrators and staff to securely access E-ParkGO.
-
-## Layout
-
-Desktop:
-
-* Left brand and product-information panel
-* Right centered authentication card
-* Theme toggle in the upper-right corner
-
-Mobile:
-
-* Compact logo
-* Login card
-* No unnecessary illustrations
-* Full-width fields and button
-
-## Content
-
-* E-ParkGO logo
-* Welcome message
-* Email field
-* Password field
-* Show-password control
-* Remember-me option
-* Forgot-password link
-* Sign-in button
-* Optional Google login
-* Staff and administrator access label
-
-## Behavior
-
-* Preserve email after a failed login
-* Show a clear invalid-credentials message
-* Disable submit while authenticating
-* Redirect authenticated users
-* Support password recovery
-* Display disabled-account messages
-
----
-
-# 22. Dashboard Page
-
-## Purpose
-
-Provide an immediate overview of the parking facility.
-
-## Header
-
-Include:
-
-* Dashboard title
-* Facility selector
-* Date selector
-* Search
-* Notifications
-* Theme switcher
-* User account
-
-## KPI Cards
-
-Recommended:
-
-* Active sessions
-* Available spaces
-* Revenue today
-* Vehicles today
-* Pending exits
-
-Each card should include:
-
-* Icon
-* Label
-* Main value
-* Supporting trend
-* Optional overflow menu
-
-## Main Panels
-
-### Occupancy Overview
-
-Display:
-
-* Total parking spaces
-* Available
-* Occupied
-* Reserved
-* Maintenance
-* Occupancy percentage
-
-### Revenue Trend
-
-Display:
-
-* Daily revenue
-* Selected date range
-* Hover tooltip
-* Currency formatting
-
-### Recent Entries
-
-Columns:
-
-* Entry time
-* Plate number
-* Vehicle
-* Entry gate
-* Parking level
-* Duration
-* Status
-
-### Parking Map Preview
-
-Display a compact parking-space overview with:
-
-* Available
-* Occupied
-* Reserved
-* Maintenance
-* Accessible
-
----
-
-# 23. New Vehicle Entry Page
-
-## Purpose
-
-Allow staff to register an arriving vehicle and assign a parking space.
-
-## Layout
-
-Desktop:
-
-```text
-Vehicle Information | Parking Assignment
-```
-
-Mobile:
-
-```text
-Vehicle Information
-Parking Assignment
-Sticky Generate Ticket button
-```
-
-## Vehicle Fields
-
-* Plate number
-* Vehicle type
-* Color
-* Make and model
-* Driver or owner name
-* Contact number
-* Optional notes
-
-Only fields required by the business should be mandatory.
-
-## Parking Assignment
-
-Include:
-
-* Zone selector
-* Parking-space search
-* Parking-space grid
-* Status legend
-* Vehicle compatibility
-* Accessible-space indicators
-
-## Parking-Space Tile States
-
-Available:
-
-* Green border
-* Green indicator
-* Selectable
-
-Occupied:
-
-* Red border
-* Red indicator
-* Disabled
-
-Reserved:
-
-* Amber border
-* Amber indicator
-* Disabled or restricted
-
-Maintenance:
-
-* Gray
-* Tool icon
-* Disabled
-
-Accessible:
-
-* Blue border
-* Accessibility icon
-* Permission or vehicle requirement where applicable
-
-## Primary Action
-
-```text
-Generate Ticket
-```
-
-Supporting notice:
-
-> The official entry time will be recorded automatically upon submission.
-
----
-
-# 24. Ticket Generated Page
-
-## Purpose
-
-Confirm successful entry and display the parking ticket.
-
-## Content
-
-* Success indicator
-* Ticket number
-* QR code
-* Plate number
-* Vehicle type
-* Entry time
-* Assigned parking space
-* Facility name
-* Ticket instructions
-
-## Actions
-
-* View Ticket
-* Print Ticket
-* Save as PDF
-* Share Ticket
-* Register Another Vehicle
-* Done
-
-## Ticket Style
-
-Use:
-
-* Receipt-inspired layout
-* High-contrast QR code
-* Monospace ticket number
-* Clear separators
-* Minimal branding
-* Print-friendly white background
-
----
-
-# 25. Scan Parking Ticket Page
-
-## Purpose
-
-Allow staff to scan and validate a QR ticket.
-
-## Layout
-
-Desktop:
-
-```text
-Scanner Panel | Ticket Details
-```
-
-Mobile:
-
-```text
-Scanner
-Recognized ticket summary
-Preview Exit
-```
-
-## Scanner Panel
-
-Include:
-
-* Camera frame
-* QR alignment guides
-* Flashlight control
-* Camera selector
-* Gallery upload, where supported
-* Manual ticket number input
-
-## Scan States
-
-### Initial
-
-> Position the QR code inside the frame.
-
-### Scanning
-
-* Subtle scanning line
-* Camera active indicator
-
-### Recognized
-
-* Green frame
-* Confirmation vibration
-* Ticket details displayed
-
-### Invalid
-
-* Red frame
-* Human-readable error
-* Scanner stays active
-
-### Completed Ticket
-
-Show:
-
-* Completion time
-* Receipt number
-* Staff member
-* No further processing allowed
-
-## Ticket Details
-
-Display:
-
-* Ticket number
-* Plate number
-* Vehicle
-* Entry time
-* Parking space
-* Current duration
-* Session status
-
-Primary action:
-
-```text
-Preview Exit
-```
-
----
-
-# 26. Exit Review Page
-
-## Purpose
-
-Review the active parking session, calculate the fee, record payment, and confirm exit.
-
-## Session Header
-
-Display:
-
-* Ticket number
-* Plate number
-* Vehicle type
-* Parking space
-* Session status
-* Entry time
-* Proposed exit time
-* Duration
-
-## Fee Breakdown
-
-Display:
-
-* Base fee
-* Additional duration charges
-* Discounts
-* Penalties
-* Total amount due
-* Rate explanation
-
-The fee breakdown should be read-only and calculated by the backend.
-
-## Payment Panel
-
-Fields:
-
-* Payment method
-* Amount received
-* Calculated change
-* Optional payment reference
-* Receipt number
-
-Primary action:
-
-```text
-Record Payment
-```
-
-## Exit Confirmation
-
-After successful payment:
-
-```text
-PAID — AWAITING EXIT
-```
-
-Display:
-
-* Paid amount
-* Payment method
-* Receipt number
-* Payment time
-
-Primary action:
-
-```text
-Confirm Vehicle Exit
-```
-
-Supporting text:
-
-> Confirming the exit will close the parking session and make the parking space available.
-
----
-
-# 27. Active Sessions Page
-
-## Purpose
-
-Allow staff to monitor all vehicles currently inside the parking facility.
-
-## KPI Cards
-
-Include:
-
-* Total active sessions
-* Pending exits
-* Long-stay vehicles
-* Payment-pending sessions
-
-## Filters
-
-* Search
-* Session status
-* Payment status
-* Zone
-* Vehicle type
-* Entry date
-* Long-stay filter
-
-## Desktop Table
-
-Columns:
-
-* Ticket number
-* Plate number
-* Vehicle
-* Parking space
-* Entry time
-* Duration
-* Payment status
-* Session status
-* Staff
-* Actions
-
-## Mobile Cards
-
-Each card should include:
-
-* Plate number
-* Ticket number
-* Parking space
-* Duration
-* Payment status
-* Session status
-* View button
-
-## Status Examples
-
-```text
-ACTIVE
-PAYMENT PENDING
-PAID AWAITING EXIT
-MANUAL REVIEW
-```
-
----
-
-# 28. Parking Map Page
-
-## Purpose
-
-Display the current status of all parking spaces.
-
-## Filters
-
-* Zone
-* Level
-* Vehicle type
-* Parking-space status
-* Accessible spaces
-* Search by space code
-
-## Parking-Space Grid
-
-Each tile should show:
-
-* Space code
-* Current state
-* Optional vehicle icon
-* Accessibility icon
-* Selected state
-
-## Space Details Panel
-
-Available space:
-
-* Space code
-* Zone
-* Level
-* Vehicle compatibility
-* Space type
-* Dimensions
-* Last updated
-* Assign action
-
-Occupied space:
-
-* Plate number
-* Ticket number
-* Vehicle type
-* Entry time
-* Current duration
-* Session link
-
-Reserved space:
-
-* Reservation information
-* Reservation time
-* Authorized user
-* Release action
-
-Maintenance space:
-
-* Maintenance reason
-* Start time
-* Expected availability
-* Restore action
-
----
-
-# 29. Payments Page
-
-## Purpose
-
-Review and manage parking payments.
-
-## Content
-
-* Payment search
-* Pending payments
-* Completed payments
-* Voided payments
-* Payment-method breakdown
-* Shift totals
-
-## Desktop Table
-
-Columns:
-
-* Receipt number
-* Ticket number
-* Plate number
-* Amount
-* Payment method
-* Payment status
-* Staff member
-* Payment time
-* Actions
-
-## Sensitive Actions
-
-The following actions require permission and confirmation:
-
-* Void payment
-* Correct payment method
-* Correct payment reference
-* Process refund
-* Apply manual discount
-
-Every sensitive action must require:
-
-* Reason
-* Staff identity
-* Optional supervisor approval
-* Audit log
-
----
-
-# 30. Transactions Page
-
-## Purpose
-
-Search and review completed and historical parking transactions.
-
-## Search Options
-
-* Plate number
-* Ticket number
-* Receipt number
-* Payment reference
-* Staff member
-
-## Filters
-
-* Date range
-* Session status
-* Payment status
-* Payment method
-* Vehicle type
-* Parking zone
-
-## Transaction Detail Timeline
-
-```text
-Entry created
-Ticket generated
-Ticket reprinted
-Exit ticket scanned
-Fee calculated
-Payment recorded
-Exit confirmed
-Session completed
-```
-
-Sensitive adjustments must display:
-
-* Previous value
-* New value
-* Staff member
-* Approver
-* Reason
-* Timestamp
-
----
-
-# 31. Rate Management Page
-
-## Purpose
-
-Allow administrators to configure parking rates.
-
-## Fields
-
-* Rate name
-* Vehicle type
-* Grace period
-* Initial duration
-* Initial fee
-* Succeeding interval
-* Succeeding fee
-* Daily maximum
-* Overnight fee
-* Lost-ticket fee
-* Effective date
-* End date
-* Active state
-
-## Calculation Preview
-
-The page should include an interactive preview.
-
-Example:
-
-```text
-Entry: 8:00 AM
-Exit: 11:30 AM
-Duration: 3 hours 30 minutes
-Calculated fee: ₱75.00
-```
-
-The preview must clearly show which rules were applied.
-
-## Saving Rates
-
-Before saving:
-
-* Validate overlapping active rates
-* Show affected vehicle types
-* Show effective date
-* Warn that active sessions retain their original rate snapshot
-
----
-
-# 32. Staff Management Page
-
-## Purpose
-
-Allow administrators to manage staff accounts and permissions.
-
-## Staff Information
-
-* Full name
-* Email address
-* Role
-* Assigned parking location
-* Account status
-* Last active
-* Current shift
-* Created date
-
-## Roles
-
-```text
-ADMIN
-STAFF
-```
-
-Optional:
-
-```text
-SUPERVISOR
-```
-
-Entry, exit, and cashier are not separate user roles.
-
-## Permissions
-
-Possible permissions:
-
-```text
-can_approve_overrides
-can_void_payments
-can_process_lost_tickets
-can_correct_session_times
-can_cancel_sessions
-```
-
-## Actions
-
-* Create staff
-* Edit profile
-* Assign role
-* Assign permissions
-* Disable account
-* Reset password
-* Review activity
-
----
-
-# 33. Reports Page
-
-## Recommended Reports
-
-* Daily revenue
-* Weekly revenue
-* Monthly revenue
-* Entries and exits
-* Occupancy by hour
-* Average parking duration
-* Vehicle-type distribution
-* Lost tickets
-* Manual overrides
-* Staff activity
-* Payment-method totals
-* Long-stay vehicles
-
-## Report Layout
-
-Use:
-
-* Summary cards
-* Date filters
-* Comparison filters
-* Simple charts
-* Export actions
-* Detailed tables
-
-Charts should only be used when they improve understanding.
-
----
-
-# 34. Audit Logs Page
-
-## Purpose
-
-Display read-only records of sensitive system actions.
-
-## Filters
-
-* Staff member
-* Action
-* Entity
-* Date range
-* Severity
-* Parking facility
-
-## Columns
-
-* Timestamp
-* Staff
-* Action
-* Entity
-* Previous value
-* New value
-* Reason
-* Device
-* IP address
-
-Audit logs must not be editable or deletable from the interface.
-
----
-
-# 35. Loading States
-
-Use:
-
-* Card skeletons
-* Table-row skeletons
-* Chart placeholders
-* Scanner initialization
-* Inline button spinners
-
-Avoid blocking the entire page for small actions.
-
-Examples:
-
-```text
-Loading active sessions…
-Initializing camera…
-Calculating parking fee…
-Recording payment…
-Confirming vehicle exit…
-```
-
----
-
-# 36. Empty States
-
-## No Active Sessions
-
-> No vehicles are currently parked.
-
-Action:
-
-```text
-Register Vehicle Entry
-```
-
-## No Transactions Found
-
-> No transactions match the selected filters.
-
-Action:
-
-```text
-Clear Filters
-```
-
-## No Parking Spaces Configured
-
-> Create a parking zone and add parking spaces to begin accepting vehicles.
-
-Action:
-
-```text
-Set Up Parking Spaces
-```
-
-## No Reports
-
-> No report data is available for the selected date range.
-
-Action:
-
-```text
-Change Date Range
-```
-
----
-
-# 37. Error States
-
-Errors should contain:
-
-* Clear title
-* Human-readable message
-* Recovery action
-* Optional reference code
-
-Example:
-
-> **Parking space is no longer available.**
-> Another staff device assigned this space moments ago. Select a different available space.
-
-Other examples:
-
-```text
-Ticket is invalid.
-Ticket has already been completed.
-Payment has already been recorded.
-Camera permission was denied.
-You are not authorized to perform this action.
-Connection was lost before the operation completed.
-```
-
-Do not expose:
-
-* Database errors
-* SQL messages
-* Authentication tokens
-* Stack traces
-* Internal identifiers
-
----
-
-# 38. Notifications
-
-Use toasts for:
-
-* Ticket generated
-* Payment recorded
-* Exit confirmed
-* Settings saved
-* Ticket copied
-* Export started
-
-Use inline alerts for:
-
-* Duplicate active session
-* Invalid ticket
-* Payment required
-* Camera permission denied
-* Rate configuration error
-* Restricted action
-
-Use persistent banners for:
-
-* Offline mode
-* Realtime disconnected
-* Shift not started
-* System maintenance
-* Unsynchronized operations
-* New app version available
-
----
-
-# 39. Offline Design
-
-Offline mode should be clearly visible.
-
-Recommended banner:
-
-> You are offline. Payment and vehicle exit confirmation are unavailable.
-
-Allowed offline behavior:
-
-* Open cached application shell
-* View recently cached information
-* View previously opened sessions
-* Access offline guidance
-
-Online-only actions:
-
-* Create official parking entry
-* Record payment
-* Confirm vehicle exit
-* Change parking rates
-* Manage staff
-* Perform sensitive overrides
-
-Do not make an offline operation appear successful when it has not reached the server.
-
----
-
-# 40. PWA Design
-
-## Install Prompt
-
-Use a nonintrusive install prompt:
-
-> Install E-ParkGO for faster access at the parking station.
-
-## Application Update
-
-Display:
-
-> A new version of E-ParkGO is available.
-
-Actions:
-
-```text
-Update Now
-Later
-```
-
-Never force an update during an active payment or exit workflow.
-
-## PWA Navigation
-
-The installed application should:
-
-* Open without browser chrome
-* Preserve the active theme
-* Support mobile-safe areas
-* Use a clear app icon
-* Provide an offline fallback page
-
----
-
-# 41. Motion Design
-
-Recommended motion:
-
-* 150–220 ms transitions
-* Smooth sidebar collapse
-* Subtle card hover
-* Scanner success pulse
-* Parking-space status update
-* Theme transition
-* Dialog entrance and exit
-
-Avoid:
-
-* Bouncing buttons
-* Long loading animations
-* Continuous animated backgrounds
-* Excessive page transitions
-* Motion that delays staff workflows
-
-Respect:
-
-```css
-@media (prefers-reduced-motion: reduce)
-```
-
----
-
-# 42. Accessibility
-
-Target:
-
-```text
-WCAG 2.2 AA
-```
-
-Requirements:
-
-* Keyboard-accessible navigation
-* Visible focus indicators
-* Proper form labels
-* Semantic heading order
-* Accessible dialogs
-* Screen-reader announcements
-* High color contrast
-* Minimum 44 × 44 px touch targets
-* Reduced-motion support
-* Text alternatives for icons
-* Error summaries
-* Manual ticket fallback
-* Status labels in addition to colors
-
-The QR scanner must provide:
-
-* Manual ticket entry
-* Permission instructions
-* Scan-success announcement
-* Invalid-scan explanation
-* Camera-unavailable fallback
-
----
-
-# 43. Responsive Breakpoints
-
-Recommended Tailwind breakpoints:
-
-```text
-sm: 640px
-md: 768px
-lg: 1024px
-xl: 1280px
-2xl: 1536px
-```
-
-| Width         | Layout                                          |
-| ------------- | ----------------------------------------------- |
-| Mobile        | Bottom navigation, cards, stacked forms         |
-| Tablet        | Compact sidebar, two-column operational screens |
-| Desktop       | Full sidebar, tables, dashboard grid            |
-| Large desktop | Wide monitoring and reporting layout            |
-
----
-
-# 44. Core Screen Checklist
-
-The initial E-ParkGO interface should include:
-
-1. Login
-2. Dashboard
-3. New Vehicle Entry
-4. Ticket Generated
-5. Scan Parking Ticket
-6. Exit Review
-7. Payment Recording
-8. Exit Confirmation
-9. Active Sessions
-10. Parking Map
-11. Transactions
-12. Rates
-13. Staff Management
-14. Reports
-15. Audit Logs
-16. Settings
-17. Offline Page
-18. Error Page
-
----
-
-# 45. Design Handoff Requirements
-
-Before development, the final design handoff should include:
-
-* Desktop frames
-* Tablet frames
-* Mobile frames
-* Light mode
-* Dark mode
-* Alternate theme examples
-* Loading states
-* Empty states
-* Error states
-* Offline states
-* Form validation
-* Disabled states
-* Hover states
-* Focus states
-* Scanner permission states
-* Responsive behavior
-* Theme tokens
-* Typography
-* Icons
-* Spacing measurements
-* Accessibility notes
-
----
-
-# 46. Design Definition of Done
-
-A page is ready for implementation when:
-
-* The main purpose is clear.
-* The primary action is immediately visible.
-* Light and dark mode are defined.
-* Mobile and desktop layouts are defined.
-* Loading states are included.
-* Empty states are included.
-* Error states are included.
-* Offline behavior is defined.
-* Forms include validation states.
-* Touch targets are large enough.
-* Color contrast is accessible.
-* Important statuses include labels.
-* Sensitive actions require confirmation.
-* Keyboard behavior is documented.
-* Realtime updates have visible feedback.
-* The page matches the E-ParkGO design system.
-
----
-
-# 47. Final Design Direction
-
-E-ParkGO should feel like a premium and dependable parking operations platform.
-
-The final interface should be:
-
-```text
-Clean
-Minimal
-Modern
-Professional
-Responsive
-Organized
-Accessible
-Fast
-Secure
-Operationally clear
-```
-
-Visual appeal must never interfere with staff efficiency.
-
-Every interface decision should support the complete parking journey:
-
-```text
-Vehicle Entry
-→ Parking Assignment
-→ Ticket Generation
-→ Active Session
-→ QR Scanning
-→ Fee Calculation
-→ Payment
-→ Exit Confirmation
-→ Parking-Space Release
-```
-
-The design should make this process feel seamless, reliable, and easy to understand across light mode, dark mode, and future custom themes.
+### 4.11 Motion
+
+Use 120–180ms opacity or transform feedback for hover, press, selection,
+disclosure, and overlay transitions. Avoid layout-property animation, parallax,
+scroll hijacking, repeated entrance choreography, and decorative motion inside
+protected workflows. Under `prefers-reduced-motion`, remove nonessential motion.
+
+## 5. Accessibility, security, reliability, and performance
+
+### 5.1 Accessibility baseline
+
+Target WCAG 2.2 AA and a 44×44px product minimum for operational controls.
+
+Every page must provide:
+
+- a skip link and semantic landmarks;
+- one `h1` and logical heading order;
+- complete keyboard operation and visible focus;
+- text labels for icon-only actions;
+- text or pattern in addition to color;
+- announced form errors and dynamic statuses;
+- focus containment/restoration for overlays;
+- 400% reflow without lost content or function;
+- reduced-motion support;
+- manual scanner fallback;
+- meaningful loading, empty, error, permission, and offline states.
+
+### 5.2 Sensitive-data rules
+
+Never expose or commit:
+
+- raw QR tokens beyond their authorized one-time surface;
+- QR hashes, credentials, cookies, JWTs, passwords, or secret keys;
+- private staff data outside authorized scope;
+- unredacted audit evidence;
+- payment evidence beyond the authorized operational need.
+
+Do not place raw QR payloads in logs, URL paths, screenshots, fixtures, analytics,
+IndexedDB, or persistent client state. Use synthetic local test data only.
+
+### 5.3 Authorization and dangerous actions
+
+Role-aware visibility is an affordance, not authorization. Server checks remain
+mandatory. Permission-denied states reveal no cross-location or sensitive record
+details.
+
+Sensitive actions display the target, consequence, authorization context, and
+required reason. Final payment and final vehicle release remain separate
+transactions and interfaces.
+
+### 5.4 Reliability
+
+Every mutation state distinguishes:
+
+not submitted, pending, succeeded, failed before recording,
+uncertain/interrupted with same-key retry, and conflict because authoritative
+state changed.
+
+Do not optimistically claim success for payment, exit, space release, rate
+publication, staff permission changes, or report exports.
+
+### 5.5 Performance
+
+- Preserve Server Components for authorization and initial data.
+- Limit Client Components to forms, scanner/media APIs, printing, filters,
+  Realtime, connectivity, and required interaction.
+- Avoid sequential request waterfalls; start independent server reads together.
+- Pass minimal serialized data into Client Components.
+- Dynamically load heavy scanner/chart code only where used.
+- Avoid new runtime dependencies, analytics, tracking, external asset sinks, or
+  third-party scripts.
+- Use content visibility or virtualization only for measured long-list needs.
+- Prevent layout shift with size-stable skeletons and media dimensions.
+
+Phase 13 and 14 own release and staging performance evidence. Phase 10A records
+bundle or interaction regressions but must not claim production Web Vitals from
+static inspection.
+
+## 6. Route inventory and page blueprints
+
+Each blueprint lists `status/owner`; primary job and hierarchy; required states,
+constraints, and evidence. Shared shell, accessibility, security, performance,
+and responsive rules from §§4–5 apply to every route.
+
+Authorization follows live server contracts; this is presentation inventory,
+never authorization: `/` is public; auth/recovery routes are for signed-out
+recovery; operational routes are for active `STAFF`/`ADMIN` within live
+location/permission scope; `/spaces` exposes configuration only to admins;
+transactions/reports retain existing view/export permissions; `/admin/*` is
+admin-only unless an existing narrower permission applies; `/offline` follows
+future Phase 11 policy.
+
+### 6.1 Public and authentication
+
+- `/` — `LIVE_REDESIGN`, Phase 10A. Explain the real parking-operations product
+  and lead to staff sign-in through an asymmetric editorial composition, real UI
+  imagery, and supported workflow proof. Exclude equal feature-card rows,
+  gradient CTA bands, vague “serverless” claims, and invented metrics, clients,
+  testimonials, integrations, or pricing. Verify light/dark, keyboard, reduced
+  motion, metadata, links, and 375/768/1440 layouts.
+- `/login`, `/forgot-password`, `/update-password` — `LIVE_REDESIGN`, Phase 10A.
+  Use a calm asymmetric desktop shell and focused single-column mobile form.
+  Reuse current secure auth/recovery behavior; show password requirements,
+  preserve safe input, announce errors, and retain generic anti-enumeration
+  responses. Cover invalid, throttled, sent, expired, mismatch, pending, success,
+  keyboard, and focus states. Exclude social login and decorative feature rows.
+
+### 6.2 Protected shell and dashboard
+
+- Protected shell — `LIVE_REDESIGN`, Phase 10A. Provide compact grouped desktop
+  navigation, an open work area, truthful facility context, a functional
+  identity/role/theme/sign-out menu, and mobile task navigation. Show only
+  implemented, authorized routes. Verify active state, collapse/drawer/bottom
+  navigation, 44px targets, skip link, focus restoration, and absence of dead or
+  fake search/date/notification/promotion controls.
+- `/dashboard` — `LIVE_REDESIGN`, Phase 10A. Prioritize authoritative
+  occupancy/availability, a supporting metric strip, exceptions,
+  movement/settlement, recent activity, and Realtime health. Use an asymmetric
+  desktop grid and ordered mobile sections. Remove hardcoded fallbacks, trends,
+  revenue, static space maps, fake menus, and rainbow KPI cards. Cover loading,
+  zero activity, stale, reconnecting, offline, denied, two-client convergence,
+  and accessible chart alternatives.
+
+### 6.3 Entry, ticket, and scanner
+
+- `/entry` — `LIVE_REDESIGN`, Phase 10A. Use vehicle facts plus an authoritative
+  parking-assignment work surface and one `Create entry` action; desktop is
+  two-zone, mobile is one logical sequence with a safe sticky action. Reuse
+  current schemas/actions/data. Adapt space selection to a keyboard picker only
+  when supported. Exclude owner, phone, notes, reservation, and invented fields.
+  Cover validation, disabled incompatibility/occupancy, duplicate plate, race,
+  pending, success, and retained safe input.
+- `/tickets/[ticketNumber]` — `LIVE_REDESIGN`, Phase 10A. Use a receipt-inspired
+  planar layout, high-contrast QR, tabular facts, facility context, and clear
+  print/reissue actions. Preserve one-time credential and revoke/reissue rules.
+  Verify 80mm/A4, monochrome, quiet zone, page breaks, and screen/print
+  separation. Visual tests assert exactly one `.ticket-print-qr`, mask it, and
+  disable trace/video for credential cases; no artifact may contain the
+  credential. Exclude sharing/download/copy without a secure contract.
+- `/scanner` — `LIVE_REDESIGN`, Phase 10A. Make the camera dominant and manual
+  lookup permanently discoverable. Cover initializing, denied, unsupported, low
+  light, scanning, recognized, invalid, throttled, and completed states. Announce
+  status without harmful focus movement; never persist or expose raw payloads.
+  Verify camera-capable projects, denial, manual fallback, keyboard, reduced
+  motion, and mobile layout.
+- `/verify` — `LIVE_REDESIGN`, Phase 10A. Use a compact transitional
+  progress/failure surface with safe facts and recovery to scanner/manual lookup.
+  Preserve fragment handling/clearing. Cover pending, valid redirect, invalid,
+  expired, revoked, completed, throttled, and unauthorized states.
+
+### 6.4 Exit, payment, and release
+
+- `/exit/[sessionId]` — `LIVE_REDESIGN`, Phase 10A. Show session identity,
+  authoritative time/duration, dominant read-only fee breakdown, quote expiry,
+  and the next permitted action. Distinguish proposed and official exit time;
+  never combine payment and release. Cover quote pending/expired/stale, added
+  amount, lost ticket, correction, completion, and denial.
+- `/payments` — `PHASE_10A_NEW`, Phase 10A. Replace the current no-query
+  not-found outcome with a static surface linking to the existing scanner and
+  sessions routes. Do not add search, lookup, or payment capability.
+- `/payments/[sessionId]` — `LIVE_REDESIGN`, Phase 10A. Present server-provided
+  PHP amount due, shift context, keypad-friendly tender, permitted change
+  preview, static non-interactive `Cash` context, receipt facts, and one
+  `Record payment` action. Cover
+  insufficient cash, missing shift, expired quote, duplicate, top-up,
+  interrupted retry, offline, and denial. Never recompute authoritative fees.
+- `/exit/[sessionId]/confirm` — `LIVE_REDESIGN`, Phase 10A. Keep final release
+  distinct; show paid/receipt context, plate, space, consequence, and one
+  `Confirm exit and release space` action. Cover top-up, stale, already complete,
+  idempotent retry, denial, and success with a next-task route.
+
+### 6.5 Operations and configuration
+
+- `/sessions` — `LIVE_REDESIGN`, Phase 10A. Present the current bounded
+  exception-session result as a compact desktop list/table and mobile records.
+  Do not add filters, search, cursors, or pagination until an owning phase adds
+  that query contract. Emphasize existing payment-pending, review, lost-ticket,
+  and correction states; keep actions permissioned, reasoned, focusable, and
+  resilient to empty/stale/error states.
+- `/spaces` — `LIVE_REDESIGN`, Phase 10A. Use a zone/space board with selection
+  and details. Make available, occupied, accessible, out-of-service, selected,
+  and stale states distinct through text/pattern/icon beyond color. Maintain
+  logical keyboard order and exclude reservations.
+- `/shifts` — `LIVE_REDESIGN`; Phase 10 expands history/reconciliation and Phase
+  10A refines the full surface. Put current shift action before admin history,
+  display server centavo strings with tabular figures, and cover no-open, open,
+  closing, variance, duplicate close, interruption, and denial with audit.
+- `/admin/rates` — `LIVE_REDESIGN`, Phase 10A. Separate draft, preview,
+  published versions, and history with progressive disclosure. Emphasize
+  effective dates, overlap errors, snapshots, vehicle types, and explicit
+  publish/retire consequences.
+- `/admin/staff` — `LIVE_REDESIGN`, Phase 10A. Use a desktop directory and mobile
+  records with one real action menu. Show only authorized name, role, location,
+  status, and safe activity. Surface invite, permission, last-admin,
+  self-elevation, disable/reactivate, and session-revocation consequences.
+- `/admin/settings` — `LIVE_REDESIGN`, Phase 10A. Group facility identity,
+  timezone/business display, receipts, and safe defaults; separate current values
+  from editing. Cover loading, validation, unsaved, saving, saved, conflict,
+  error, and denial. Do not add Phase 12 security settings.
+
+### 6.6 Transactions, reports, and audit
+
+- `/transactions` — `CURRENT_PHASE_NEW`, Phase 10 then Phase 10A regression.
+  Use bounded filters, desktop table, mobile records, and progressive
+  reconciliation detail. Show authorized export processing/success/failure/audit
+  states. Exclude decorative charts and raw evidence. Verify invalid cursor,
+  empty, redaction, denial, stale data, pagination stability, and CSV safety.
+- `/reports` — `CURRENT_PHASE_NEW`, Phase 10 then Phase 10A regression. Use one
+  primary summary, constrained filters, at most one useful visualization, and a
+  reconciliation table. Show units, business date, Asia/Manila timezone,
+  comparison basis, and location scope. Cover no data, oversized range,
+  processing, denial, stale, and error; provide text/table chart equivalents.
+- `/admin/audit` — `CURRENT_PHASE_NEW`, Phase 10 then Phase 10A regression.
+  Present immutable evidence through bounded filters, a compact event table, and
+  a details drawer/inline disclosure. Redact secrets, QR/hash/auth data, and
+  disallowed personal/payment fields. Omit copy/export unless authorized and
+  audited; use color only for defined severity/state.
+
+### 6.7 System and deferred surfaces
+
+- Not found and route errors — `PHASE_10A_NEW`, Phase 10A. Provide a branded,
+  safe message, retry/back/home action, and optional correlation ID without
+  stacks, internal paths, database errors, or sensitive identifiers. Verify
+  focus, keyboard recovery, and offline distinction.
+- `/offline` — `FUTURE_PHASE_DEFERRED`, Phase 11. Specify connection, cache age,
+  allowed read-only content, retry, update, install, and storage-clear guidance.
+  No auth, QR, payment, receipt, audit, admin, or mutation payload cache; disable
+  writes offline. Phase 10A must not implement PWA tooling, workers, or caches.
+- Security surfaces — `FUTURE_PHASE_DEFERRED`, Phase 12. If Phase 12 creates MFA,
+  device, session, or revocation pages, use auth geometry and direct language.
+  Phase 10A must not invent routes, backend capability, or settings.
+- `/auth/callback` and API Route Handlers — `NON_VISUAL`. Preserve redirect,
+  error mapping, validation, and security contracts; user-visible destinations
+  provide safe, actionable outcomes.
+
+## 7. Responsive behavior
+
+Use content behavior, not device labels, to choose breakpoints. Required evidence
+widths are 375px, 768px, and 1440px.
+
+### Mobile
+
+- Single-column task order.
+- 16px page inset.
+- No horizontal page scroll.
+- Sticky actions respect keyboard and safe-area insets.
+- Tables become compact records only when information/action parity remains.
+- Camera, keypad, and print flows are tested on relevant projects.
+
+### Tablet
+
+- 24px inset.
+- Shell may become rail/drawer.
+- Filters may wrap into two aligned rows or a drawer.
+- Two-column composition only where reading and focus order remain logical.
+
+### Desktop
+
+- 28–40px inset and a constrained readable work area.
+- Use asymmetric grids based on task priority, not equal card templates.
+- Long tables may use the available width while descriptions stay constrained.
+- Sticky regions must not cover focus, headings, or table content.
+
+At 400% zoom, content reflows without two-dimensional scrolling except for
+intrinsically tabular content where a labeled scroll region is necessary.
+
+## 8. State language
+
+Use direct, specific wording:
+
+- Loading: describe what is being loaded when delay is meaningful.
+- Empty: explain why no records appear and offer a valid next action.
+- Error: state what failed and how to retry or continue safely.
+- Permission: explain that access is unavailable without exposing the record.
+- Offline: state which reads may be stale and that writes are unavailable.
+- Success: state what was recorded and the next useful task.
+- Conflict: state that the authoritative record changed and refresh the facts.
+
+Avoid “Oops,” exclamation marks, celebratory confetti, blame, and vague
+“Something went wrong” when a safe specific explanation is available.
+
+## 9. Component and dependency rules
+
+- Use Tailwind 4, shadcn/Base UI, existing Lucide icons, Recharts, and current
+  application dependencies.
+- Generated primitives remain under `src/components/ui/**`.
+- Never hand-write shadcn primitive source. Run
+  `npx shadcn@latest add <component>` only for a verified missing primitive.
+- Prefer semantic token refinement in `src/app/globals.css`, existing primitive
+  `className` support, and focused shared/feature compositions.
+- Do not add another UI framework, icon package, font, animation library,
+  analytics SDK, tracking pixel, or external runtime asset dependency.
+- `@axe-core/playwright` may be added as a development dependency only after
+  official compatibility verification in the active Phase 10A step.
+- Keep functions under 50 lines where practical, files focused at 200–400 lines,
+  and no file above 800 lines without an ADR exception.
+
+## 10. Visual QA and regression matrix
+
+### 10.1 Baselines
+
+Capture synthetic-data evidence for each page family:
+
+- light and dark;
+- 375px, 768px, and 1440px;
+- loading, populated, empty, and recoverable error where applicable;
+- permission, stale, offline-disabled, or print states where applicable.
+
+Stable screenshot assertions run in Chromium desktop and mobile Chrome.
+Firefox, WebKit, and mobile Safari perform functional, overflow, and interaction
+checks to avoid engine-specific screenshot noise.
+
+### 10.2 Browser checks
+
+For every critical page:
+
+- no horizontal overflow or clipped content;
+- no obscured sticky action;
+- no accidental layout shift;
+- no uncaught console or hydration error;
+- no unexpected failed request;
+- complete keyboard traversal and visible focus;
+- dialog containment and trigger focus restoration;
+- meaningful screen-reader names, roles, values, and announcements;
+- reduced-motion behavior;
+- light/dark parity.
+
+### 10.3 Security review
+
+Before evidence is committed:
+
+- search fixtures, screenshots, logs, and artifacts for credentials and raw QR
+  material;
+- verify role/location denial and redaction;
+- verify no client recomputation of authoritative values;
+- verify no analytics, tracking, or external asset sink;
+- verify screenshots use synthetic identities and safe financial examples.
+
+## 11. Design Definition of Done
+
+A page is design-complete only when:
+
+- its route, role, job, data authority, and primary action match this contract;
+- it uses semantic tokens and the approved radius/surface system;
+- it contains no fake data, fake affordance, unsupported field, or dead action;
+- desktop, tablet, mobile, light, dark, and 400% reflow are intentional;
+- loading, empty, error, success, permission, stale, and offline states are
+  implemented where applicable;
+- keyboard, focus, screen-reader, contrast, target size, and reduced motion meet
+  the accessibility baseline;
+- sensitive data is minimized and redacted;
+- Server/Client boundaries and all domain contracts remain unchanged unless the
+  owning active phase explicitly authorizes a change;
+- targeted unit/integration/E2E tests pass;
+- visual regression evidence is reviewed;
+- there is no unresolved critical/high accessibility, security, code-review, or
+  silent-failure finding.
+
+## 12. Phase 10A release gate
+
+Only the Phase 10A playbook’s exact gate and append-only evidence may complete
+the phase and activate Phase 11; documentation checks are not app validation.
