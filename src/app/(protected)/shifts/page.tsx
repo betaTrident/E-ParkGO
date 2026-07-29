@@ -1,4 +1,5 @@
 import { ShiftPanel } from '@/features/shifts/components/shift-panel'
+import { ShiftHistoryPanel } from '@/features/shifts/components/shift-history-panel'
 import { getOpenShiftForActor } from '@/features/shifts/service'
 
 export default async function ShiftsPage() {
@@ -14,6 +15,7 @@ export default async function ShiftsPage() {
         </p>
       </header>
       <ShiftPanel openShift={openShift} />
+      <ShiftHistoryPanel />
     </div>
   )
 }

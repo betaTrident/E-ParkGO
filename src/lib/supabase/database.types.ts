@@ -1472,8 +1472,37 @@ export type Database = {
         }
         Returns: Json
       }
+      export_report: {
+        Args: {
+          p_correlation_id: string
+          p_from: string
+          p_idempotency_key: string
+          p_report_type: string
+          p_to: string
+        }
+        Returns: Json
+      }
       get_dashboard_snapshot: {
         Args: { p_business_date?: string }
+        Returns: Json
+      }
+      get_report_preview: {
+        Args: { p_from: string; p_report_type: string; p_to: string }
+        Returns: Json
+      }
+      list_shift_history: {
+        Args: { p_cursor?: string; p_limit?: number }
+        Returns: Json
+      }
+      list_transactions: {
+        Args: {
+          p_cursor?: string
+          p_from: string
+          p_limit?: number
+          p_plate?: string
+          p_status?: string
+          p_to: string
+        }
         Returns: Json
       }
       process_lost_ticket: {
@@ -1502,6 +1531,18 @@ export type Database = {
           p_idempotency_key: string
           p_reason: string
           p_session_id: string
+        }
+        Returns: Json
+      }
+      search_audit_logs: {
+        Args: {
+          p_action?: string
+          p_actor_id?: string
+          p_correlation_id?: string
+          p_cursor?: string
+          p_from: string
+          p_limit?: number
+          p_to: string
         }
         Returns: Json
       }
