@@ -10,12 +10,15 @@ Run only when PLAN.md §0.2 declares CURRENT_PHASE: 10A and Phase 10 is COMPLETE
 - `STATUS: PENDING`; `IMPLEMENTATION_STATE: NOT_STARTED`.
 - `AUTHORIZED_ENVIRONMENT: LOCAL_ONLY`;
   `EXECUTION_MODE: LOCAL_VERIFICATION_AND_REPAIR_ONLY`.
-- Load project skills in order: `redesign-existing-projects`, `design-system`,
-  `frontend-patterns`, `accessibility`, `browser-qa`, `tdd-workflow`,
-  `verification-loop`, `security-review`, `coding-standards`.
+- Load project skills in order: `redesign-existing-projects`, `frontend-design`,
+  `ui-ux-pro-max`, `shadcn`, `enterprise`, `premium-frontend-ui`,
+  `design-system`, `frontend-patterns`, `accessibility`, `browser-qa`,
+  `tdd-workflow`, `verification-loop`, `security-review`, `coding-standards`.
 - Load plugin skills: `v-react-best-practices`, `v-shadcn`,
   `pl-browser-automation`, `sp-executing`, `sp-requesting-review`,
   `c-review-bugbot`, `c-security-review`.
+- Load `gsap-core` / `gsap-react` / `gsap-scrolltrigger` only when Phase 10A
+  motion work requires GSAP.
 - Load `context7-mcp` before uncertain Next.js, React, Playwright, axe, Tailwind,
   Base UI, or shadcn APIs.
 - Required dependency: a linked Phase 10 PASS attempt and `PLAN.md §0.2`

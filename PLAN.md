@@ -80,7 +80,7 @@ Load these skill files with the `Read` tool at the start of each phase. Full pat
 | 8 — Payment/Exit | `backend-patterns`, `security-review`, `supabase` |
 | 9 — Dashboard/RT | `frontend-patterns`, `supabase`, `accessibility` |
 | 10 — Reports | `backend-patterns`, `frontend-patterns`, `design-system`, `accessibility` |
-| 10A — Premium UI/UX | `redesign-existing-projects`, `design-system`, `frontend-patterns`, `accessibility`, `browser-qa`, `tdd-workflow`, `verification-loop`, `security-review`, `coding-standards` |
+| 10A — Premium UI/UX | `redesign-existing-projects`, `frontend-design`, `ui-ux-pro-max`, `shadcn`, `enterprise`, `premium-frontend-ui`, `design-system`, `frontend-patterns`, `accessibility`, `browser-qa`, `tdd-workflow`, `verification-loop`, `security-review`, `coding-standards` |
 | 11 — PWA | `frontend-patterns`, `supabase` |
 | 12 — Hardening | `security-review`, `supabase-postgres-best-practices` |
 | 13 — Tests | `tdd-workflow`, `ai-regression-testing`, `verification-loop` |

@@ -101,7 +101,7 @@ Load skills with the `Read` tool on the listed absolute paths **before writing a
 | 8 | Cash payment & confirmed exit | `backend-patterns`, `security-review`, `supabase` | `plug-supabase`, `sp-executing` |
 | 9 | Dashboard & Realtime | `frontend-patterns`, `supabase`, `accessibility` | `v-react-best-practices`, `v-next-cache-components`, `plug-supabase`, `c-canvas` |
 | 10 | Reports & audit | `backend-patterns`, `frontend-patterns`, `design-system`, `accessibility` | `v-react-best-practices`, `c-canvas` |
-| 10A | Premium UI/UX refinement | `redesign-existing-projects`, `design-system`, `frontend-patterns`, `accessibility`, `browser-qa`, `tdd-workflow`, `verification-loop`, `security-review`, `coding-standards` | `v-react-best-practices`, `v-shadcn`, `pl-browser-automation`, `sp-executing`, `sp-requesting-review`, `c-review-bugbot`, `c-security-review` |
+| 10A | Premium UI/UX refinement | `redesign-existing-projects`, `frontend-design`, `ui-ux-pro-max`, `shadcn`, `enterprise`, `premium-frontend-ui`, `design-system`, `frontend-patterns`, `accessibility`, `browser-qa`, `tdd-workflow`, `verification-loop`, `security-review`, `coding-standards` | `v-react-best-practices`, `v-shadcn`, `pl-browser-automation`, `sp-executing`, `sp-requesting-review`, `c-review-bugbot`, `c-security-review` |
 | 11 | PWA & offline | `frontend-patterns`, `supabase` | `v-runtime-cache`, `v-next-cache-components` |
 | 12 | Security hardening | `security-review`, `supabase-postgres-best-practices` | `plug-supabase-pg`, `c-security-review` |
 | 13 | Release test suite | `tdd-workflow`, `ai-regression-testing`, `verification-loop` | `pl-browser-automation`, `c-review-bugbot`, `sp-finish-branch`, `v-verification` |
@@ -129,6 +129,9 @@ These skills apply broadly across multiple phases. Load them whenever the named 
 | Checking progress across phases | `c-statusline` |
 | Security review before any commit | `c-security-review` |
 | Bug detection after any implementation phase | `c-review-bugbot` |
+| GSAP / scroll / React motion work | `gsap-core`, `gsap-react`, `gsap-scrolltrigger` |
+| Landing / marketing anti-slop UI (not ops dashboards) | `design-taste-frontend` (`taste-skill`) |
+| Minimalist or industrial-brutalist aesthetic briefs | `minimalist-ui`, `industrial-brutalist-ui` |
 
 ---
 
@@ -151,6 +154,17 @@ These skills apply broadly across multiple phases. Load them whenever the named 
 | `backend-patterns` | `k:\E-ParkGO\.agents\skills\backend-patterns\SKILL.md` |
 | `api-design` | `k:\E-ParkGO\.agents\skills\api-design\SKILL.md` |
 | `frontend-patterns` | `k:\E-ParkGO\.agents\skills\frontend-patterns\SKILL.md` |
+| `frontend-design` | `k:\E-ParkGO\.agents\skills\frontend-design\SKILL.md` |
+| `ui-ux-pro-max` | `k:\E-ParkGO\.agents\skills\ui-ux-pro-max\SKILL.md` |
+| `shadcn` | `k:\E-ParkGO\.agents\skills\shadcn\SKILL.md` |
+| `enterprise` | `k:\E-ParkGO\.agents\skills\enterprise\SKILL.md` |
+| `premium-frontend-ui` | `k:\E-ParkGO\.agents\skills\premium-frontend-ui\SKILL.md` |
+| `gsap-core` | `k:\E-ParkGO\.agents\skills\gsap-core\SKILL.md` |
+| `gsap-react` | `k:\E-ParkGO\.agents\skills\gsap-react\SKILL.md` |
+| `gsap-scrolltrigger` | `k:\E-ParkGO\.agents\skills\gsap-scrolltrigger\SKILL.md` |
+| `design-taste-frontend` | `k:\E-ParkGO\.agents\skills\taste-skill\SKILL.md` |
+| `minimalist-ui` | `k:\E-ParkGO\.agents\skills\minimalist-skill\SKILL.md` |
+| `industrial-brutalist-ui` | `k:\E-ParkGO\.agents\skills\brutalist-skill\SKILL.md` |
 | `security-review` | `k:\E-ParkGO\.agents\skills\security-review\SKILL.md` |
 | `accessibility` | `k:\E-ParkGO\.agents\skills\accessibility\SKILL.md` |
 | `ai-regression-testing` | `k:\E-ParkGO\.agents\skills\ai-regression-testing\SKILL.md` |
