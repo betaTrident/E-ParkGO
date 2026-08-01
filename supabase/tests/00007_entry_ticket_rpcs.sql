@@ -1,11 +1,11 @@
 begin;
 
-select plan(32);
+select plan(31);
 
 select has_function(
   'public',
   'create_parking_entry',
-  array['text', 'uuid', 'text', 'uuid', 'uuid', 'uuid']
+  array['text', 'uuid', 'text', 'uuid', 'uuid']
 );
 select has_function(
   'public',
@@ -21,7 +21,6 @@ select throws_ok(
     'ABC1234',
     '33333333-3333-4333-8333-333333333331'::uuid,
     'Blue',
-    '44444444-4444-4444-8444-444444444441'::uuid,
     '11111111-1111-4111-8111-111111111112'::uuid,
     '11111111-1111-4111-8111-111111111113'::uuid
   ) $$,
@@ -43,7 +42,6 @@ select throws_ok(
     'A',
     '33333333-3333-4333-8333-333333333331'::uuid,
     null,
-    '44444444-4444-4444-8444-444444444441'::uuid,
     '11111111-1111-4111-8111-111111111114'::uuid,
     '11111111-1111-4111-8111-111111111115'::uuid
   ) $$,
@@ -59,7 +57,6 @@ select isnt(
       'abc-1234',
       '33333333-3333-4333-8333-333333333331'::uuid,
       'Blue',
-      '44444444-4444-4444-8444-444444444441'::uuid,
       'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'::uuid,
       'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01'::uuid
     )->>'qr_payload')
@@ -73,7 +70,6 @@ select lives_ok(
     'abc-1234',
     '33333333-3333-4333-8333-333333333331'::uuid,
     'Blue',
-    '44444444-4444-4444-8444-444444444441'::uuid,
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'::uuid,
     'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01'::uuid
   ) $$,
@@ -86,7 +82,6 @@ select is(
       'abc-1234',
       '33333333-3333-4333-8333-333333333331'::uuid,
       'Blue',
-      '44444444-4444-4444-8444-444444444441'::uuid,
       'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'::uuid,
       'cccccccc-cccc-4ccc-8ccc-cccccccccc01'::uuid
     )->>'credential_recovery')
@@ -101,7 +96,6 @@ select is(
       'abc-1234',
       '33333333-3333-4333-8333-333333333331'::uuid,
       'Blue',
-      '44444444-4444-4444-8444-444444444441'::uuid,
       'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'::uuid,
       'cccccccc-cccc-4ccc-8ccc-cccccccccc01'::uuid
     )->>'qr_payload')
@@ -115,7 +109,6 @@ select throws_ok(
     'abc-1234',
     '33333333-3333-4333-8333-333333333331'::uuid,
     'Red',
-    '44444444-4444-4444-8444-444444444442'::uuid,
     'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01'::uuid,
     'dddddddd-dddd-4ddd-8ddd-dddddddddd01'::uuid
   ) $$,
@@ -147,22 +140,25 @@ select is(
   'vehicle row reused for same normalized plate'
 );
 
--- Occupied space and session side effects
+-- Pool entry session side effects (no physical space assignment)
 select is(
   (
-    select status::text
-    from public.parking_spaces
-    where id = '44444444-4444-4444-8444-444444444441'
+    select ps.parking_space_id
+    from public.parking_sessions ps
+    join public.vehicles v on v.id = ps.vehicle_id
+    where v.normalized_plate_number = 'ABC1234'
+      and ps.status = 'ACTIVE'
   ),
-  'OCCUPIED',
-  'space marked occupied after entry'
+  null,
+  'pool entry leaves parking_space_id null'
 );
 
 select isnt_empty(
   $$ select 1
      from public.parking_sessions ps
+     join public.vehicles v on v.id = ps.vehicle_id
      join public.parking_rate_snapshots prs on prs.parking_session_id = ps.id
-     where ps.parking_space_id = '44444444-4444-4444-8444-444444444441'
+     where v.normalized_plate_number = 'ABC1234'
        and ps.status = 'ACTIVE' $$,
   'entry stores immutable rate snapshot'
 );
@@ -171,7 +167,8 @@ select isnt_empty(
   $$ select 1
      from public.parking_tickets pt
      join public.parking_sessions ps on ps.id = pt.parking_session_id
-     where ps.parking_space_id = '44444444-4444-4444-8444-444444444441'
+     join public.vehicles v on v.id = ps.vehicle_id
+     where v.normalized_plate_number = 'ABC1234'
        and pt.status = 'ACTIVE'
        and octet_length(pt.qr_token_hash) = 32 $$,
   'ticket stores 32-byte qr hash only'
@@ -203,7 +200,6 @@ select throws_ok(
     'ABC-1234',
     '33333333-3333-4333-8333-333333333331'::uuid,
     null,
-    '44444444-4444-4444-8444-444444444442'::uuid,
     'eeeeeeee-eeee-4eee-8eee-eeeeeeeeee01'::uuid,
     'ffffffff-ffff-4fff-8fff-ffffffffff01'::uuid
   ) $$,
@@ -212,34 +208,18 @@ select throws_ok(
   'duplicate active session for same plate rejected'
 );
 
--- Space unavailable
+-- Inactive or unknown vehicle type rejected
 select throws_ok(
   $$ select public.create_parking_entry(
     'XYZ9876',
-    '33333333-3333-4333-8333-333333333331'::uuid,
+    '99999999-9999-4999-8999-999999999991'::uuid,
     null,
-    '44444444-4444-4444-8444-444444444441'::uuid,
     'eeeeeeee-eeee-4eee-8eee-eeeeeeeeee02'::uuid,
     'ffffffff-ffff-4fff-8fff-ffffffffff02'::uuid
   ) $$,
   'P0001',
   'SPACE_NOT_AVAILABLE',
-  'occupied space rejected'
-);
-
--- Incompatible vehicle type for dedicated space
-select throws_ok(
-  $$ select public.create_parking_entry(
-    'MOTO123',
-    '33333333-3333-4333-8333-333333333331'::uuid,
-    null,
-    '44444444-4444-4444-8444-444444444443'::uuid,
-    'eeeeeeee-eeee-4eee-8eee-eeeeeeeeee03'::uuid,
-    'ffffffff-ffff-4fff-8fff-ffffffffff03'::uuid
-  ) $$,
-  'P0001',
-  'SPACE_NOT_AVAILABLE',
-  'incompatible vehicle type for space rejected'
+  'unknown vehicle type rejected'
 );
 
 -- Missing published rate for vehicle type
@@ -248,7 +228,6 @@ select throws_ok(
     'NORATE1',
     '33333333-3333-4333-8333-333333333332'::uuid,
     null,
-    '44444444-4444-4444-8444-444444444443'::uuid,
     'eeeeeeee-eeee-4eee-8eee-eeeeeeeeee04'::uuid,
     'ffffffff-ffff-4fff-8fff-ffffffffff04'::uuid
   ) $$,
@@ -305,7 +284,6 @@ select is(
           'TOKTEST',
           '33333333-3333-4333-8333-333333333332'::uuid,
           null,
-          '44444444-4444-4444-8444-444444444443'::uuid,
           '12121212-1212-4212-8212-121212121201'::uuid,
           '13131313-1313-4313-8313-131313131301'::uuid
         )->>'qr_payload'),
@@ -345,7 +323,8 @@ select isnt(
       (
         select ps.id
         from public.parking_sessions ps
-        where ps.parking_space_id = '44444444-4444-4444-8444-444444444441'
+        join public.vehicles v on v.id = ps.vehicle_id
+        where v.normalized_plate_number = 'ABC1234'
         limit 1
       ),
       'Ticket damaged during print',
@@ -362,7 +341,8 @@ select lives_ok(
     (
       select ps.id
       from public.parking_sessions ps
-      where ps.parking_space_id = '44444444-4444-4444-8444-444444444441'
+      join public.vehicles v on v.id = ps.vehicle_id
+    where v.normalized_plate_number = 'ABC1234'
       limit 1
     ),
     'Ticket damaged during print',
@@ -377,7 +357,8 @@ select is(
     select count(*)::integer
     from public.parking_tickets pt
     join public.parking_sessions ps on ps.id = pt.parking_session_id
-    where ps.parking_space_id = '44444444-4444-4444-8444-444444444441'
+    join public.vehicles v on v.id = ps.vehicle_id
+    where v.normalized_plate_number = 'ABC1234'
       and pt.status = 'REVOKED'
   ),
   1,
@@ -389,7 +370,8 @@ select is(
     select count(*)::integer
     from public.parking_tickets pt
     join public.parking_sessions ps on ps.id = pt.parking_session_id
-    where ps.parking_space_id = '44444444-4444-4444-8444-444444444441'
+    join public.vehicles v on v.id = ps.vehicle_id
+    where v.normalized_plate_number = 'ABC1234'
       and pt.status = 'ACTIVE'
   ),
   1,
@@ -401,7 +383,8 @@ select ok(
     select count(distinct pt.ticket_number)
     from public.parking_tickets pt
     join public.parking_sessions ps on ps.id = pt.parking_session_id
-    where ps.parking_space_id = '44444444-4444-4444-8444-444444444441'
+    join public.vehicles v on v.id = ps.vehicle_id
+    where v.normalized_plate_number = 'ABC1234'
   ) >= 2,
   'reissue creates a distinct ticket number'
 );
@@ -411,7 +394,8 @@ select ok(
     select count(distinct pt.qr_token_hash)
     from public.parking_tickets pt
     join public.parking_sessions ps on ps.id = pt.parking_session_id
-    where ps.parking_space_id = '44444444-4444-4444-8444-444444444441'
+    join public.vehicles v on v.id = ps.vehicle_id
+    where v.normalized_plate_number = 'ABC1234'
   ) >= 2,
   'reissue creates a distinct qr hash'
 );
@@ -422,7 +406,8 @@ select is(
       (
         select ps.id
         from public.parking_sessions ps
-        where ps.parking_space_id = '44444444-4444-4444-8444-444444444441'
+        join public.vehicles v on v.id = ps.vehicle_id
+        where v.normalized_plate_number = 'ABC1234'
         limit 1
       ),
       'Ticket damaged during print',
@@ -457,7 +442,7 @@ select set_config(
 select ok(
   has_function_privilege(
     'authenticated',
-    'public.create_parking_entry(text,uuid,text,uuid,uuid,uuid)',
+    'public.create_parking_entry(text,uuid,text,uuid,uuid)',
     'EXECUTE'
   ),
   'authenticated can execute create_parking_entry'
@@ -466,7 +451,7 @@ select ok(
 select ok(
   not has_function_privilege(
     'anon',
-    'public.create_parking_entry(text,uuid,text,uuid,uuid,uuid)',
+    'public.create_parking_entry(text,uuid,text,uuid,uuid)',
     'EXECUTE'
   ),
   'anon cannot execute create_parking_entry'

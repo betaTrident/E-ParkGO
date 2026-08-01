@@ -51,3 +51,43 @@ export const exitPreviewResultSchema = z.object({
 })
 
 export type ExitPreviewResult = z.infer<typeof exitPreviewResultSchema>
+
+const settleForbiddenFields = [
+  ...forbiddenExitFields,
+  'payment_id',
+  'paymentId',
+  'receipt_number',
+  'receiptNumber',
+  'exit_time',
+  'exitTime',
+] as const
+
+export function containsForbiddenSettleField(input: Record<string, unknown>): boolean {
+  return settleForbiddenFields.some((field) => field in input)
+}
+
+export const settleCashAndExitRequestSchema = z
+  .object({
+    session_id: z.uuid('Session id is required'),
+    cash_tendered_centavos: centavosSchema,
+    external_reference: z.string().min(1).max(64).optional(),
+    idempotency_key: z.uuid('Idempotency key is required'),
+    correlation_id: z.uuid().optional(),
+  })
+  .strict()
+
+export type SettleCashAndExitRequestInput = z.infer<typeof settleCashAndExitRequestSchema>
+
+export const settleCashAndExitResultSchema = z.object({
+  session_id: z.uuid(),
+  exit_time: z.string(),
+  session_status: z.literal('COMPLETED'),
+  released_space_id: z.uuid().nullable(),
+  payment_id: z.uuid().nullable(),
+  receipt_number: z.string().nullable(),
+  amount_centavos: centavosSchema.nullable(),
+  cash_tendered_centavos: centavosSchema.nullable(),
+  change_centavos: centavosSchema.nullable(),
+})
+
+export type SettleCashAndExitResult = z.infer<typeof settleCashAndExitResultSchema>

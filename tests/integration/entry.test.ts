@@ -62,59 +62,25 @@ describe('entry integration', () => {
     })
 
     const vehicleTypeId = '33333333-3333-4333-8333-333333333331'
-    const locationId = '11111111-1111-4111-8111-111111111111'
-
-    const { data: spaces } = await client
-      .from('parking_spaces')
-      .select('id')
-      .eq('parking_location_id', locationId)
-      .eq('vehicle_type_id', vehicleTypeId)
-      .eq('status', 'AVAILABLE')
-      .eq('is_active', true)
-      .limit(20)
-
-    if (!spaces?.length) {
-      context.skip()
-      return
-    }
-
     const idempotencyKey = crypto.randomUUID()
     const correlationId = crypto.randomUUID()
     const plate = `INT${Date.now().toString().slice(-6)}`
 
-    let first: Awaited<ReturnType<typeof client.rpc>> | null = null
-    let spaceId: string | null = null
-
-    for (const space of spaces) {
-      const attempt = await client.rpc('create_parking_entry', {
-        p_plate: plate,
-        p_vehicle_type_id: vehicleTypeId,
-        p_color: 'Blue',
-        p_space_id: space.id,
-        p_idempotency_key: idempotencyKey,
-        p_correlation_id: correlationId,
-      })
-
-      if (!attempt.error) {
-        first = attempt
-        spaceId = space.id
-        break
-      }
-    }
-
-    if (!first || !spaceId) {
-      context.skip()
-      return
-    }
+    const first = await client.rpc('create_parking_entry', {
+      p_plate: plate,
+      p_vehicle_type_id: vehicleTypeId,
+      p_color: null,
+      p_idempotency_key: idempotencyKey,
+      p_correlation_id: correlationId,
+    })
 
     expect(first.error).toBeNull()
     expect(first.data?.qr_payload).toBeTruthy()
 
     const replay = await client.rpc('create_parking_entry', {
       p_plate: plate,
-      p_vehicle_type_id: '33333333-3333-4333-8333-333333333331',
-      p_color: 'Blue',
-      p_space_id: spaceId,
+      p_vehicle_type_id: vehicleTypeId,
+      p_color: null,
       p_idempotency_key: idempotencyKey,
       p_correlation_id: crypto.randomUUID(),
     })

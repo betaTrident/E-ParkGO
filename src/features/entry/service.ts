@@ -32,6 +32,10 @@ function mapEntryRpcError(error: { message: string } | null): string {
     return 'This vehicle already has an active parking session.'
   }
 
+  if (message.includes('CAPACITY_FULL')) {
+    return 'No free parking spaces left for this vehicle type.'
+  }
+
   if (message.includes('SPACE_NOT_AVAILABLE')) {
     return 'The selected space is not available.'
   }
@@ -78,8 +82,7 @@ export async function createParkingEntry(
   const { data, error } = await supabase.rpc('create_parking_entry', {
     p_plate: input.plate_number,
     p_vehicle_type_id: input.vehicle_type_id,
-    p_color: input.color ?? null,
-    p_space_id: input.parking_space_id,
+    p_color: null,
     p_idempotency_key: input.idempotency_key,
     p_correlation_id: input.correlation_id ?? randomUUID(),
   })

@@ -1,55 +1,96 @@
 "use client";
 
-import { ChevronDown, Info, TrendingUp } from "lucide-react";
 import { Cell, Pie, PieChart, ResponsiveContainer } from "recharts";
-import type { DashboardZoneSnapshot } from "@/features/dashboard/types";
+import type { DashboardMetrics } from "@/features/dashboard/types";
 
 interface OccupancyOverviewProps {
-  zones?: DashboardZoneSnapshot[] | undefined;
+  metrics?: DashboardMetrics | undefined;
 }
 
-const fallbackData = [
-  { name: "Available", value: 342, percentage: "47.5%", color: "#34D399" },
-  { name: "Occupied", value: 268, percentage: "37.2%", color: "#F87171" },
-  { name: "Reserved", value: 68, percentage: "9.4%", color: "#FBBF24" },
-  { name: "Maintenance", value: 42, percentage: "5.8%", color: "#9CA3AF" },
-];
+function buildChartData(metrics: DashboardMetrics) {
+  const carFree = Math.max(metrics.car_capacity - metrics.car_occupied, 0);
+  const motorcycleFree = Math.max(
+    metrics.motorcycle_capacity - metrics.motorcycle_occupied,
+    0,
+  );
+  const totalCapacity = metrics.car_capacity + metrics.motorcycle_capacity;
+  const totalOccupied = metrics.car_occupied + metrics.motorcycle_occupied;
+  const totalFree = carFree + motorcycleFree;
 
-export function OccupancyOverview({ zones }: OccupancyOverviewProps) {
-  const totalSpaces = zones?.length
-    ? zones.reduce((acc, z) => acc + z.total_spaces, 0)
-    : 720;
+  const toPercent = (value: number) =>
+    totalCapacity > 0 ? `${((value / totalCapacity) * 100).toFixed(1)}%` : "0.0%";
+
+  return {
+    totalCapacity,
+    occupancyRate:
+      totalCapacity > 0
+        ? `${((totalOccupied / totalCapacity) * 100).toFixed(1)}%`
+        : "0.0%",
+    segments: [
+      {
+        name: "Cars free",
+        value: carFree,
+        percentage: toPercent(carFree),
+        color: "#34D399",
+      },
+      {
+        name: "Motorcycles free",
+        value: motorcycleFree,
+        percentage: toPercent(motorcycleFree),
+        color: "#60A5FA",
+      },
+      {
+        name: "Cars occupied",
+        value: metrics.car_occupied,
+        percentage: toPercent(metrics.car_occupied),
+        color: "#F87171",
+      },
+      {
+        name: "Motorcycles occupied",
+        value: metrics.motorcycle_occupied,
+        percentage: toPercent(metrics.motorcycle_occupied),
+        color: "#FBBF24",
+      },
+    ].filter((segment) => segment.value > 0),
+    summary: { carFree, motorcycleFree, totalFree, totalOccupied },
+  };
+}
+
+export function OccupancyOverview({ metrics }: OccupancyOverviewProps) {
+  if (!metrics) {
+    return (
+      <section
+        aria-label="Occupancy Overview"
+        className="rounded-md border border-slate-200/80 bg-white p-5 text-sm text-slate-500 shadow-xs dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400"
+      >
+        Pool occupancy data is temporarily unavailable.
+      </section>
+    );
+  }
+
+  const chart = buildChartData(metrics);
+  const chartData =
+    chart.segments.length > 0
+      ? chart.segments
+      : [{ name: "Empty", value: 1, percentage: "0.0%", color: "#E2E8F0" }];
 
   return (
     <section
       aria-label="Occupancy Overview"
       className="flex flex-col justify-between rounded-md border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
     >
-      {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
-            Occupancy Overview
-          </h2>
-          <Info aria-hidden="true" className="size-4 text-slate-400" />
-        </div>
-        <button
-          type="button"
-          className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
-        >
-          <span>All Levels</span>
-          <ChevronDown className="size-3.5 text-slate-500" />
-        </button>
+        <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
+          Pool occupancy
+        </h2>
       </div>
 
-      {/* Main Content: Donut + Legend */}
       <div className="mt-4 flex flex-col items-center justify-between gap-6 sm:flex-row">
-        {/* Donut Chart with Center Label */}
         <div className="relative flex size-52 shrink-0 items-center justify-center">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={fallbackData}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={65}
@@ -60,7 +101,7 @@ export function OccupancyOverview({ zones }: OccupancyOverviewProps) {
                 dataKey="value"
                 stroke="none"
               >
-                {fallbackData.map((entry) => (
+                {chartData.map((entry) => (
                   <Cell key={entry.name} fill={entry.color} />
                 ))}
               </Pie>
@@ -68,18 +109,17 @@ export function OccupancyOverview({ zones }: OccupancyOverviewProps) {
           </ResponsiveContainer>
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
             <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
-              Total Spaces
+              Total capacity
             </span>
             <span className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              {totalSpaces}
+              {chart.totalCapacity}
             </span>
-            <span className="text-[11px] text-slate-400">100%</span>
+            <span className="text-[11px] text-slate-400">{chart.occupancyRate} occupied</span>
           </div>
         </div>
 
-        {/* Legend List */}
         <div className="w-full flex-1 space-y-3">
-          {fallbackData.map((item) => (
+          {chart.segments.map((item) => (
             <div
               key={item.name}
               className="flex items-center justify-between text-xs"
@@ -103,41 +143,20 @@ export function OccupancyOverview({ zones }: OccupancyOverviewProps) {
               </div>
             </div>
           ))}
-
-          {/* Render Active Zones from props if available */}
-          {zones && zones.length > 0 ? (
-            <div className="mt-3 border-t border-slate-100 pt-2 text-xs dark:border-slate-800">
-              <span className="text-[11px] font-semibold text-slate-400">Active Zones:</span>
-              <div className="mt-1 flex flex-wrap gap-2">
-                {zones.map((zone) => (
-                  <span
-                    key={zone.zone_id}
-                    className="inline-flex items-center gap-1 rounded bg-slate-100 px-2 py-0.5 font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-300"
-                  >
-                    <span>{zone.zone_name}</span>
-                    <span className="text-slate-400">({zone.zone_code})</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          ) : null}
         </div>
       </div>
 
-      {/* Footer summary bar */}
       <div className="mt-6 flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
-            Occupancy Rate
+            Occupancy rate
           </span>
           <span className="text-base font-extrabold text-blue-600 dark:text-blue-400">
-            52.5%
+            {chart.occupancyRate}
           </span>
         </div>
-        <div className="flex items-center gap-1 rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400">
-          <TrendingUp className="size-3.5" />
-          <span>6.8%</span>
-          <span className="font-normal text-emerald-600/80">vs yesterday</span>
+        <div className="text-xs font-medium text-slate-600 dark:text-slate-300">
+          {chart.summary.totalFree} free · {chart.summary.totalOccupied} occupied
         </div>
       </div>
     </section>

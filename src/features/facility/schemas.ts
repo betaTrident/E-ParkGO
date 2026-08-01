@@ -28,6 +28,21 @@ export const facilitySettingsSchema = z
 
 export type FacilitySettingsInput = z.infer<typeof facilitySettingsSchema>
 
+export const capacitySchema = z
+  .object({
+    carCapacity: z.coerce
+      .number()
+      .int('Car capacity must be a whole number')
+      .min(0, 'Car capacity cannot be negative'),
+    motorcycleCapacity: z.coerce
+      .number()
+      .int('Motorcycle capacity must be a whole number')
+      .min(0, 'Motorcycle capacity cannot be negative'),
+  })
+  .strict()
+
+export type CapacityInput = z.infer<typeof capacitySchema>
+
 export const forbiddenFacilityFields = [
   'actor_id',
   'actorId',

@@ -61,52 +61,19 @@ describe('payment and exit integration', () => {
       refresh_token: 'integration-refresh-token',
     })
 
-    await client.rpc('start_staff_shift', {
-      p_device_id: null,
-      p_opening_float_centavos: 0,
+    const vehicleTypeId = '33333333-3333-4333-8333-333333333331'
+
+    const plate = `PE${Date.now().toString().slice(-6)}`
+    const entry = await client.rpc('create_parking_entry', {
+      p_plate: plate,
+      p_vehicle_type_id: vehicleTypeId,
+      p_color: null,
+      p_space_id: null,
       p_idempotency_key: crypto.randomUUID(),
       p_correlation_id: crypto.randomUUID(),
     })
 
-    const vehicleTypeId = '33333333-3333-4333-8333-333333333331'
-    const locationId = '11111111-1111-4111-8111-111111111111'
-
-    const { data: spaces } = await client
-      .from('parking_spaces')
-      .select('id')
-      .eq('parking_location_id', locationId)
-      .eq('vehicle_type_id', vehicleTypeId)
-      .eq('status', 'AVAILABLE')
-      .eq('is_active', true)
-      .limit(20)
-
-    if (!spaces?.length) {
-      context.skip()
-      return
-    }
-
-    const plate = `PE${Date.now().toString().slice(-6)}`
-    let entry = null as Awaited<ReturnType<typeof client.rpc>> | null
-    let spaceId: string | null = null
-
-    for (const space of spaces) {
-      const attempt = await client.rpc('create_parking_entry', {
-        p_plate: plate,
-        p_vehicle_type_id: vehicleTypeId,
-        p_color: null,
-        p_space_id: space.id,
-        p_idempotency_key: crypto.randomUUID(),
-        p_correlation_id: crypto.randomUUID(),
-      })
-
-      if (!attempt.error) {
-        entry = attempt
-        spaceId = space.id
-        break
-      }
-    }
-
-    if (!entry || !spaceId) {
+    if (entry.error) {
       context.skip()
       return
     }

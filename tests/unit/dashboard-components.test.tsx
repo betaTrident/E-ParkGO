@@ -12,6 +12,10 @@ const metrics: DashboardMetrics = {
   out_of_service_spaces: 1,
   operational_capacity: 11,
   occupancy_basis_points: 2727,
+  car_capacity: 8,
+  car_occupied: 2,
+  motorcycle_capacity: 4,
+  motorcycle_occupied: 1,
   active_sessions: 3,
   payment_pending_sessions: 1,
   paid_awaiting_exit_sessions: 0,
@@ -27,7 +31,7 @@ describe("dashboard components", () => {
     render(<MetricGrid metrics={metrics} />);
 
     expect(screen.getByRole("region", { name: "Operational metrics" })).toBeInTheDocument();
-    expect(screen.getByText("Active sessions")).toBeInTheDocument();
+    expect(screen.getByText("Cars free")).toBeInTheDocument();
     expect(screen.getByText("27.3%")).toBeInTheDocument();
   });
 

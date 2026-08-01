@@ -50,8 +50,8 @@ export function FeeBreakdown({
 }: FeeBreakdownProps) {
   const statusLabel =
     preview.status === 'PAID_AWAITING_EXIT'
-      ? 'No payment required'
-      : 'Payment pending'
+      ? 'No payment required — cash only at exit'
+      : 'Cash payment due at exit'
 
   return (
     <section
@@ -63,7 +63,8 @@ export function FeeBreakdown({
           Fee preview
         </h2>
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Authoritative quote from the facility rate snapshot. Totals cannot be edited.
+          Authoritative quote from the facility rate snapshot. Cash only at exit — totals cannot be
+          edited.
         </p>
       </header>
 

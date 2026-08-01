@@ -78,7 +78,7 @@ export async function getTicketPrintFacts(
         status,
         parking_location_id,
         vehicles!inner (display_plate_number, vehicle_types!inner (code)),
-        parking_spaces!inner (code, parking_zones!inner (code))
+        parking_spaces (code, parking_zones (code))
       )
     `,
     )
@@ -104,7 +104,7 @@ export async function getTicketPrintFacts(
     ? space.parking_zones[0]
     : space?.parking_zones
 
-  if (!session || !vehicle || !space || !zone) {
+  if (!session || !vehicle) {
     return null
   }
 
@@ -113,8 +113,8 @@ export async function getTicketPrintFacts(
     entry_time: session.entry_time,
     display_plate_number: vehicle.display_plate_number,
     vehicle_type_code: vehicleType?.code ?? '',
-    space_code: space.code,
-    zone_code: zone.code,
+    space_code: space?.code ?? '',
+    zone_code: zone?.code ?? '',
     status: data.status,
     qr_payload: null,
   }

@@ -29,6 +29,7 @@ function mapPaymentRpcError(error: { message: string } | null): {
     ['INSUFFICIENT_CASH', 'Cash tendered is less than the amount due.', 'INSUFFICIENT_CASH'],
     ['PAYMENT_ALREADY_RECORDED', 'Payment was already recorded for this session.', 'PAYMENT_ALREADY_RECORDED'],
     ['SESSION_CANCELLED', 'This session was cancelled.', 'SESSION_CANCELLED'],
+    // Legacy: shift gate removed in Phase S2; retained for backward-compatible error mapping.
     ['SHIFT_REQUIRED', 'Open a cash shift before recording payments.', 'SHIFT_REQUIRED'],
     ['DUPLICATE_PAYMENT_REFERENCE', 'That payment reference was already used.', 'DUPLICATE_PAYMENT_REFERENCE'],
     ['PAYMENT_REQUIRED', 'Additional payment is required before exit.', 'PAYMENT_REQUIRED'],

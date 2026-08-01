@@ -84,6 +84,9 @@ export function RateVersionList({ rates }: RateVersionListProps) {
                   {rate.mode === "FLAT"
                     ? formatCentavosPhp(rate.flat_fee_centavos ?? "0")
                     : `${formatCentavosPhp(rate.initial_fee_centavos ?? "0")} + ${formatCentavosPhp(rate.succeeding_fee_centavos ?? "0")}/interval`}
+                  <span className="mt-1 block text-xs text-slate-500">
+                    Lost ticket penalty: {formatCentavosPhp(rate.lost_ticket_penalty_centavos ?? "0")}
+                  </span>
                 </TableCell>
                 <TableCell className="text-sm">{formatWindow(rate)}</TableCell>
                 <TableCell>

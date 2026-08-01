@@ -7,6 +7,10 @@ export interface DashboardMetrics {
   out_of_service_spaces: number
   operational_capacity: number
   occupancy_basis_points: number
+  car_capacity: number
+  car_occupied: number
+  motorcycle_capacity: number
+  motorcycle_occupied: number
   active_sessions: number
   payment_pending_sessions: number
   paid_awaiting_exit_sessions: number

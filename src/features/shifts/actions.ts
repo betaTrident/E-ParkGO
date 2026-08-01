@@ -1,3 +1,4 @@
+/** @deprecated Shift open/close is retired for ops simplification (Phase S2). Payments no longer require an open shift. */
 'use server'
 
 import { revalidatePath } from 'next/cache'

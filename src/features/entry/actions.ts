@@ -38,8 +38,6 @@ export async function createEntryAction(
   const parsed = entryFormSchema.safeParse({
     plateNumber: formData.get('plateNumber'),
     vehicleTypeId: formData.get('vehicleTypeId'),
-    color: formData.get('color') || undefined,
-    parkingSpaceId: formData.get('parkingSpaceId'),
   })
 
   if (!parsed.success) {
@@ -54,7 +52,7 @@ export async function createEntryAction(
   }
 
   const forbidden = Object.keys(toFormRecord(formData)).some((key) =>
-    ['actorId', 'locationId', 'entryTime', 'status', 'totalCentavos'].includes(key),
+    ['actorId', 'locationId', 'entryTime', 'status', 'totalCentavos', 'color', 'parkingSpaceId'].includes(key),
   )
 
   if (forbidden) {
@@ -64,8 +62,6 @@ export async function createEntryAction(
   const result = await createParkingEntry({
     plate_number: parsed.data.plateNumber,
     vehicle_type_id: parsed.data.vehicleTypeId,
-    color: parsed.data.color,
-    parking_space_id: parsed.data.parkingSpaceId,
     idempotency_key: idempotencyKey,
     correlation_id: randomUUID(),
   })

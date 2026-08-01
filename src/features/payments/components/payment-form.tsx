@@ -92,7 +92,7 @@ export function PaymentForm({ facts }: PaymentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
-        <p className="text-sm text-slate-500">Amount due (read-only)</p>
+        <p className="text-sm text-slate-500">Cash amount due (read-only)</p>
         <p className="text-3xl font-bold tracking-tight">{formatCentavosForDisplay(dueCentavos)}</p>
       </div>
 
@@ -107,6 +107,10 @@ export function PaymentForm({ facts }: PaymentFormProps) {
           required
         />
       </label>
+
+      <p className="text-sm text-slate-600 dark:text-slate-400">
+        Cash only. Payment is attributed to your signed-in staff account.
+      </p>
 
       <Button type="submit" disabled={pending || Number(dueCentavos) === 0} className="min-h-11 w-full">
         {pending ? 'Recording payment…' : 'Confirm cash payment'}

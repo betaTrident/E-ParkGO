@@ -8,6 +8,8 @@ INSERT INTO public.parking_locations (
   currency,
   receipt_prefix,
   settings,
+  car_capacity,
+  motorcycle_capacity,
   is_active
 )
 VALUES (
@@ -18,6 +20,8 @@ VALUES (
   'PHP',
   'EPG',
   '{"grace_display_minutes": 15}'::jsonb,
+  50,
+  30,
   true
 )
 ON CONFLICT (id) DO UPDATE
@@ -27,6 +31,8 @@ SET
   currency = EXCLUDED.currency,
   receipt_prefix = EXCLUDED.receipt_prefix,
   settings = EXCLUDED.settings,
+  car_capacity = EXCLUDED.car_capacity,
+  motorcycle_capacity = EXCLUDED.motorcycle_capacity,
   is_active = EXCLUDED.is_active,
   updated_at = now();
 
@@ -67,6 +73,7 @@ INSERT INTO public.vehicle_types (
   parking_location_id,
   code,
   name,
+  capacity_pool,
   is_active
 )
 VALUES
@@ -75,6 +82,7 @@ VALUES
     '11111111-1111-4111-8111-111111111111',
     'CAR',
     'Car',
+    'CAR',
     true
   ),
   (
@@ -82,11 +90,13 @@ VALUES
     '11111111-1111-4111-8111-111111111111',
     'MOTO',
     'Motorcycle',
+    'MOTORCYCLE',
     true
   )
 ON CONFLICT (id) DO UPDATE
 SET
   name = EXCLUDED.name,
+  capacity_pool = EXCLUDED.capacity_pool,
   is_active = EXCLUDED.is_active,
   updated_at = now();
 

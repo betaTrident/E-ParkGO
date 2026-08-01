@@ -14,48 +14,35 @@ interface VerifyFragmentProps {
   onTokenReady: (token: string) => Promise<void>
 }
 
-type VerificationState =
-  | { kind: 'pending' }
-  | { kind: 'ready'; token: string }
-  | { kind: 'error'; message: string }
-
-function readInitialVerificationState(): VerificationState {
-  if (typeof window === 'undefined') {
-    return { kind: 'pending' }
-  }
-
-  const fragment = readFragmentFromWindow()
-  removeFragmentFromHistory('/verify')
-
-  const parsed = parseQrFragment(fragment)
-  if (!parsed) {
-    return {
-      kind: 'error',
-      message: 'The scanned link is invalid or incomplete.',
-    }
-  }
-
-  return { kind: 'ready', token: parsed.token }
-}
-
 export function VerifyFragment({ onTokenReady }: VerifyFragmentProps) {
   const router = useRouter()
   const submittedRef = useRef(false)
-  const [initialState] = useState(readInitialVerificationState)
   const [pending, setPending] = useState(false)
-  const [error, setError] = useState<string | null>(
-    initialState.kind === 'error' ? initialState.message : null,
-  )
+  const [error, setError] = useState<string | null>(null)
+  const [token, setToken] = useState<string | null>(null)
 
   useEffect(() => {
-    if (initialState.kind !== 'ready' || submittedRef.current) {
+    const fragment = readFragmentFromWindow()
+    removeFragmentFromHistory('/verify')
+
+    const parsed = parseQrFragment(fragment)
+    if (!parsed) {
+      setError('The scanned link is invalid or incomplete.')
+      return
+    }
+
+    setToken(parsed.token)
+  }, [])
+
+  useEffect(() => {
+    if (!token || submittedRef.current) {
       return
     }
 
     submittedRef.current = true
     setPending(true)
 
-    void onTokenReady(initialState.token)
+    void onTokenReady(token)
       .catch(() => {
         setError('Unable to validate this ticket right now.')
         submittedRef.current = false
@@ -63,7 +50,7 @@ export function VerifyFragment({ onTokenReady }: VerifyFragmentProps) {
       .finally(() => {
         setPending(false)
       })
-  }, [initialState, onTokenReady])
+  }, [onTokenReady, token])
 
   return (
     <div className="mx-auto max-w-lg space-y-4 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">

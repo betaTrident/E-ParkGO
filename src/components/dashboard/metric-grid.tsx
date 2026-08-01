@@ -1,10 +1,10 @@
 import {
+  Bike,
+  Car,
   CarFront,
-  CircleParking,
   Clock3,
   DollarSign,
   LogIn,
-  LogOut,
 } from "lucide-react";
 
 import type { DashboardMetrics } from "@/features/dashboard/types";
@@ -22,18 +22,30 @@ const panelClass =
   "rounded-md border border-[#dce5f0] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-slate-800 dark:bg-[#0d192a]";
 
 export function MetricGrid({ metrics }: MetricGridProps) {
+  const carFree = Math.max(metrics.car_capacity - metrics.car_occupied, 0);
+  const motorcycleFree = Math.max(
+    metrics.motorcycle_capacity - metrics.motorcycle_occupied,
+    0,
+  );
+
   const cards = [
+    {
+      label: "Cars free",
+      value: `${carFree}/${metrics.car_capacity}`,
+      icon: Car,
+      hint: `${metrics.car_occupied} cars currently parked`,
+    },
+    {
+      label: "Motorcycles free",
+      value: `${motorcycleFree}/${metrics.motorcycle_capacity}`,
+      icon: Bike,
+      hint: `${metrics.motorcycle_occupied} motorcycles currently parked`,
+    },
     {
       label: "Active sessions",
       value: String(metrics.active_sessions),
       icon: CarFront,
       hint: `${metrics.payment_pending_sessions} pending payment`,
-    },
-    {
-      label: "Available spaces",
-      value: String(metrics.available_spaces),
-      icon: CircleParking,
-      hint: `${metrics.occupied_spaces} occupied of ${metrics.operational_capacity} operational`,
     },
     {
       label: "Today's revenue",
@@ -48,16 +60,10 @@ export function MetricGrid({ metrics }: MetricGridProps) {
       hint: `${metrics.exits_today} exits recorded`,
     },
     {
-      label: "Paid awaiting exit",
-      value: String(metrics.paid_awaiting_exit_sessions),
-      icon: Clock3,
-      hint: `${metrics.lost_ticket_sessions} lost ticket · ${metrics.manual_review_sessions} manual review`,
-    },
-    {
       label: "Occupancy",
       value: occupancyPercent(metrics.occupancy_basis_points),
-      icon: LogOut,
-      hint: `${metrics.out_of_service_spaces} out of service`,
+      icon: Clock3,
+      hint: `${metrics.occupied_spaces} of ${metrics.operational_capacity} pool slots occupied`,
     },
   ] as const;
 

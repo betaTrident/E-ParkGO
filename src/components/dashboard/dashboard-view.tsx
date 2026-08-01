@@ -6,7 +6,6 @@ import { KPIStatCards } from "@/components/dashboard/kpi-stat-cards";
 import { OccupancyOverview } from "@/components/dashboard/occupancy-overview";
 import { RevenueTrend } from "@/components/dashboard/revenue-trend";
 import { RecentEntriesTable } from "@/components/dashboard/recent-entries-table";
-import { SpaceMapGrid } from "@/components/dashboard/space-map-grid";
 import { RealtimeStatus } from "@/components/dashboard/realtime-status";
 import { useConnectivity } from "@/hooks/use-connectivity";
 import { useDashboardRealtime } from "@/hooks/use-dashboard-realtime";
@@ -85,15 +84,11 @@ export function DashboardView({
 
       {/* Row 2: Analytics & Overview (Occupancy Donut + Revenue Line Chart) */}
       <div className="grid gap-5 xl:grid-cols-2">
-        <OccupancyOverview zones={data?.zones} />
+        <OccupancyOverview metrics={data?.metrics} />
         <RevenueTrend />
       </div>
 
-      {/* Row 3: Operational Data (Recent Entries Table + Space Map Grid) */}
-      <div className="grid gap-5 xl:grid-cols-2">
-        <RecentEntriesTable snapshot={data} />
-        <SpaceMapGrid />
-      </div>
+      <RecentEntriesTable snapshot={data} />
 
       {/* Footer */}
       <footer className="mt-8 border-t border-slate-200/60 pt-6 text-center text-xs font-medium text-slate-400 dark:border-slate-800 dark:text-slate-500">

@@ -1,3 +1,4 @@
+/** @deprecated Shift open/close is retired for ops simplification (Phase S2). Payments no longer require an open shift. */
 import { randomUUID } from 'node:crypto'
 
 import type { CloseShiftRequestInput, StartShiftRequestInput } from '@/features/shifts/schemas'

@@ -60,6 +60,10 @@ const snapshot: DashboardSnapshot = {
     out_of_service_spaces: 0,
     operational_capacity: 4,
     occupancy_basis_points: 2500,
+    car_capacity: 3,
+    car_occupied: 1,
+    motorcycle_capacity: 1,
+    motorcycle_occupied: 0,
     active_sessions: 1,
     payment_pending_sessions: 0,
     paid_awaiting_exit_sessions: 0,
@@ -91,7 +95,7 @@ describe("DashboardView", () => {
 
     expect(screen.getByRole("heading", { name: "Dashboard" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Operational metrics" })).toBeInTheDocument();
-    expect(screen.getByText("Active sessions")).toBeInTheDocument();
+    expect(screen.getByText("Cars available")).toBeInTheDocument();
   });
 
   it("announces a safe sign-out failure to the authenticated user", () => {
@@ -149,7 +153,7 @@ describe("DashboardView", () => {
 
     expect(screen.getByText("Dashboard snapshot failed to load.")).toBeInTheDocument();
     expect(screen.getByText("ABC1234")).toBeInTheDocument();
-    expect(screen.getByText("Zone A")).toBeInTheDocument();
+    expect(screen.getByText("Pool occupancy")).toBeInTheDocument();
   });
 
   it("lets operators manually probe connectivity", async () => {

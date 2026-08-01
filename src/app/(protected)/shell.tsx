@@ -37,7 +37,7 @@ const navigation = [
   },
   { label: "Entries", href: "/entry", icon: CarFront, available: true },
   { label: "Scan & Exit", href: "/scanner", icon: QrCode, available: true },
-  { label: "Payments", href: "/payments", icon: CreditCard, available: true },
+  { label: "Payments", href: "/payments", icon: CreditCard, available: false },
   {
     label: "Active Sessions",
     href: "/sessions",
@@ -48,7 +48,7 @@ const navigation = [
     label: "Parking Spaces",
     href: "/spaces",
     icon: MapPinned,
-    available: true,
+    available: false,
   },
   { label: "Reports", href: "/reports", icon: BarChart3, available: false },
   {
@@ -77,7 +77,6 @@ const PAGE_TITLES: Record<string, string> = {
   "/admin/rates": "Rates",
   "/admin/staff": "Staff & Users",
   "/admin/settings": "Settings",
-  "/shifts": "Shifts",
   "/verify": "Verify",
   "/exit": "Exit",
   "/tickets": "Ticket",

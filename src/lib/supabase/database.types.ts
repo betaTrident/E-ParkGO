@@ -188,11 +188,13 @@ export type Database = {
       }
       parking_locations: {
         Row: {
+          car_capacity: number
           code: string
           created_at: string
           currency: string
           id: string
           is_active: boolean
+          motorcycle_capacity: number
           name: string
           receipt_prefix: string
           settings: Json
@@ -200,11 +202,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          car_capacity?: number
           code: string
           created_at?: string
           currency?: string
           id?: string
           is_active?: boolean
+          motorcycle_capacity?: number
           name: string
           receipt_prefix: string
           settings?: Json
@@ -212,11 +216,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          car_capacity?: number
           code?: string
           created_at?: string
           currency?: string
           id?: string
           is_active?: boolean
+          motorcycle_capacity?: number
           name?: string
           receipt_prefix?: string
           settings?: Json
@@ -407,7 +413,7 @@ export type Database = {
           id: string
           override_approved_by: string | null
           parking_location_id: string
-          parking_space_id: string
+          parking_space_id?: string | null
           payment_processed_by: string | null
           payment_status: Database["public"]["Enums"]["session_payment_status"]
           penalty_centavos: number | null
@@ -432,7 +438,7 @@ export type Database = {
           id?: string
           override_approved_by?: string | null
           parking_location_id: string
-          parking_space_id: string
+          parking_space_id?: string | null
           payment_processed_by?: string | null
           payment_status?: Database["public"]["Enums"]["session_payment_status"]
           penalty_centavos?: number | null
@@ -457,7 +463,7 @@ export type Database = {
           id?: string
           override_approved_by?: string | null
           parking_location_id?: string
-          parking_space_id?: string
+          parking_space_id?: string | null
           payment_processed_by?: string | null
           payment_status?: Database["public"]["Enums"]["session_payment_status"]
           penalty_centavos?: number | null
@@ -1142,6 +1148,7 @@ export type Database = {
       }
       vehicle_types: {
         Row: {
+          capacity_pool: string
           code: string
           created_at: string
           id: string
@@ -1151,6 +1158,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          capacity_pool: string
           code: string
           created_at?: string
           id?: string
@@ -1160,6 +1168,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          capacity_pool?: string
           code?: string
           created_at?: string
           id?: string
@@ -1345,6 +1354,13 @@ export type Database = {
         }
         Returns: string
       }
+      admin_update_location_capacities: {
+        Args: {
+          p_car_capacity: number
+          p_motorcycle_capacity: number
+        }
+        Returns: string
+      }
       admin_update_parking_space: {
         Args: {
           p_correlation_id: string
@@ -1463,11 +1479,10 @@ export type Database = {
       }
       create_parking_entry: {
         Args: {
-          p_color: string
+          p_color: string | null
           p_correlation_id: string
           p_idempotency_key: string
           p_plate: string
-          p_space_id: string
           p_vehicle_type_id: string
         }
         Returns: Json
@@ -1494,6 +1509,10 @@ export type Database = {
         Args: { p_cursor?: string; p_limit?: number }
         Returns: Json
       }
+      list_staff_cash_totals: {
+        Args: { p_business_date?: string }
+        Returns: Json
+      }
       list_transactions: {
         Args: {
           p_cursor?: string
@@ -1516,6 +1535,16 @@ export type Database = {
         Returns: Json
       }
       record_parking_payment: {
+        Args: {
+          p_cash_tendered_centavos: number
+          p_correlation_id: string
+          p_external_reference: string
+          p_idempotency_key: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      settle_cash_and_exit: {
         Args: {
           p_cash_tendered_centavos: number
           p_correlation_id: string

@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 import { ExitPageClient } from '@/features/exit/components/exit-page-client'
 import { getExitSessionFacts } from '@/features/exit/service'
@@ -15,14 +15,17 @@ export default async function ExitPage({ params }: ExitPageProps) {
     notFound()
   }
 
+  if (facts.status === 'COMPLETED') {
+    redirect('/sessions')
+  }
+
   return (
     <div className="mx-auto max-w-4xl space-y-8 px-4 py-8 sm:px-6">
       <header className="space-y-2">
         <p className="text-sm font-medium text-blue-600 dark:text-blue-300">Operations</p>
-        <h1 className="text-3xl font-bold tracking-tight">Exit preview</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Exit checkout</h1>
         <p className="max-w-2xl text-slate-600 dark:text-slate-400">
-          Review the parked session and request an authoritative fee quote, then continue to payment or exit
-          confirmation.
+          Review the fee quote, collect cash if due, and release the vehicle on one screen.
         </p>
       </header>
       <ExitPageClient facts={facts} quoteExpired={facts.quoteExpired} />

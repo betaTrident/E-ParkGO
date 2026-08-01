@@ -13,6 +13,9 @@ const forbiddenEntryFields = [
   'status',
   'session_id',
   'sessionId',
+  'color',
+  'parking_space_id',
+  'parkingSpaceId',
 ] as const
 
 export function containsForbiddenEntryField(input: Record<string, unknown>): boolean {
@@ -35,8 +38,6 @@ export const entryRequestSchema = z
   .object({
     plate_number: plateSchema,
     vehicle_type_id: z.uuid('Select a valid vehicle type'),
-    color: z.string().trim().max(40, 'Color is too long').optional(),
-    parking_space_id: z.uuid('Select a valid parking space'),
     idempotency_key: z.uuid('Idempotency key is required'),
     correlation_id: z.uuid('Correlation id is required').optional(),
   })
@@ -48,8 +49,6 @@ export const entryFormSchema = z
   .object({
     plateNumber: plateSchema,
     vehicleTypeId: z.uuid('Select a vehicle type'),
-    color: z.string().trim().max(40, 'Color is too long').optional(),
-    parkingSpaceId: z.uuid('Select a parking space'),
   })
   .strict()
 

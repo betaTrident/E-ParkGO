@@ -16,41 +16,8 @@ async function createEntry(page: Page, plate: string) {
   await expect(page.getByRole('heading', { name: 'Vehicle entry' })).toBeVisible()
   await page.getByLabel('Plate number').fill(plate)
   await page.getByLabel('Vehicle type').selectOption({ label: 'Car' })
-
-  const spaceSelect = page.getByLabel('Parking space')
-  const options = spaceSelect.locator('option:not([value=""])')
-  const optionCount = await options.count()
-
-  if (optionCount === 0) {
-    throw new Error('No available parking spaces for scanner E2E')
-  }
-
-  for (let index = 0; index < optionCount; index += 1) {
-    const value = await options.nth(index).getAttribute('value')
-    if (!value) {
-      continue
-    }
-
-    await spaceSelect.selectOption(value)
-    await page.getByRole('button', { name: 'Create entry and issue ticket' }).click()
-
-    try {
-      await page.waitForURL(/\/tickets\/.*issued=1/, { timeout: 20_000 })
-      return
-    } catch {
-      const spaceUnavailable = page.getByText(/selected space is not available/i)
-      if (await spaceUnavailable.isVisible().catch(() => false)) {
-        await page.goto('/entry')
-        await page.getByLabel('Plate number').fill(plate)
-        await page.getByLabel('Vehicle type').selectOption({ label: 'Car' })
-        continue
-      }
-
-      throw new Error('Entry creation failed without a recoverable space conflict')
-    }
-  }
-
-  throw new Error('Exhausted available parking spaces for scanner E2E')
+  await page.getByRole('button', { name: 'Create entry and issue ticket' }).click()
+  await page.waitForURL(/\/tickets\/.*issued=1/, { timeout: 60_000 })
 }
 
 test.describe('Phase 7 scanner and exit preview flows', () => {
@@ -79,7 +46,8 @@ test.describe('Phase 7 scanner and exit preview flows', () => {
     await expect(page.getByRole('heading', { name: 'Fee preview' })).toBeVisible({
       timeout: 60_000,
     })
-    await expect(page.getByText('No payment required')).toBeVisible()
+    await expect(page.getByText('No payment required — cash only at exit')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Collect cash & exit' })).toBeVisible()
 
     const storageKeys = await page.evaluate(() => Object.keys(localStorage))
     expect(storageKeys.some((key) => key.toLowerCase().includes('token'))).toBe(false)

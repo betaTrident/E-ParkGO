@@ -59,7 +59,6 @@ select isnt(
       'PAYEXIT1',
       '33333333-3333-4333-8333-333333333331'::uuid,
       null,
-      '44444444-4444-4444-8444-444444444447'::uuid,
       '24141414-1414-4414-8414-141414141401'::uuid,
       '24141414-1414-4414-8414-141414141402'::uuid
     )->>'session_id')
@@ -157,12 +156,14 @@ select is(
 
 select is(
   (
-    select sp.status::text
-    from public.parking_spaces sp
-    where sp.id = '44444444-4444-4444-8444-444444444447'
+    select ps.parking_space_id
+    from public.parking_sessions ps
+    join public.vehicles v on v.id = ps.vehicle_id
+    where v.normalized_plate_number = 'PAYEXIT1'
+    limit 1
   ),
-  'AVAILABLE',
-  'space released after exit'
+  null,
+  'pool session remains unassigned after exit'
 );
 
 select isnt(
@@ -171,7 +172,6 @@ select isnt(
       'PAYEXIT2',
       '33333333-3333-4333-8333-333333333331'::uuid,
       null,
-      '44444444-4444-4444-8444-444444444448'::uuid,
       '29191919-1919-4919-8919-191919191901'::uuid,
       '29191919-1919-4919-8919-191919191902'::uuid
     )->>'session_id')
@@ -299,12 +299,14 @@ select cmp_ok(
 
 select is(
   (
-    select sp.status::text
-    from public.parking_spaces sp
-    where sp.id = '44444444-4444-4444-8444-444444444448'
+    select ps.status::text
+    from public.parking_sessions ps
+    join public.vehicles v on v.id = ps.vehicle_id
+    where v.normalized_plate_number = 'PAYEXIT2'
+    limit 1
   ),
-  'OCCUPIED',
-  'payment does not release space'
+  'PAID_AWAITING_EXIT',
+  'payment alone does not complete exit'
 );
 
 select is(

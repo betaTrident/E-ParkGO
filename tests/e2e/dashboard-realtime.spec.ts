@@ -12,38 +12,12 @@ async function signIn(page: Page) {
 }
 
 async function createEntry(page: Page, plate: string) {
-  for (const vehicleType of ['Car', 'Motorcycle'] as const) {
-    await page.goto('/entry')
-    await expect(page.getByRole('heading', { name: 'Vehicle entry' })).toBeVisible()
-    await page.getByLabel('Plate number').fill(plate)
-    await page.getByLabel('Vehicle type').selectOption({ label: vehicleType })
-    const spaceSelect = page.getByLabel('Parking space')
-    const firstSpace = spaceSelect.locator('option:not([value=""])').first()
-    const hasSpace = await firstSpace
-      .getAttribute('value', { timeout: 5_000 })
-      .catch(() => null)
-
-    if (!hasSpace) {
-      continue
-    }
-
-    await spaceSelect.selectOption(hasSpace)
-    await page.getByRole('button', { name: 'Create entry and issue ticket' }).click()
-
-    try {
-      await page.waitForURL(/\/tickets\/.*issued=1/, { timeout: 60_000 })
-      return
-    } catch {
-      const unavailable = page.getByText(/selected space is not available/i)
-      if (await unavailable.isVisible().catch(() => false)) {
-        continue
-      }
-
-      throw new Error('Entry creation failed without a recoverable space conflict')
-    }
-  }
-
-  throw new Error('No available parking spaces for dashboard realtime E2E')
+  await page.goto('/entry')
+  await expect(page.getByRole('heading', { name: 'Vehicle entry' })).toBeVisible()
+  await page.getByLabel('Plate number').fill(plate)
+  await page.getByLabel('Vehicle type').selectOption({ label: 'Car' })
+  await page.getByRole('button', { name: 'Create entry and issue ticket' }).click()
+  await page.waitForURL(/\/tickets\/.*issued=1/, { timeout: 60_000 })
 }
 
 test.describe('dashboard realtime', () => {

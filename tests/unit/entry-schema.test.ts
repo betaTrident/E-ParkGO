@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   containsForbiddenEntryField,
+  entryFormSchema,
   entryRequestSchema,
   normalizePlateNumber,
 } from '@/features/entry/schemas'
@@ -11,12 +12,10 @@ describe('entry schema', () => {
     expect(normalizePlateNumber(' ab-12 34 ')).toBe('AB1234')
   })
 
-  it('accepts valid entry requests', () => {
+  it('accepts valid entry requests with plate and vehicle type only', () => {
     const parsed = entryRequestSchema.safeParse({
       plate_number: 'abc-1234',
       vehicle_type_id: '33333333-3333-4333-8333-333333333331',
-      color: 'Blue',
-      parking_space_id: '44444444-4444-4444-8444-444444444441',
       idempotency_key: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01',
       correlation_id: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbb01',
     })
@@ -27,11 +26,38 @@ describe('entry schema', () => {
     }
   })
 
+  it('rejects color and parking space fields', () => {
+    const withColor = entryRequestSchema.safeParse({
+      plate_number: 'ABC1234',
+      vehicle_type_id: '33333333-3333-4333-8333-333333333331',
+      color: 'Blue',
+      idempotency_key: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01',
+    })
+
+    const withSpace = entryRequestSchema.safeParse({
+      plate_number: 'ABC1234',
+      vehicle_type_id: '33333333-3333-4333-8333-333333333331',
+      parking_space_id: '44444444-4444-4444-8444-444444444441',
+      idempotency_key: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01',
+    })
+
+    expect(withColor.success).toBe(false)
+    expect(withSpace.success).toBe(false)
+  })
+
+  it('accepts entry form input without color or parking space', () => {
+    const parsed = entryFormSchema.safeParse({
+      plateNumber: 'ABC1234',
+      vehicleTypeId: '33333333-3333-4333-8333-333333333331',
+    })
+
+    expect(parsed.success).toBe(true)
+  })
+
   it('rejects unknown fields', () => {
     const parsed = entryRequestSchema.safeParse({
       plate_number: 'ABC1234',
       vehicle_type_id: '33333333-3333-4333-8333-333333333331',
-      parking_space_id: '44444444-4444-4444-8444-444444444441',
       idempotency_key: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaa01',
       actor_id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
     })
@@ -43,6 +69,18 @@ describe('entry schema', () => {
     expect(
       containsForbiddenEntryField({
         entry_time: '2026-07-21T00:00:00.000Z',
+      }),
+    ).toBe(true)
+
+    expect(
+      containsForbiddenEntryField({
+        color: 'Blue',
+      }),
+    ).toBe(true)
+
+    expect(
+      containsForbiddenEntryField({
+        parking_space_id: '44444444-4444-4444-8444-444444444441',
       }),
     ).toBe(true)
   })

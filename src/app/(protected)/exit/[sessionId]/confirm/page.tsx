@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 import { ExitConfirmation } from '@/features/exit/components/exit-confirmation'
 import { getPaymentSessionFacts } from '@/features/payments/service'
@@ -13,6 +13,14 @@ export default async function ExitConfirmPage({ params }: ExitConfirmPageProps) 
 
   if (!facts) {
     notFound()
+  }
+
+  if (facts.status === 'COMPLETED') {
+    redirect('/sessions')
+  }
+
+  if (facts.status === 'PAYMENT_PENDING' || facts.status === 'PAID_AWAITING_EXIT') {
+    redirect(`/exit/${sessionId}`)
   }
 
   return (

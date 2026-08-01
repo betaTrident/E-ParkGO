@@ -2,6 +2,28 @@ begin;
 
 select plan(8);
 
+set local role service_role;
+
+-- Isolate pool: complete leftover nonterminal sessions from prior test files.
+update public.parking_sessions ps
+set
+  status = 'COMPLETED',
+  exit_time = coalesce(ps.exit_time, clock_timestamp()),
+  updated_at = now()
+where ps.parking_location_id = '11111111-1111-4111-8111-111111111111'
+  and ps.status in (
+    'ACTIVE',
+    'EXIT_PENDING',
+    'PAYMENT_PENDING',
+    'PAID_AWAITING_EXIT',
+    'LOST_TICKET',
+    'MANUAL_REVIEW'
+  );
+
+update public.parking_locations pl
+set car_capacity = 1, updated_at = now()
+where pl.id = '11111111-1111-4111-8111-111111111111';
+
 set local role authenticated;
 select set_config(
   'request.jwt.claims',
@@ -9,17 +31,16 @@ select set_config(
   true
 );
 
--- Same-space race: first wins, second conflicts
+-- Pool capacity race: first wins, second conflicts when pool is full
 select lives_ok(
   $$ select public.create_parking_entry(
     'RACE001',
     '33333333-3333-4333-8333-333333333331'::uuid,
     null,
-    '44444444-4444-4444-8444-444444444442'::uuid,
     '21212121-2121-4212-8212-212121212101'::uuid,
     '22222222-2222-4222-8222-222222222201'::uuid
   ) $$,
-  'first concurrent entry on space succeeds'
+  'first entry on reduced car pool succeeds'
 );
 
 select throws_ok(
@@ -27,13 +48,12 @@ select throws_ok(
     'RACE002',
     '33333333-3333-4333-8333-333333333331'::uuid,
     null,
-    '44444444-4444-4444-8444-444444444442'::uuid,
     '21212121-2121-4212-8212-212121212102'::uuid,
     '22222222-2222-4222-8222-222222222202'::uuid
   ) $$,
   'P0001',
-  'SPACE_NOT_AVAILABLE',
-  'second concurrent entry on same space rejected'
+  'CAPACITY_FULL',
+  'second entry rejected when car pool is full'
 );
 
 -- Same-plate race after first session active
@@ -42,7 +62,6 @@ select throws_ok(
     'RACE001',
     '33333333-3333-4333-8333-333333333332'::uuid,
     null,
-    '44444444-4444-4444-8444-444444444443'::uuid,
     '23232323-2323-4323-8323-232323232301'::uuid,
     '24242424-2424-4424-8424-242424242401'::uuid
   ) $$,
@@ -57,7 +76,6 @@ select throws_ok(
     'FAIL001',
     '33333333-3333-4333-8333-333333333332'::uuid,
     null,
-    '44444444-4444-4444-8444-444444444443'::uuid,
     '25252525-2525-4525-8525-252525252501'::uuid,
     '26262626-2626-4626-8626-262626262601'::uuid
   ) $$,
@@ -111,7 +129,6 @@ select is(
       'RACE001',
       '33333333-3333-4333-8333-333333333331'::uuid,
       null,
-      '44444444-4444-4444-8444-444444444442'::uuid,
       '21212121-2121-4212-8212-212121212101'::uuid,
       '27272727-2727-4727-8727-272727272701'::uuid
     )->>'session_id')
@@ -121,7 +138,6 @@ select is(
       'RACE001',
       '33333333-3333-4333-8333-333333333331'::uuid,
       null,
-      '44444444-4444-4444-8444-444444444442'::uuid,
       '21212121-2121-4212-8212-212121212101'::uuid,
       '28282828-2828-4828-8828-282828282801'::uuid
     )->>'session_id')
@@ -131,10 +147,11 @@ select is(
 
 select ok(
   (
-    select entry_time
-    from public.parking_sessions
-    where parking_space_id = '44444444-4444-4444-8444-444444444442'
-      and status = 'ACTIVE'
+    select ps.entry_time
+    from public.parking_sessions ps
+    join public.vehicles v on v.id = ps.vehicle_id
+    where v.normalized_plate_number = 'RACE001'
+      and ps.status = 'ACTIVE'
     limit 1
   ) <= clock_timestamp(),
   'entry time uses authoritative database clock'

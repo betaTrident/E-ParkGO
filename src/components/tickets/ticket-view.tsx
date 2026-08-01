@@ -58,8 +58,10 @@ export function TicketView({
             {facts.ticket_number}
           </h1>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Entry {formatEntryTime(facts.entry_time)} · Space {facts.zone_code}-
-            {facts.space_code}
+            Entry {formatEntryTime(facts.entry_time)}
+            {facts.zone_code && facts.space_code
+              ? ` · Space ${facts.zone_code}-${facts.space_code}`
+              : " · Capacity pool entry"}
           </p>
         </header>
 

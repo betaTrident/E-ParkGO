@@ -11,23 +11,11 @@ async function signIn(page: Page, email: string, password: string) {
   await page.waitForURL((url) => url.pathname === '/dashboard', { timeout: 60_000 })
 }
 
-async function selectFirstAvailableSpace(page: Page) {
-  const spaceSelect = page.getByLabel('Parking space')
-  const firstSpace = spaceSelect.locator('option:not([value=""])').first()
-  await expect(firstSpace).toBeAttached({ timeout: 30_000 })
-  const value = await firstSpace.getAttribute('value')
-  if (!value) {
-    throw new Error('No available parking spaces for entry E2E')
-  }
-  await spaceSelect.selectOption(value)
-}
-
 async function createEntry(page: Page, plate: string) {
   await page.goto('/entry')
   await expect(page.getByRole('heading', { name: 'Vehicle entry' })).toBeVisible()
   await page.getByLabel('Plate number').fill(plate)
   await page.getByLabel('Vehicle type').selectOption({ label: 'Car' })
-  await selectFirstAvailableSpace(page)
   await page.getByRole('button', { name: 'Create entry and issue ticket' }).click()
   await page.waitForURL(/\/tickets\/.*issued=1/, { timeout: 60_000 })
 }
