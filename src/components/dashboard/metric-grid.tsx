@@ -19,7 +19,7 @@ function occupancyPercent(basisPoints: number): string {
 }
 
 const panelClass =
-  "rounded-xl border border-[#dce5f0] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-slate-800 dark:bg-[#0d192a]";
+  "rounded-md border border-[#dce5f0] bg-white p-4 shadow-[0_1px_2px_rgba(15,23,42,0.02)] dark:border-slate-800 dark:bg-[#0d192a]";
 
 export function MetricGrid({ metrics }: MetricGridProps) {
   const cards = [

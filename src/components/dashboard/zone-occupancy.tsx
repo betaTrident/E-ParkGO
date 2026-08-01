@@ -15,7 +15,7 @@ export function ZoneOccupancy({ zones }: ZoneOccupancyProps) {
     return (
       <section
         aria-label="Zone occupancy"
-        className="rounded-xl border border-dashed border-slate-200 p-6 text-sm text-slate-500 dark:border-slate-700"
+        className="rounded-md border border-dashed border-slate-200 p-6 text-sm text-slate-500 dark:border-slate-700"
       >
         No active zones configured for this facility.
       </section>
@@ -25,7 +25,7 @@ export function ZoneOccupancy({ zones }: ZoneOccupancyProps) {
   return (
     <section
       aria-label="Zone occupancy"
-      className="rounded-xl border border-[#dce5f0] bg-white p-5 dark:border-slate-800 dark:bg-[#0d192a]"
+      className="rounded-md border border-[#dce5f0] bg-white p-5 dark:border-slate-800 dark:bg-[#0d192a]"
     >
       <h2 className="text-base font-semibold">Zone occupancy</h2>
       <ul className="mt-4 space-y-4">

@@ -81,7 +81,7 @@ export function RecentEntriesTable({ snapshot }: RecentEntriesTableProps) {
   return (
     <section
       aria-label="Recent Entries"
-      className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+      className="flex flex-col justify-between rounded-md border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
     >
       {/* Header */}
       <div className="flex items-center justify-between">

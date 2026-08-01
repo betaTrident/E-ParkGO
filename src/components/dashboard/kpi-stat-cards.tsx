@@ -59,11 +59,11 @@ export function KPIStatCards({ metrics }: KPIStatCardsProps) {
         return (
           <article
             key={card.title}
-            className="relative rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs transition-shadow hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
+            className="relative rounded-md border border-slate-200/80 bg-white p-5 shadow-xs transition-shadow hover:shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
             <div className="flex items-start justify-between">
               <span
-                className={`flex size-14 shrink-0 items-center justify-center rounded-2xl ${card.iconBg}`}
+                className={`flex size-14 shrink-0 items-center justify-center rounded-md ${card.iconBg}`}
               >
                 <Icon className="size-7" />
               </span>

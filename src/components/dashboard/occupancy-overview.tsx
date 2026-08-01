@@ -23,7 +23,7 @@ export function OccupancyOverview({ zones }: OccupancyOverviewProps) {
   return (
     <section
       aria-label="Occupancy Overview"
-      className="flex flex-col justify-between rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
+      className="flex flex-col justify-between rounded-md border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
     >
       {/* Header */}
       <div className="flex items-center justify-between">
@@ -125,7 +125,7 @@ export function OccupancyOverview({ zones }: OccupancyOverviewProps) {
       </div>
 
       {/* Footer summary bar */}
-      <div className="mt-6 flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
+      <div className="mt-6 flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3.5 dark:border-slate-800 dark:bg-slate-800/50">
         <div className="flex items-center gap-2">
           <span className="text-xs font-medium text-slate-600 dark:text-slate-400">
             Occupancy Rate
