@@ -27,7 +27,7 @@ describe('FeeBreakdown', () => {
 
     expect(screen.getByRole('heading', { name: 'Fee preview' })).toBeInTheDocument()
     expect(screen.getByText('Total due')).toBeInTheDocument()
-    expect(screen.getByText('Payment pending')).toBeInTheDocument()
+    expect(screen.getByText('Cash payment due at exit')).toBeInTheDocument()
     expect(screen.getByText(/Quote expires:/)).toBeInTheDocument()
   })
 

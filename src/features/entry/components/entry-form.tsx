@@ -116,8 +116,9 @@ export function EntryForm({
             ))}
           </NativeSelect>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            {remaining} of {pool.capacity} {poolKey === "car" ? "car" : "motorcycle"}{" "}
-            spaces free ({pool.occupied} occupied).
+            {remaining} of {pool.capacity}{" "}
+            {poolKey === "car" ? "car" : "motorcycle"} pool slots free (
+            {pool.occupied} occupied).
           </p>
         </div>
       </div>
@@ -127,8 +128,8 @@ export function EntryForm({
           role="status"
           className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
         >
-          No free parking spaces left for this vehicle type. Choose a different
-          type or wait for a session to exit.
+          This vehicle type pool is at capacity. Choose a different type or
+          wait for a session to exit.
         </p>
       ) : null}
 

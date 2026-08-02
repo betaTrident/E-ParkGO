@@ -9,8 +9,8 @@ reset role;
 select throws_ok(
   $$ select public.settle_cash_and_exit(
     '11111111-1111-4111-8111-111111111111'::uuid,
-    0,
-    null,
+    0::bigint,
+    null::text,
     'f0f0f0f0-f0f0-4f0f-8f0f-f0f0f0f0f001'::uuid,
     'f0f0f0f0-f0f0-4f0f-8f0f-f0f0f0f0f002'::uuid
   ) $$,
@@ -89,8 +89,8 @@ select is(
         where v.normalized_plate_number = 'SETTLE0'
         limit 1
       ),
-      0,
-      null,
+      0::bigint,
+      null::text,
       'f3f3f3f3-f3f3-4f3f-8f3f-f3f3f3f3f301'::uuid,
       'f3f3f3f3-f3f3-4f3f-8f3f-f3f3f3f3f302'::uuid
     )->>'session_status')
@@ -288,7 +288,7 @@ select throws_ok(
       limit 1
     ),
     1000,
-    null,
+    null::text,
     'f9f9f9f9-f9f9-4f9f-8f9f-f9f9f9f9f901'::uuid,
     'f9f9f9f9-f9f9-4f9f-8f9f-f9f9f9f9f902'::uuid
   ) $$,

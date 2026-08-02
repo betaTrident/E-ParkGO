@@ -33,11 +33,11 @@ function mapEntryRpcError(error: { message: string } | null): string {
   }
 
   if (message.includes('CAPACITY_FULL')) {
-    return 'No free parking spaces left for this vehicle type.'
+    return 'This vehicle type pool is at capacity.'
   }
 
   if (message.includes('SPACE_NOT_AVAILABLE')) {
-    return 'The selected space is not available.'
+    return 'Capacity is not available for this vehicle type.'
   }
 
   if (message.includes('RATE_NOT_CONFIGURED')) {

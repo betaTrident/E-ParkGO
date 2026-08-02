@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 
 interface PaymentsIndexPageProps {
   searchParams: Promise<{ sessionId?: string }>
@@ -7,7 +7,7 @@ interface PaymentsIndexPageProps {
 export default async function PaymentsIndexPage({ searchParams }: PaymentsIndexPageProps) {
   const params = await searchParams
   if (!params.sessionId) {
-    notFound()
+    redirect('/scanner')
   }
-  redirect(`/payments/${params.sessionId}`)
+  redirect(`/exit/${params.sessionId}`)
 }

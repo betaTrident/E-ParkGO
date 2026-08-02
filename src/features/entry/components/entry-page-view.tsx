@@ -66,8 +66,9 @@ export function EntryPageView({
           Vehicle entry
         </h1>
         <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          Record plate and vehicle type, issue a one-time QR ticket, and print
-          it immediately. Payment is collected at exit only.
+          Record plate and vehicle type against the facility capacity pool, issue
+          a one-time QR ticket, and print it immediately. Cash payment is
+          collected at exit only — no space selection or shift required.
         </p>
       </header>
 

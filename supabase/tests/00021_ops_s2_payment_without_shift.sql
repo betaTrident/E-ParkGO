@@ -11,7 +11,7 @@ select throws_ok(
   $$ select public.record_parking_payment(
     '11111111-1111-4111-8111-111111111111'::uuid,
     5000,
-    null,
+    null::text,
     'e0e0e0e0-e0e0-4e0e-8e0e-e0e0e0e0e001'::uuid,
     'e0e0e0e0-e0e0-4e0e-8e0e-e0e0e0e0e002'::uuid
   ) $$,

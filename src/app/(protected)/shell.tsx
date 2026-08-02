@@ -167,23 +167,6 @@ export function ProtectedShell({ children, profile }: ProtectedShellProps) {
                 const active = isActive(href);
 
                 if (!isNavigationVisible(item, profile.role)) {
-                  if (!item.available) {
-                    return (
-                      <li key={href}>
-                        <span
-                          aria-disabled="true"
-                          title={`${label} — coming soon`}
-                          className={cn(
-                            "flex h-10 cursor-not-allowed select-none items-center gap-3 rounded-md px-3 text-sm font-medium text-slate-400 opacity-50 dark:text-slate-600",
-                            collapsed && "justify-center",
-                          )}
-                        >
-                          <Icon aria-hidden="true" className="size-4.5 shrink-0" />
-                          {!collapsed && <span>{label}</span>}
-                        </span>
-                      </li>
-                    );
-                  }
                   return null;
                 }
 

@@ -158,7 +158,7 @@ function humanizeDomainError(code: ApiErrorCode): string {
     case 'ACTIVE_SESSION_EXISTS':
       return 'This vehicle already has an active parking session.'
     case 'SPACE_NOT_AVAILABLE':
-      return 'The selected space is not available.'
+      return 'Capacity is not available for this vehicle type.'
     case 'RATE_NOT_CONFIGURED':
       return 'No published rate is configured for this vehicle type.'
     case 'IDEMPOTENCY_CONFLICT':

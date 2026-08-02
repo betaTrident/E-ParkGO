@@ -1,3 +1,4 @@
+/** @deprecated Ops S5 — capacity pools replace bay board; retained for admin legacy only. */
 "use client";
 
 import { useMemo, useState } from "react";

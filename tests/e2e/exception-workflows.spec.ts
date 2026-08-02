@@ -16,9 +16,14 @@ test.describe('Phase 8 exception workflows', () => {
     test.setTimeout(120_000)
     await signInAdmin(page)
     await page.goto('/sessions')
-    await expect(page.getByRole('heading', { name: 'Active & exception sessions' })).toBeVisible()
-    const exitPreview = page.getByRole('link', { name: 'Exit preview' })
-    const emptyState = page.getByText('No exception sessions right now')
-    await expect(exitPreview.or(emptyState).first()).toBeVisible()
+    await expect(
+      page.getByRole('main').getByRole('heading', { name: 'Active sessions' }),
+    ).toBeVisible()
+    const sessionsRegion = page.getByRole('list', { name: 'Active sessions' }).or(
+      page.getByRole('region', { name: 'Active sessions' }),
+    )
+    const checkout = sessionsRegion.getByRole('link', { name: 'Checkout' })
+    const emptyState = page.getByText('No sessions need attention.')
+    await expect(checkout.or(emptyState).first()).toBeVisible({ timeout: 30_000 })
   })
 })

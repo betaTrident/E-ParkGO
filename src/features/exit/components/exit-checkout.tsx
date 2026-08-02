@@ -32,7 +32,9 @@ export function ExitCheckout({ facts, preview, quoteExpired = false }: ExitCheck
   const idempotencyKey = useMemo(() => crypto.randomUUID(), [])
 
   const dueCentavos = preview.total_centavos
-  const requiresCash = preview.status === 'PAYMENT_PENDING' && dueCentavos !== '0'
+  const requiresCash =
+    preview.status === 'PAYMENT_PENDING' && dueCentavos !== '0'
+  const paidAwaitingExit = preview.status === 'PAID_AWAITING_EXIT'
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -151,16 +153,18 @@ export function ExitCheckout({ facts, preview, quoteExpired = false }: ExitCheck
               />
             </label>
           </>
-        ) : (
+        ) : !paidAwaitingExit ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900">
             <p className="text-sm text-slate-600 dark:text-slate-400">
               No cash is due. Confirm exit to release the vehicle.
             </p>
           </div>
-        )}
+        ) : null}
 
         <p className="text-sm text-slate-600 dark:text-slate-400">
-          Cash only. Payment and exit are completed together on this screen.
+          {paidAwaitingExit
+            ? 'No cash is due. Confirm exit to release the vehicle.'
+            : 'Cash only. Payment and exit are completed together on this screen.'}
         </p>
 
         <Button
@@ -168,7 +172,11 @@ export function ExitCheckout({ facts, preview, quoteExpired = false }: ExitCheck
           disabled={pending || quoteExpired}
           className="min-h-11 w-full"
         >
-          {pending ? 'Processing…' : 'Collect cash & exit'}
+          {pending
+            ? 'Processing…'
+            : paidAwaitingExit
+              ? 'Confirm exit'
+              : 'Collect cash & exit'}
         </Button>
 
         {error ? (

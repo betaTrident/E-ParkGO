@@ -28,14 +28,14 @@
 ### 0.2 Execution Control and Current Status
 
 ```text
-CURRENT_PHASE: OPS-S3
-CURRENT_STEP: S3 COMPLETE
+CURRENT_PHASE: 10
+CURRENT_STEP: 10.0 Execution guard
 EXECUTION_STATUS: ACTIVE
-EXECUTION_MODE: LOCAL_IMPLEMENTATION
-ACTIVE_PLAYBOOK: contexts/plans/ops-simplification-v1.md
+EXECUTION_MODE: LOCAL_VERIFICATION_AND_REPAIR_ONLY
+ACTIVE_PLAYBOOK: contexts/plans/phases/phase-10-reports-audit.md
 CURRENT_BLOCKER: none
-NEXT_UNLOCK: Begin S4 sessions UX exceptions
-DO_NOT_START: Phase S4 or later until authorized; Phase 10A+
+NEXT_UNLOCK: Load Phase 10 skills and complete Step 10.0
+DO_NOT_START: Phase 10A or any later phase
 LAST_IMPLEMENTATION_COMMIT_AUDITED: pending
 ```
 
@@ -53,8 +53,8 @@ Allowed status values are `COMPLETE`, `ACTIVE`, `BLOCKED`, and `PENDING`. Exactl
 | **7. Validation, Fee, Exit Preview** | **COMPLETE** | Complete | Validation RPCs, deterministic fee engine, scanner/verify/exit preview UI, pgTAP fee vectors, and E2E across five browsers. Evidence: [2026-07-21 pass](contexts/plans/evidence/phase-07.md#attempt-2026-07-21t2305000800). | `contexts/plans/phases/phase-07-validation-fee-exit-preview.md` |
 | **8. Cash Payment & Confirmed Exit** | **COMPLETE** | Complete | Shift/payment/exit RPCs, exception workflows, operational UI, pgTAP concurrency suites, and Phase 8 E2E pass. Evidence: [2026-07-22 pass](contexts/plans/evidence/phase-08.md#attempt-2026-07-22t0045000800). | `contexts/plans/phases/phase-08-cash-payment-confirmed-exit.md` |
 | **9. Dashboard & Realtime** | **COMPLETE** | Complete | Authoritative snapshot RPC, private Broadcast invalidation, Query/realtime UI, pgTAP + E2E convergence. Evidence: [2026-07-22 pass](contexts/plans/evidence/phase-09.md#attempt-2026-07-22t0140000800). | `contexts/plans/phases/phase-09-dashboard-realtime.md` |
-| **OPS-S0..S6 Ops Simplification v1** | **ACTIVE** (S1) | S0 complete; S1–S6 pending | Product pivot: capacity pools, pay-at-exit-only, actor-attributed cash, unified exit. Phase 10 paused until S6 PASS. Evidence: [S0 pass](contexts/plans/evidence/ops-simplification-v1.md#ops-s0-attempt-2026-08-02). ADR: [0001](docs/adr/0001-ops-simplification-capacity-and-cash-attribution.md). | `contexts/plans/ops-simplification-v1.md` |
-| **10. Reports & Audit** | **PAUSED** | Not started beyond tables/RLS | Ops simplification in progress; resume after S6. Required gate: reconciliation, pagination, timezone/location scope, redaction, audited CSV export, accessibility, and E2E must pass. | `contexts/plans/phases/phase-10-reports-audit.md` |
+| **OPS-S0..S6 Ops Simplification v1** | **COMPLETE** | S0–S6 complete | OPS-S0..S6 **COMPLETE**; capacity pools, pay-at-exit-only, actor-attributed cash, unified exit. Evidence: [S6 pass](contexts/plans/evidence/ops-simplification-v1.md#ops-s6-attempt-2026-08-02). ADR: [0003](docs/adr/0003-ops-simplification-capacity-and-cash-attribution.md). | `contexts/plans/ops-simplification-v1.md` |
+| **10. Reports & Audit** | **ACTIVE** | Not started beyond tables/RLS | Resume after S6 PASS. Required gate: reconciliation, pagination, timezone/location scope, redaction, audited CSV export, accessibility, and E2E must pass. | `contexts/plans/phases/phase-10-reports-audit.md` |
 | **10A. Premium UI/UX Refinement** | **PENDING** | Documentation contract ready; application refinement not started | Required gate: Phase 10 complete, Precision Operations UI across all implemented pages, no fake data/affordances, responsive/theme/print parity, WCAG 2.2 AA, visual regression, full functional/security gate. | `contexts/plans/phases/phase-10a-premium-ui-ux-refinement.md` |
 | 11. PWA & Offline | **PENDING** | Not started | Requires Phase 10A complete. Required gate: verified Next-compatible tooling, install/update, sanitized read cache, mutation prohibition, clearing, browser inspection, and E2E must pass. | `contexts/plans/phases/phase-11-pwa-offline.md` |
 | 12. Security Hardening | **PENDING** | Partial baseline | Required gate: Phase 12-owned §21 evidence, full DB/web matrix, MFA/device/origin/rate/log/health controls, lost-device/incident tabletop, and no critical/high finding. Backup/restore/continuity remains Phase 14-owned. | `contexts/plans/phases/phase-12-security-hardening.md` |

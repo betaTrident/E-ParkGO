@@ -46,22 +46,21 @@ test.describe('dashboard realtime', () => {
     await signIn(pageA)
     await signIn(pageB)
 
-    const entriesBeforeText = await pageB
-      .getByText('Entries today')
-      .locator('..')
-      .locator('p.font-mono')
+    const entriesCard = pageB
+      .getByRole('region', { name: 'Operational metrics' })
+      .getByRole('article')
+      .filter({ hasText: 'Entries today' })
+
+    const entriesBeforeText = await entriesCard
+      .getByRole('paragraph')
+      .filter({ hasText: /^\d+$/ })
       .first()
       .textContent()
 
     await createEntry(pageA, plate)
 
     const readEntriesMetric = async () =>
-      pageB
-        .getByText('Entries today')
-        .locator('..')
-        .locator('p.font-mono')
-        .first()
-        .textContent()
+      entriesCard.getByRole('paragraph').filter({ hasText: /^\d+$/ }).first().textContent()
 
     try {
       await expect.poll(readEntriesMetric, { timeout: 5_000 }).not.toBe(

@@ -41,7 +41,7 @@ test.describe('Phase 8 payment and confirmed exit flows', () => {
     await expect(page.getByText('No payment required — cash only at exit')).toBeVisible({
       timeout: 60_000,
     })
-    await page.getByRole('button', { name: 'Collect cash & exit' }).click()
+    await page.getByRole('button', { name: /^(Collect cash & exit|Confirm exit)$/ }).click()
     await expect(page.getByText('Exit completed')).toBeVisible({ timeout: 60_000 })
   })
 })

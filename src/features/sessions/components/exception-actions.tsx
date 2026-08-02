@@ -4,15 +4,23 @@ import { useMemo, useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 
-interface ExceptionActionsProps {
-  sessionId: string
-  status: string
+export type ExceptionDialogKind = 'cancel' | 'lost-ticket' | 'correct'
+
+export function getExceptionCapabilities(status: string) {
+  return {
+    canCancel: status === 'PAYMENT_PENDING',
+    canLostTicket: ['PAYMENT_PENDING', 'PAID_AWAITING_EXIT'].includes(status),
+    canCorrect: ['PAYMENT_PENDING', 'LOST_TICKET', 'MANUAL_REVIEW'].includes(status),
+  }
 }
 
-type DialogKind = 'cancel' | 'lost-ticket' | 'correct' | null
+interface ExceptionActionsProps {
+  sessionId: string
+  dialog: ExceptionDialogKind | null
+  onDialogChange: (dialog: ExceptionDialogKind | null) => void
+}
 
-export function ExceptionActions({ sessionId, status }: ExceptionActionsProps) {
-  const [dialog, setDialog] = useState<DialogKind>(null)
+export function ExceptionActions({ sessionId, dialog, onDialogChange }: ExceptionActionsProps) {
   const [reason, setReason] = useState('')
   const [evidenceKey, setEvidenceKey] = useState('plate_photo')
   const [evidenceValue, setEvidenceValue] = useState('')
@@ -23,12 +31,8 @@ export function ExceptionActions({ sessionId, status }: ExceptionActionsProps) {
   const [pending, setPending] = useState(false)
   const idempotencyKey = useMemo(() => crypto.randomUUID(), [])
 
-  const canCancel = status === 'PAYMENT_PENDING'
-  const canLostTicket = ['PAYMENT_PENDING', 'PAID_AWAITING_EXIT'].includes(status)
-  const canCorrect = ['PAYMENT_PENDING', 'LOST_TICKET', 'MANUAL_REVIEW'].includes(status)
-
   function closeDialog() {
-    setDialog(null)
+    onDialogChange(null)
     setReason('')
     setEvidenceValue('')
     setError(null)
@@ -55,7 +59,7 @@ export function ExceptionActions({ sessionId, status }: ExceptionActionsProps) {
         return
       }
       setMessage('Exception recorded. Refresh to see updated session state.')
-      setDialog(null)
+      onDialogChange(null)
     } catch {
       setError('Network error while submitting exception.')
     } finally {
@@ -65,24 +69,6 @@ export function ExceptionActions({ sessionId, status }: ExceptionActionsProps) {
 
   return (
     <div className="space-y-2">
-      <div className="flex flex-wrap gap-2">
-        {canCancel ? (
-          <Button type="button" variant="outline" size="sm" onClick={() => setDialog('cancel')}>
-            Cancel session
-          </Button>
-        ) : null}
-        {canLostTicket ? (
-          <Button type="button" variant="outline" size="sm" onClick={() => setDialog('lost-ticket')}>
-            Lost ticket
-          </Button>
-        ) : null}
-        {canCorrect ? (
-          <Button type="button" variant="outline" size="sm" onClick={() => setDialog('correct')}>
-            Correct session
-          </Button>
-        ) : null}
-      </div>
-
       {dialog ? (
         <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-700 dark:bg-slate-950">
           <p className="text-sm font-medium">

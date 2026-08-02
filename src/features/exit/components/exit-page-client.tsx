@@ -4,6 +4,7 @@ import { useActionState, useMemo } from 'react'
 
 import { ExitCheckout } from '@/features/exit/components/exit-checkout'
 import { exitPreviewAction, type ExitPreviewActionState } from '@/features/exit/actions'
+import type { ExitPreviewResult } from '@/features/exit/schemas'
 import type { ExitSessionFacts } from '@/features/exit/service'
 import { Button } from '@/components/ui/button'
 import { formatBusinessDateTime } from '@/lib/time/business-time'
@@ -19,10 +20,34 @@ interface ExitPageClientProps {
   quoteExpired: boolean
 }
 
+function buildPaidAwaitingPreview(facts: ExitSessionFacts): ExitPreviewResult {
+  const paidAmount = facts.totalCentavos ?? '0'
+
+  return {
+    session_id: facts.sessionId,
+    status: 'PAID_AWAITING_EXIT',
+    billed_minutes: 0,
+    subtotal_centavos: paidAmount,
+    discount_centavos: '0',
+    penalty_centavos: '0',
+    adjustment_centavos: '0',
+    total_centavos: '0',
+    fee_version: 1,
+    quote_expires_at: facts.quoteExpiresAt ?? new Date().toISOString(),
+  }
+}
+
 export function ExitPageClient({ facts, quoteExpired }: ExitPageClientProps) {
   const [state, formAction, pending] = useActionState(exitPreviewAction, initialState)
   const idempotencyKey = useMemo(() => crypto.randomUUID(), [])
   const correlationId = useMemo(() => crypto.randomUUID(), [])
+
+  const paidAwaitingPreview = useMemo(
+    () => (facts.status === 'PAID_AWAITING_EXIT' ? buildPaidAwaitingPreview(facts) : null),
+    [facts],
+  )
+  const preview = state.data ?? paidAwaitingPreview
+  const showCalculateForm = !preview
 
   return (
     <div className="space-y-6">
@@ -56,9 +81,11 @@ export function ExitPageClient({ facts, quoteExpired }: ExitPageClientProps) {
         </dl>
       </section>
 
-      {state.data ? (
-        <ExitCheckout facts={facts} preview={state.data} quoteExpired={quoteExpired} />
-      ) : (
+      {preview ? (
+        <ExitCheckout facts={facts} preview={preview} quoteExpired={quoteExpired} />
+      ) : null}
+
+      {showCalculateForm ? (
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="sessionId" value={facts.sessionId} />
           <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
@@ -72,7 +99,7 @@ export function ExitPageClient({ facts, quoteExpired }: ExitPageClientProps) {
             </p>
           ) : null}
         </form>
-      )}
+      ) : null}
 
       {state.error ? (
         <p role="alert" className="text-sm text-red-700 dark:text-red-300">

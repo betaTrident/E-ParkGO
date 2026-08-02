@@ -50,7 +50,7 @@ export function ExitConfirmation({ facts }: ExitConfirmationProps) {
       <div className="space-y-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-6 dark:border-emerald-900 dark:bg-emerald-950/40">
         <h2 className="text-xl font-semibold text-emerald-900 dark:text-emerald-100">Exit completed</h2>
         <p className="text-sm text-emerald-800 dark:text-emerald-200">
-          The session is completed and the parking space has been released exactly once.
+          The session is completed and capacity in the pool is available again.
         </p>
         <Link
           href="/sessions"

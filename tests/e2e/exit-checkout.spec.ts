@@ -44,7 +44,7 @@ test.describe('Phase S3 unified exit checkout', () => {
       timeout: 60_000,
     })
 
-    await page.getByRole('button', { name: 'Collect cash & exit' }).click()
+    await page.getByRole('button', { name: /^(Collect cash & exit|Confirm exit)$/ }).click()
     await expect(page.getByText('Exit completed')).toBeVisible({ timeout: 60_000 })
   })
 })

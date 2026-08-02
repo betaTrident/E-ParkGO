@@ -391,10 +391,10 @@ Empty state: “No sessions need attention.”
 
 ### Steps
 
-- [ ] Build `session-row-actions` with accessible menu (`DropdownMenu` via shadcn — `npx shadcn@latest add dropdown-menu` if missing).
-- [ ] Move exception controls into menu; keep server permission checks.
-- [ ] Restyle page to dashboard padding/card pattern.
-- [ ] Update E2E selectors for More actions.
+- [x] Build `session-row-actions` with accessible menu (`DropdownMenu` via shadcn — `npx shadcn@latest add dropdown-menu` if missing).
+- [x] Move exception controls into menu; keep server permission checks.
+- [x] Restyle page to dashboard padding/card pattern.
+- [x] Update E2E selectors for More actions.
 
 ### Gate
 
@@ -403,8 +403,8 @@ npx playwright test tests/e2e/payment-exit.spec.ts --workers=1
 npm run lint
 ```
 
-- [ ] Primary row has no lost/cancel/correct buttons visible until More actions opened.
-- [ ] Evidence S4 PASS.
+- [x] Primary row has no lost/cancel/correct buttons visible until More actions opened.
+- [x] Evidence S4 PASS.
 
 ---
 
@@ -431,9 +431,9 @@ npm run lint
 
 ### Gate
 
-- [ ] Staff nav shows ≤ 5 primary ops items.
-- [ ] No dead-end “must select space” or “must start shift” copy remains in primary flows.
-- [ ] Evidence S5 PASS.
+- [x] Staff nav shows ≤ 5 primary ops items.
+- [x] No dead-end “must select space” or “must start shift” copy remains in primary flows.
+- [x] Evidence S5 PASS.
 
 ---
 
@@ -472,8 +472,8 @@ npm run lint
 
 - [ ] No raw QR in logs, paths, or IndexedDB.
 - [ ] Payment/exit RPCs still location-scoped; actor cannot spoof `actor_id`.
-- [ ] Lost ticket still permission-gated; penalty from rate snapshot, not client.
-- [ ] Idempotency conflicts return safe errors.
+- [x] Lost ticket still permission-gated; penalty from rate snapshot, not client.
+- [x] Idempotency conflicts return safe errors.
 - [ ] No float money; no client-supplied entry/exit timestamps.
 
 ### Gate
