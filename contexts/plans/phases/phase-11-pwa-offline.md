@@ -2,7 +2,7 @@
 
 <!-- ============================================================
 PHASE 11 START — EXECUTION LOCK
-Run only when PLAN.md §0.2 declares CURRENT_PHASE: 11 and Phase 10 is COMPLETE.
+Run only when PLAN.md §0.2 declares CURRENT_PHASE: 11 and Phase 10A is COMPLETE.
 ============================================================ -->
 
 ## 11.0 Execution guard
@@ -10,7 +10,8 @@ Run only when PLAN.md §0.2 declares CURRENT_PHASE: 11 and Phase 10 is COMPLETE.
 - `STATUS: PENDING`; `IMPLEMENTATION_STATE: NOT_STARTED`.
 - Load project `frontend-patterns`, `supabase`; plugins `v-runtime-cache`,
   `v-next-cache-components`; load `context7-mcp` before choosing PWA tooling.
-- Dependency: stable routes/data classifications from Phases 5–10.
+- Dependency: stable routes/data classifications from Phases 5–10 and the
+  Phase 10A premium UI/UX gate.
 - No offline mutation outbox, background entry/payment/exit, cached fee authority,
   or caching of Auth, QR, payment, receipt, admin, report, or audit payloads.
 

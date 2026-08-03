@@ -7,7 +7,7 @@ Run only when PLAN.md §0.2 declares CURRENT_PHASE: 7 and Phase 6 is COMPLETE.
 
 ## 7.0 Execution guard
 
-- `STATUS: PENDING`; `IMPLEMENTATION_STATE: NOT_STARTED`.
+- `STATUS: COMPLETE`; `IMPLEMENTATION_STATE: COMPLETE`.
 - Load project `backend-patterns`, `supabase-postgres-best-practices`; plugins
   `plug-supabase-pg`, `sp-executing`; use `context7-mcp` for camera/Next APIs.
 - Required human input before Step 7.1: an operator-approved development tariff

@@ -1,17 +1,36 @@
 "use client"
 
-import { ThemeProvider } from "next-themes"
+import { QueryClientProvider } from "@tanstack/react-query"
+import dynamic from "next/dynamic"
+import { useState } from "react"
 
+import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/sonner"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { createAppQueryClient } from "@/lib/query/client"
+
+const ReactQueryDevtools = dynamic(
+  () =>
+    import("@tanstack/react-query-devtools").then(
+      (module) => module.ReactQueryDevtools,
+    ),
+  { ssr: false },
+)
 
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [queryClient] = useState(() => createAppQueryClient())
+
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-      <TooltipProvider>
-        {children}
-        <Toaster />
-      </TooltipProvider>
+    <ThemeProvider>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          {children}
+          <Toaster />
+        </TooltipProvider>
+        {process.env.NODE_ENV === "development" ? (
+          <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
+        ) : null}
+      </QueryClientProvider>
     </ThemeProvider>
   )
 }

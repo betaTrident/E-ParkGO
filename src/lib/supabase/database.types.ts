@@ -188,11 +188,13 @@ export type Database = {
       }
       parking_locations: {
         Row: {
+          car_capacity: number
           code: string
           created_at: string
           currency: string
           id: string
           is_active: boolean
+          motorcycle_capacity: number
           name: string
           receipt_prefix: string
           settings: Json
@@ -200,11 +202,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          car_capacity?: number
           code: string
           created_at?: string
           currency?: string
           id?: string
           is_active?: boolean
+          motorcycle_capacity?: number
           name: string
           receipt_prefix: string
           settings?: Json
@@ -212,11 +216,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          car_capacity?: number
           code?: string
           created_at?: string
           currency?: string
           id?: string
           is_active?: boolean
+          motorcycle_capacity?: number
           name?: string
           receipt_prefix?: string
           settings?: Json
@@ -407,7 +413,7 @@ export type Database = {
           id: string
           override_approved_by: string | null
           parking_location_id: string
-          parking_space_id: string
+          parking_space_id?: string | null
           payment_processed_by: string | null
           payment_status: Database["public"]["Enums"]["session_payment_status"]
           penalty_centavos: number | null
@@ -432,7 +438,7 @@ export type Database = {
           id?: string
           override_approved_by?: string | null
           parking_location_id: string
-          parking_space_id: string
+          parking_space_id?: string | null
           payment_processed_by?: string | null
           payment_status?: Database["public"]["Enums"]["session_payment_status"]
           penalty_centavos?: number | null
@@ -457,7 +463,7 @@ export type Database = {
           id?: string
           override_approved_by?: string | null
           parking_location_id?: string
-          parking_space_id?: string
+          parking_space_id?: string | null
           payment_processed_by?: string | null
           payment_status?: Database["public"]["Enums"]["session_payment_status"]
           penalty_centavos?: number | null
@@ -1142,6 +1148,7 @@ export type Database = {
       }
       vehicle_types: {
         Row: {
+          capacity_pool: string
           code: string
           created_at: string
           id: string
@@ -1151,6 +1158,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          capacity_pool: string
           code: string
           created_at?: string
           id?: string
@@ -1160,6 +1168,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          capacity_pool?: string
           code?: string
           created_at?: string
           id?: string
@@ -1345,6 +1354,13 @@ export type Database = {
         }
         Returns: string
       }
+      admin_update_location_capacities: {
+        Args: {
+          p_car_capacity: number
+          p_motorcycle_capacity: number
+        }
+        Returns: string
+      }
       admin_update_parking_space: {
         Args: {
           p_correlation_id: string
@@ -1414,6 +1430,177 @@ export type Database = {
       admin_withdraw_rate_draft: {
         Args: { p_correlation_id: string; p_rate_id: string }
         Returns: undefined
+      }
+      calculate_parking_exit: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      cancel_parking_session: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_reason: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      close_staff_shift: {
+        Args: {
+          p_correlation_id: string
+          p_declared_cash_centavos: number
+          p_idempotency_key: string
+          p_notes: string
+          p_shift_id: string
+        }
+        Returns: Json
+      }
+      confirm_vehicle_exit: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      correct_parking_session: {
+        Args: {
+          p_correction_type: string
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_reason: string
+          p_session_id: string
+          p_values: Json
+        }
+        Returns: Json
+      }
+      create_parking_entry: {
+        Args: {
+          p_color: string | null
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_plate: string
+          p_vehicle_type_id: string
+        }
+        Returns: Json
+      }
+      export_report: {
+        Args: {
+          p_correlation_id: string
+          p_from: string
+          p_idempotency_key: string
+          p_report_type: string
+          p_to: string
+        }
+        Returns: Json
+      }
+      get_dashboard_snapshot: {
+        Args: { p_business_date?: string }
+        Returns: Json
+      }
+      get_report_preview: {
+        Args: { p_from: string; p_report_type: string; p_to: string }
+        Returns: Json
+      }
+      list_shift_history: {
+        Args: { p_cursor?: string; p_limit?: number }
+        Returns: Json
+      }
+      list_staff_cash_totals: {
+        Args: { p_business_date?: string }
+        Returns: Json
+      }
+      list_transactions: {
+        Args: {
+          p_cursor?: string
+          p_from: string
+          p_limit?: number
+          p_plate?: string
+          p_status?: string
+          p_to: string
+        }
+        Returns: Json
+      }
+      process_lost_ticket: {
+        Args: {
+          p_correlation_id: string
+          p_evidence: Json
+          p_idempotency_key: string
+          p_reason: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      record_parking_payment: {
+        Args: {
+          p_cash_tendered_centavos: number
+          p_correlation_id: string
+          p_external_reference: string
+          p_idempotency_key: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      settle_cash_and_exit: {
+        Args: {
+          p_cash_tendered_centavos: number
+          p_correlation_id: string
+          p_external_reference: string
+          p_idempotency_key: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      reissue_parking_ticket: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_reason: string
+          p_session_id: string
+        }
+        Returns: Json
+      }
+      search_audit_logs: {
+        Args: {
+          p_action?: string
+          p_actor_id?: string
+          p_correlation_id?: string
+          p_cursor?: string
+          p_from: string
+          p_limit?: number
+          p_to: string
+        }
+        Returns: Json
+      }
+      start_staff_shift: {
+        Args: {
+          p_correlation_id: string
+          p_device_id: string
+          p_idempotency_key: string
+          p_opening_float_centavos: number
+        }
+        Returns: Json
+      }
+      validate_parking_ticket: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_ticket_number: string
+          p_token: string
+        }
+        Returns: Json
+      }
+      void_parking_payment: {
+        Args: {
+          p_correlation_id: string
+          p_idempotency_key: string
+          p_payment_id: string
+          p_reason: string
+        }
+        Returns: Json
       }
     }
     Enums: {

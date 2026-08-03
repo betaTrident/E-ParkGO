@@ -2,8 +2,8 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { facilitySettingsSchema } from '@/features/facility/schemas'
-import { updateFacilitySettings } from '@/features/facility/service'
+import { capacitySchema, facilitySettingsSchema } from '@/features/facility/schemas'
+import { updateFacilitySettings, updateLocationCapacities } from '@/features/facility/service'
 import { requireAdminProfile } from '@/lib/auth/session'
 
 export interface FacilityActionState {
@@ -54,5 +54,43 @@ export async function updateFacilitySettingsAction(
     success: true,
     error: null,
     message: 'Facility settings saved.',
+  }
+}
+
+export async function updateLocationCapacitiesAction(
+  _prevState: FacilityActionState,
+  formData: FormData,
+): Promise<FacilityActionState> {
+  await requireAdminProfile()
+
+  const parsed = capacitySchema.safeParse({
+    carCapacity: formData.get('carCapacity'),
+    motorcycleCapacity: formData.get('motorcycleCapacity'),
+  })
+
+  if (!parsed.success) {
+    return {
+      ...initialState(),
+      error: parsed.error.issues[0]?.message ?? 'Invalid capacity values',
+    }
+  }
+
+  const result = await updateLocationCapacities(parsed.data)
+
+  if (!result.success) {
+    return {
+      ...initialState(),
+      error: result.error ?? 'Unable to update capacities',
+    }
+  }
+
+  revalidatePath('/admin/settings')
+  revalidatePath('/entry')
+  revalidatePath('/dashboard')
+
+  return {
+    success: true,
+    error: null,
+    message: 'Capacity pools saved.',
   }
 }

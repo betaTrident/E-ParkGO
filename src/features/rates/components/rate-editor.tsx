@@ -144,6 +144,9 @@ export function RateEditor({ vehicleTypes }: RateEditorProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="lostTicketPenaltyCentavos">Lost ticket penalty centavos</Label>
+            <p className="text-xs text-slate-500">
+              Applied when processing a lost ticket. Charged on top of parking fees at exit.
+            </p>
             <Input
               id="lostTicketPenaltyCentavos"
               name="lostTicketPenaltyCentavos"

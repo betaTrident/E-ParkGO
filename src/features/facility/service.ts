@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 
-import type { FacilitySettingsInput } from '@/features/facility/schemas'
+import type { CapacityInput, FacilitySettingsInput } from '@/features/facility/schemas'
 import { createServerSupabaseClient } from '@/lib/supabase/server'
 
 export interface FacilitySettingsRecord {
@@ -9,6 +9,8 @@ export interface FacilitySettingsRecord {
   timezone: string
   currency: string
   receipt_prefix: string
+  car_capacity: number
+  motorcycle_capacity: number
   settings: Record<string, unknown>
 }
 
@@ -45,7 +47,7 @@ export async function getFacilitySettings(
   const supabase = await createServerSupabaseClient()
   const { data, error } = await supabase
     .from('parking_locations')
-    .select('id, name, timezone, currency, receipt_prefix, settings')
+    .select('id, name, timezone, currency, receipt_prefix, car_capacity, motorcycle_capacity, settings')
     .eq('id', locationId)
     .maybeSingle()
 
@@ -74,6 +76,22 @@ export async function updateFacilitySettings(
       grace_display_minutes: input.graceDisplayMinutes,
     },
     p_correlation_id: randomUUID(),
+  })
+
+  if (error) {
+    return { success: false, error: mapConfigurationRpcError(error) }
+  }
+
+  return { success: true }
+}
+
+export async function updateLocationCapacities(
+  input: CapacityInput,
+): Promise<ConfigurationActionResult> {
+  const supabase = await createServerSupabaseClient()
+  const { error } = await supabase.rpc('admin_update_location_capacities', {
+    p_car_capacity: input.carCapacity,
+    p_motorcycle_capacity: input.motorcycleCapacity,
   })
 
   if (error) {

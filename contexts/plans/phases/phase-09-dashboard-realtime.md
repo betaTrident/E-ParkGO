@@ -7,8 +7,7 @@ Run only when PLAN.md §0.2 declares CURRENT_PHASE: 9 and Phase 8 is COMPLETE.
 
 ## 9.0 Execution guard
 
-- `STATUS: PENDING`; `IMPLEMENTATION_STATE: NOT_STARTED` except the current Auth
-  readiness dashboard shell, which is not an operational dashboard.
+- `STATUS: COMPLETE`; `IMPLEMENTATION_STATE: COMPLETE` (gate evidence: `contexts/plans/evidence/phase-09.md`).
 - Load project `frontend-patterns`, `supabase`, `accessibility`; plugins
   `v-react-best-practices`, `v-next-cache-components`, `plug-supabase`, `c-canvas`.
 - Dependencies: stable entry/payment/exit RPCs and all Phase 8 gates.

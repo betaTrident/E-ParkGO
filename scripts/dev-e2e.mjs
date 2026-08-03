@@ -1,4 +1,4 @@
-import { renameSync, existsSync } from 'node:fs'
+import { renameSync, existsSync, rmSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { spawn } from 'node:child_process'
 
@@ -47,9 +47,18 @@ const childEnv = {
 
 isolateRemoteEnvFiles()
 
+const nextCacheDir = resolve(root, '.next')
+try {
+  if (existsSync(nextCacheDir)) {
+    rmSync(nextCacheDir, { recursive: true, force: true, maxRetries: 3, retryDelay: 200 })
+  }
+} catch {
+  // A concurrent Next.js process may still hold files under .next on Windows.
+}
+
 const child = spawn(
   'npx',
-  ['next', 'dev', '--turbopack', '-p', e2ePort],
+  ['next', 'dev', '-p', e2ePort],
   {
     cwd: root,
     env: childEnv,

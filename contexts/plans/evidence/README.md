@@ -6,8 +6,11 @@ but does not contain or replace detailed evidence.
 
 ## File naming
 
-- One file per phase: `phase-03.md` through `phase-15.md`.
-- Create the file on the first gate attempt.
+- One file per phase: `phase-03.md` through `phase-15.md`, including the inserted
+  `phase-10a.md` design-refinement gate.
+- Create the file on the first gate attempt, or pre-seed only a status/header
+  block when an inserted phase needs a durable evidence link. A pre-seeded file
+  is not an attempt and cannot support a PASS status.
 - Append new attempts in chronological order. Never delete or rewrite a failed
   attempt; append a correction and a new attempt.
 - Never store secrets, raw QR tokens/hashes, cookies/JWTs, passwords, dumps, real
