@@ -1,15 +1,12 @@
 'use client'
 
+import { useMemo } from 'react'
+
 import { Button } from '@/components/ui/button'
 import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+  DataTable,
+  type DataTableColumnDef,
+} from '@/components/ui/data-table'
 
 interface ReportTableColumn<T> {
   key: keyof T | string
@@ -36,52 +33,31 @@ export function ReportTable<T extends Record<string, unknown>>({
   onNextPage,
   isLoading = false,
 }: ReportTableProps<T>) {
+  const tableColumns = useMemo<Array<DataTableColumnDef<T>>>(
+    () =>
+      columns.map((column) => ({
+        id: String(column.key),
+        accessorFn: (row) => row[column.key as keyof T],
+        header: column.header,
+        cell: ({ row }) =>
+          column.render
+            ? column.render(row.original)
+            : String(row.original[column.key as keyof T] ?? ''),
+      })),
+    [columns],
+  )
+
   return (
     <section className="flex flex-col gap-4" aria-busy={isLoading}>
-      <div className="hidden overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 md:block">
-        <Table>
-          <TableCaption className="sr-only">{caption}</TableCaption>
-          <TableHeader className="bg-slate-50 dark:bg-slate-950">
-            <TableRow>
-              {columns.map((column) => (
-                <TableHead
-                  key={String(column.key)}
-                  className="px-4 py-3 text-xs uppercase tracking-wide text-slate-500"
-                >
-                  {column.header}
-                </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.length === 0 ? (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="px-4 py-6 whitespace-normal text-slate-500"
-                >
-                  {emptyMessage}
-                </TableCell>
-              </TableRow>
-            ) : (
-              rows.map((row, index) => (
-                <TableRow key={String(row.id ?? index)}>
-                  {columns.map((column) => (
-                    <TableCell
-                      key={String(column.key)}
-                      className="px-4 py-3 align-top whitespace-normal"
-                    >
-                      {column.render
-                        ? column.render(row)
-                        : String(row[column.key as keyof T] ?? '')}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        className="hidden rounded-2xl border-slate-200 md:block dark:border-slate-800"
+        caption={caption}
+        columns={tableColumns}
+        data={rows}
+        emptyMessage={emptyMessage}
+        getRowId={(row, index) => String(row.id ?? index)}
+        headerClassName="bg-slate-50 dark:bg-slate-950"
+      />
 
       <ul className="flex flex-col gap-3 md:hidden" aria-label={`${caption} mobile list`}>
         {rows.length === 0 ? (

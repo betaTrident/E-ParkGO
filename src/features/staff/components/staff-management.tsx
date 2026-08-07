@@ -1,10 +1,14 @@
 "use client";
 
 import { Shield, UserPlus, UserX } from "lucide-react";
-import { useActionState, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DataTable,
+  type DataTableColumnDef,
+} from "@/components/ui/data-table";
 import {
   Dialog,
   DialogContent,
@@ -16,14 +20,6 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   disableStaffAction,
   inviteStaffAction,
@@ -296,8 +292,48 @@ export function StaffManagement({
   currentProfile,
   staffMembers,
 }: StaffManagementProps) {
+  const columns = useMemo<Array<DataTableColumnDef<StaffMemberRecord>>>(
+    () => [
+      {
+        accessorKey: "full_name",
+        header: "Name",
+        cell: ({ row }) => (
+          <span className="font-medium">{row.original.full_name}</span>
+        ),
+      },
+      {
+        accessorKey: "email",
+        header: "Email",
+        cell: ({ row }) => row.original.email ?? "—",
+      },
+      {
+        accessorKey: "role",
+        header: "Role",
+        cell: ({ row }) => (
+          <span className="capitalize">{row.original.role.toLowerCase()}</span>
+        ),
+      },
+      {
+        id: "status",
+        header: "Status",
+        cell: ({ row }) => <StatusBadge member={row.original} />,
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        cell: ({ row }) => (
+          <StaffActions
+            member={row.original}
+            currentProfileId={currentProfile.id}
+          />
+        ),
+      },
+    ],
+    [currentProfile.id],
+  );
+
   return (
-    <div className="space-y-6 p-4 sm:p-6 xl:p-8">
+    <div className="flex flex-col gap-6 p-4 sm:p-6 xl:p-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
@@ -311,39 +347,12 @@ export function StaffManagement({
         <InviteStaffDialog />
       </div>
 
-      <div className="hidden overflow-hidden rounded-xl border bg-white dark:bg-slate-950 md:block">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {staffMembers.map((member) => (
-              <TableRow key={member.id}>
-                <TableCell className="font-medium">{member.full_name}</TableCell>
-                <TableCell>{member.email ?? "—"}</TableCell>
-                <TableCell className="capitalize">
-                  {member.role.toLowerCase()}
-                </TableCell>
-                <TableCell>
-                  <StatusBadge member={member} />
-                </TableCell>
-                <TableCell>
-                  <StaffActions
-                    member={member}
-                    currentProfileId={currentProfile.id}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        className="hidden rounded-xl bg-white md:block dark:bg-slate-950"
+        columns={columns}
+        data={staffMembers}
+        getRowId={(row) => row.id}
+      />
 
       <div className="grid gap-4 md:hidden">
         {staffMembers.map((member) => (
