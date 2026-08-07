@@ -4,6 +4,14 @@ import { ArrowRight, Car } from "lucide-react";
 import Link from "next/link";
 import type { DashboardSnapshot } from "@/features/dashboard/types";
 import { formatBusinessDateTime } from "@/lib/time/business-time";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 interface RecentEntriesTableProps {
   snapshot?: DashboardSnapshot | null;
@@ -77,45 +85,45 @@ export function RecentEntriesTable({ snapshot }: RecentEntriesTableProps) {
         </Link>
       </div>
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full text-left text-xs">
-          <thead>
-            <tr className="border-b border-slate-100 text-slate-400 dark:border-slate-800 dark:text-slate-500">
-              <th scope="col" className="pb-3 font-semibold">
+      <div className="mt-4">
+        <Table className="text-xs">
+          <TableHeader>
+            <TableRow className="border-b border-slate-100 hover:bg-transparent dark:border-slate-800">
+              <TableHead className="h-auto pb-3 font-semibold text-slate-400 dark:text-slate-500">
                 Time
-              </th>
-              <th scope="col" className="pb-3 font-semibold">
+              </TableHead>
+              <TableHead className="h-auto pb-3 font-semibold text-slate-400 dark:text-slate-500">
                 License Plate
-              </th>
-              <th scope="col" className="pb-3 font-semibold">
+              </TableHead>
+              <TableHead className="h-auto pb-3 font-semibold text-slate-400 dark:text-slate-500">
                 Type
-              </th>
-              <th scope="col" className="pb-3 font-semibold">
+              </TableHead>
+              <TableHead className="h-auto pb-3 font-semibold text-slate-400 dark:text-slate-500">
                 Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
             {entriesList.slice(0, 5).map((row) => (
-              <tr
+              <TableRow
                 key={row.id}
-                className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
+                className="border-slate-100 hover:bg-slate-50/50 dark:border-slate-800/60 dark:hover:bg-slate-800/30"
               >
-                <td className="whitespace-nowrap py-3 font-medium text-slate-600 dark:text-slate-300">
+                <TableCell className="py-3 font-medium text-slate-600 dark:text-slate-300">
                   {row.time}
-                </td>
-                <td className="whitespace-nowrap py-3">
+                </TableCell>
+                <TableCell className="py-3">
                   <span className="inline-block rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] font-semibold tracking-wider text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
                     {row.plate}
                   </span>
-                </td>
-                <td className="whitespace-nowrap py-3 font-medium text-slate-700 dark:text-slate-200">
+                </TableCell>
+                <TableCell className="py-3 font-medium text-slate-700 dark:text-slate-200">
                   <div className="flex items-center gap-1.5">
                     <Car className="size-3.5 text-slate-400" />
                     <span>{row.type}</span>
                   </div>
-                </td>
-                <td className="whitespace-nowrap py-3">
+                </TableCell>
+                <TableCell className="py-3">
                   <span
                     className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                       row.status === "Active"
@@ -125,11 +133,11 @@ export function RecentEntriesTable({ snapshot }: RecentEntriesTableProps) {
                   >
                     {row.status}
                   </span>
-                </td>
-              </tr>
+                </TableCell>
+              </TableRow>
             ))}
-          </tbody>
-        </table>
+          </TableBody>
+        </Table>
       </div>
 
       <div className="mt-4 flex items-center justify-center border-t border-slate-100 pt-3 dark:border-slate-800">
