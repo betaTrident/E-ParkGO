@@ -4,6 +4,7 @@ import {
   tableFeatures,
   useTable,
   type ColumnDef,
+  type RowData,
 } from "@tanstack/react-table";
 
 import {
@@ -20,12 +21,12 @@ import { cn } from "@/lib/utils";
 /** Core-only feature set shared by app data tables (TanStack Table v9). */
 export const dataTableFeatures = tableFeatures({});
 
-export type DataTableColumnDef<TData> = ColumnDef<
+export type DataTableColumnDef<TData extends RowData> = ColumnDef<
   typeof dataTableFeatures,
   TData
 >;
 
-interface DataTableProps<TData> {
+interface DataTableProps<TData extends RowData> {
   columns: Array<DataTableColumnDef<TData>>;
   data: TData[];
   caption?: string;
@@ -36,7 +37,7 @@ interface DataTableProps<TData> {
   getRowId?: (originalRow: TData, index: number) => string;
 }
 
-export function DataTable<TData>({
+export function DataTable<TData extends RowData>({
   columns,
   data,
   caption,
@@ -50,7 +51,7 @@ export function DataTable<TData>({
     features: dataTableFeatures,
     columns,
     data,
-    getRowId,
+    ...(getRowId ? { getRowId } : {}),
   });
 
   const rows = table.getRowModel().rows;
