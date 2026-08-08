@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/badge";
+import { PageHeader } from "@/components/shared/page-header";
+import { SectionPanel } from "@/components/shared/section-panel";
 import { RateEditor } from "@/features/rates/components/rate-editor";
 import { RateVersionList } from "@/features/rates/components/rate-version-list";
 import { listRateVersions } from "@/features/rates/service";
@@ -12,24 +15,17 @@ export default async function AdminRatesPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-10 px-4 py-8 sm:px-6">
-      <header className="space-y-2">
-        <p className="text-sm font-medium text-blue-600 dark:text-blue-300">
-          Administration
-        </p>
-        <h1 className="text-3xl font-bold tracking-tight">Rates</h1>
-        <p className="max-w-2xl text-slate-600 dark:text-slate-400">
-          Versioned, effective-dated tariffs. Published rows are immutable;
-          overlapping windows are rejected at publish time.
-        </p>
-      </header>
+    <div className="page-root">
+      <PageHeader
+        title="Rates"
+        description="Versioned, effective-dated tariffs. Published rows are immutable; overlapping windows are rejected at publish time."
+        badge={<Badge variant="outline">Admin only</Badge>}
+        action={<RateEditor vehicleTypes={vehicleTypes} />}
+      />
 
-      <RateEditor vehicleTypes={vehicleTypes} />
-
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold">Versions</h2>
+      <SectionPanel title="Rate versions" bodyClassName="p-0 overflow-hidden">
         <RateVersionList rates={rates} />
-      </section>
+      </SectionPanel>
     </div>
   );
 }

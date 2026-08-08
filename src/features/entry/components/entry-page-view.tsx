@@ -1,3 +1,5 @@
+import { PageHeader } from "@/components/shared/page-header";
+import { SectionPanel } from "@/components/shared/section-panel";
 import type { DashboardMetrics, DashboardSnapshot } from "@/features/dashboard/types";
 import { EntryContextPanel } from "@/features/entry/components/entry-context-panel";
 import {
@@ -60,46 +62,28 @@ export function EntryPageView({
       : {};
 
   return (
-    <div className="space-y-5 p-4 sm:p-6 xl:p-7">
-      <header className="space-y-1">
-        <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-          Vehicle entry
-        </h1>
-        <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          Record plate and vehicle type against the facility capacity pool, issue
-          a one-time QR ticket, and print it immediately. Cash payment is
-          collected at exit only — no space selection or shift required.
-        </p>
-      </header>
+    <div className="page-root">
+      <PageHeader
+        title="Vehicle entry"
+        description="Record plate and vehicle type against the facility capacity pool, issue a one-time QR ticket, and print it immediately."
+      />
 
       {metrics ? (
         <EntryKpiStrip metrics={metrics} />
       ) : (
-        <p
-          role="status"
-          className="rounded-lg border border-slate-200 bg-slate-50/80 px-4 py-3 text-sm text-slate-600 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-300"
-        >
-          Live facility metrics are temporarily unavailable. You can still create
-          an entry below.
-        </p>
+        <div className="panel p-4 text-xs text-muted-foreground">
+          Live facility metrics are temporarily unavailable. You can still create an entry below.
+        </div>
       )}
 
       <div className="grid gap-5 xl:grid-cols-2">
-        <section
-          aria-label="Issue ticket"
-          className="rounded-md border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
-        >
-          <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
-            Issue ticket
-          </h2>
-          <div className="mt-5">
-            <EntryForm
-              vehicleTypes={vehicleTypes}
-              poolCapacities={poolCapacities}
-              poolRemaining={poolRemaining}
-            />
-          </div>
-        </section>
+        <SectionPanel title="Issue ticket">
+          <EntryForm
+            vehicleTypes={vehicleTypes}
+            poolCapacities={poolCapacities}
+            poolRemaining={poolRemaining}
+          />
+        </SectionPanel>
 
         <EntryContextPanel snapshot={snapshot} />
       </div>

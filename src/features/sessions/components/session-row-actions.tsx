@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState } from 'react'
+import { MoreHorizontal } from 'lucide-react'
 
 import { Button, buttonVariants } from '@/components/ui/button'
 import {
@@ -11,10 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import {
-  ExceptionActions,
   getExceptionCapabilities,
   type ExceptionDialogKind,
 } from '@/features/sessions/components/exception-actions'
+import { SessionExceptionSheet } from '@/features/sessions/components/session-exception-sheet'
 import { cn } from '@/lib/utils'
 
 interface SessionRowActionsProps {
@@ -32,8 +33,8 @@ export function SessionRowActions({ sessionId, status }: SessionRowActionsProps)
   }
 
   return (
-    <div className="space-y-3">
-      <div className="flex flex-wrap items-center gap-2">
+    <>
+      <div className="flex items-center gap-2">
         <Link
           href={`/exit/${sessionId}`}
           className={cn(buttonVariants({ size: 'sm' }))}
@@ -41,36 +42,41 @@ export function SessionRowActions({ sessionId, status }: SessionRowActionsProps)
           Checkout
         </Link>
 
-        {hasMoreActions ? (
+        {hasMoreActions && (
           <DropdownMenu>
             <DropdownMenuTrigger
-              aria-label="More actions"
-              render={<Button variant="outline" size="sm" />}
-            >
-              More actions
-            </DropdownMenuTrigger>
+              render={
+                <Button variant="outline" size="sm" aria-label="More actions">
+                  <MoreHorizontal className="size-4" />
+                </Button>
+              }
+            />
             <DropdownMenuContent align="end">
-              {canLostTicket ? (
+              {canLostTicket && (
                 <DropdownMenuItem onClick={() => openDialog('lost-ticket')}>
                   Process lost ticket
                 </DropdownMenuItem>
-              ) : null}
-              {canCancel ? (
+              )}
+              {canCancel && (
                 <DropdownMenuItem onClick={() => openDialog('cancel')}>
                   Cancel session
                 </DropdownMenuItem>
-              ) : null}
-              {canCorrect ? (
+              )}
+              {canCorrect && (
                 <DropdownMenuItem onClick={() => openDialog('correct')}>
                   Correct session
                 </DropdownMenuItem>
-              ) : null}
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
-        ) : null}
+        )}
       </div>
 
-      <ExceptionActions sessionId={sessionId} dialog={dialog} onDialogChange={setDialog} />
-    </div>
+      <SessionExceptionSheet
+        sessionId={sessionId}
+        dialog={dialog}
+        onDialogChange={setDialog}
+      />
+    </>
   )
 }

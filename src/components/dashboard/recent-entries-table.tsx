@@ -2,6 +2,12 @@
 
 import { ArrowRight, Car } from "lucide-react";
 import Link from "next/link";
+import { useMemo } from "react";
+
+import {
+  DataTable,
+  type DataTableColumnDef,
+} from "@/components/ui/data-table";
 import type { DashboardSnapshot } from "@/features/dashboard/types";
 import { formatBusinessDateTime } from "@/lib/time/business-time";
 
@@ -9,7 +15,15 @@ interface RecentEntriesTableProps {
   snapshot?: DashboardSnapshot | null;
 }
 
-const mockEntries = [
+type RecentEntryRow = {
+  id: string;
+  time: string;
+  plate: string;
+  type: string;
+  status: string;
+};
+
+const mockEntries: RecentEntryRow[] = [
   {
     id: "1",
     time: "10:24 AM",
@@ -47,18 +61,67 @@ const mockEntries = [
   },
 ];
 
+const columns: Array<DataTableColumnDef<RecentEntryRow>> = [
+  {
+    accessorKey: "time",
+    header: "Time",
+    cell: ({ row }) => (
+      <span className="font-medium text-slate-600 dark:text-slate-300">
+        {row.original.time}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "plate",
+    header: "License Plate",
+    cell: ({ row }) => (
+      <span className="inline-block rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] font-semibold tracking-wider text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
+        {row.original.plate}
+      </span>
+    ),
+  },
+  {
+    accessorKey: "type",
+    header: "Type",
+    cell: ({ row }) => (
+      <div className="flex items-center gap-1.5 font-medium text-slate-700 dark:text-slate-200">
+        <Car className="size-3.5 text-slate-400" />
+        <span>{row.original.type}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "status",
+    header: "Status",
+    cell: ({ row }) => (
+      <span
+        className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
+          row.original.status === "Active"
+            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
+            : "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400"
+        }`}
+      >
+        {row.original.status}
+      </span>
+    ),
+  },
+];
+
 export function RecentEntriesTable({ snapshot }: RecentEntriesTableProps) {
-  const movements = snapshot?.recent_movements;
-  const entriesList =
-    movements && movements.length > 0
-      ? movements.map((m, idx) => ({
-          id: m.session_id + idx,
-          time: formatBusinessDateTime(m.occurred_at, "h:mm a"),
-          plate: m.plate_display,
-          type: m.kind === "entry" ? "Entry" : "Exit",
-          status: m.session_status === "COMPLETED" ? "Completed" : "Active",
-        }))
-      : mockEntries;
+  const entriesList = useMemo(() => {
+    const movements = snapshot?.recent_movements;
+    if (!movements || movements.length === 0) {
+      return mockEntries;
+    }
+
+    return movements.map((m, idx) => ({
+      id: m.session_id + idx,
+      time: formatBusinessDateTime(m.occurred_at, "h:mm a"),
+      plate: m.plate_display,
+      type: m.kind === "entry" ? "Entry" : "Exit",
+      status: m.session_status === "COMPLETED" ? "Completed" : "Active",
+    }));
+  }, [snapshot?.recent_movements]);
 
   return (
     <section
@@ -77,59 +140,14 @@ export function RecentEntriesTable({ snapshot }: RecentEntriesTableProps) {
         </Link>
       </div>
 
-      <div className="mt-4 overflow-x-auto">
-        <table className="w-full text-left text-xs">
-          <thead>
-            <tr className="border-b border-slate-100 text-slate-400 dark:border-slate-800 dark:text-slate-500">
-              <th scope="col" className="pb-3 font-semibold">
-                Time
-              </th>
-              <th scope="col" className="pb-3 font-semibold">
-                License Plate
-              </th>
-              <th scope="col" className="pb-3 font-semibold">
-                Type
-              </th>
-              <th scope="col" className="pb-3 font-semibold">
-                Status
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-            {entriesList.slice(0, 5).map((row) => (
-              <tr
-                key={row.id}
-                className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/30"
-              >
-                <td className="whitespace-nowrap py-3 font-medium text-slate-600 dark:text-slate-300">
-                  {row.time}
-                </td>
-                <td className="whitespace-nowrap py-3">
-                  <span className="inline-block rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] font-semibold tracking-wider text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                    {row.plate}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap py-3 font-medium text-slate-700 dark:text-slate-200">
-                  <div className="flex items-center gap-1.5">
-                    <Car className="size-3.5 text-slate-400" />
-                    <span>{row.type}</span>
-                  </div>
-                </td>
-                <td className="whitespace-nowrap py-3">
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
-                      row.status === "Active"
-                        ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400"
-                        : "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400"
-                    }`}
-                  >
-                    {row.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="mt-4">
+        <DataTable
+          className="border-0"
+          columns={columns}
+          data={entriesList.slice(0, 5)}
+          getRowId={(row) => row.id}
+          tableClassName="text-xs"
+        />
       </div>
 
       <div className="mt-4 flex items-center justify-center border-t border-slate-100 pt-3 dark:border-slate-800">

@@ -110,6 +110,7 @@ export async function createSpaceAction(
   }
 
   revalidatePath('/spaces')
+  revalidatePath('/admin/settings')
 
   return { success: true, error: null, message: 'Space created.' }
 }

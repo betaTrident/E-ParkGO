@@ -1,5 +1,18 @@
+'use client'
+
+import { useMemo } from 'react'
+import { Calendar } from 'lucide-react'
+
+import { Badge } from '@/components/ui/badge'
+import {
+  DataTable,
+  type DataTableColumnDef,
+} from '@/components/ui/data-table'
+import { EmptyState } from '@/components/shared/empty-state'
+import { PageHeader } from '@/components/shared/page-header'
+import { SectionPanel } from '@/components/shared/section-panel'
+import { StatusChip } from '@/components/shared/status-chip'
 import { SessionRowActions } from '@/features/sessions/components/session-row-actions'
-import { cn } from '@/lib/utils'
 
 export interface SessionListItem {
   id: string
@@ -12,82 +25,69 @@ interface SessionsPageViewProps {
   sessions: SessionListItem[]
 }
 
-function formatSessionStatus(status: string): string {
-  return status
-    .toLowerCase()
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
-}
-
-function statusPillClass(status: string): string {
-  if (status === 'PAID_AWAITING_EXIT') {
-    return 'bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400'
-  }
-
-  if (
-    status === 'PAYMENT_PENDING' ||
-    status === 'LOST_TICKET' ||
-    status === 'MANUAL_REVIEW'
-  ) {
-    return 'bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400'
-  }
-
-  return 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300'
-}
-
-const sessionCardClass =
-  'rounded-md border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900'
-
 export function SessionsPageView({ sessions }: SessionsPageViewProps) {
+  const columns = useMemo<Array<DataTableColumnDef<SessionListItem>>>(
+    () => [
+      {
+        id: 'plateDisplay',
+        header: 'Vehicle Plate',
+        cell: ({ row }) => (
+          <span className="ref-tag">{row.original.plateDisplay}</span>
+        ),
+      },
+      {
+        accessorKey: 'ticketNumber',
+        header: 'Ticket Number',
+        cell: ({ row }) => (
+          <span className="font-mono text-xs font-medium text-foreground">
+            {row.original.ticketNumber}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'status',
+        header: 'Status',
+        cell: ({ row }) => <StatusChip status={row.original.status} />,
+      },
+      {
+        id: 'actions',
+        header: () => <div className="text-right">Actions</div>,
+        cell: ({ row }) => (
+          <div className="flex justify-end">
+            <SessionRowActions
+              sessionId={row.original.id}
+              status={row.original.status}
+            />
+          </div>
+        ),
+      },
+    ],
+    [],
+  )
+
   return (
-    <div className="space-y-5 p-4 sm:p-6 xl:p-7">
-      <header className="space-y-1">
-        <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-          Active sessions
-        </h1>
-        <p className="max-w-2xl text-sm text-slate-500 dark:text-slate-400">
-          Sessions awaiting checkout, payment, or manual review. Use Checkout for
-          the standard exit flow; open More actions for exceptions only.
-        </p>
-      </header>
+    <div className="page-root">
+      <PageHeader
+        title="Active sessions"
+        description="Sessions awaiting checkout, payment, or manual review. Standard exit flows use Checkout."
+        badge={<Badge variant="outline">{sessions.length} active</Badge>}
+      />
 
       {sessions.length === 0 ? (
-        <section
-          aria-label="Active sessions"
-          className={sessionCardClass}
-        >
-          <p className="text-sm text-slate-500 dark:text-slate-400">
-            No sessions need attention.
-          </p>
-        </section>
+        <EmptyState
+          icon={Calendar}
+          title="No active sessions"
+          description="No sessions currently need attention. New sessions will appear here as vehicles enter."
+        />
       ) : (
-        <ul className="space-y-4" aria-label="Active sessions">
-          {sessions.map((session) => (
-            <li key={session.id} className={sessionCardClass}>
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                <div className="flex min-w-0 flex-wrap items-center gap-2">
-                  <span className="inline-block rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] font-semibold tracking-wider text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                    {session.plateDisplay}
-                  </span>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                    {session.ticketNumber}
-                  </span>
-                  <span
-                    className={cn(
-                      'inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold',
-                      statusPillClass(session.status),
-                    )}
-                  >
-                    {formatSessionStatus(session.status)}
-                  </span>
-                </div>
-
-                <SessionRowActions sessionId={session.id} status={session.status} />
-              </div>
-            </li>
-          ))}
-        </ul>
+        <SectionPanel title="Active Session Records" bodyClassName="p-0 overflow-hidden">
+          <DataTable
+            className="border-0 rounded-none"
+            columns={columns}
+            data={sessions}
+            getRowId={(row) => row.id}
+          />
+        </SectionPanel>
       )}
     </div>
   )

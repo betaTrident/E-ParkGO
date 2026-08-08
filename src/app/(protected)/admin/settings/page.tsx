@@ -1,6 +1,13 @@
-import { FacilitySettingsForm } from "@/features/facility/components/facility-settings-form";
-import { getFacilitySettings } from "@/features/facility/service";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageHeader } from "@/components/shared/page-header";
+import { SectionPanel } from "@/components/shared/section-panel";
 import { SpaceEditor } from "@/components/spaces/space-editor";
+import {
+  CapacitySettingsForm,
+  GeneralSettingsForm,
+} from "@/features/facility/components/facility-settings-form";
+import { getFacilitySettings } from "@/features/facility/service";
 import { listVehicleTypes, listZones } from "@/features/spaces/service";
 import { requireAdminProfile } from "@/lib/auth/session";
 
@@ -14,8 +21,8 @@ export default async function AdminSettingsPage() {
 
   if (!settings) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8">
-        <p role="alert" className="text-red-600">
+      <div className="page-root">
+        <p role="alert" className="text-sm font-medium text-destructive">
           Facility settings could not be loaded for your location.
         </p>
       </div>
@@ -23,34 +30,47 @@ export default async function AdminSettingsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-10 px-4 py-8 sm:px-6">
-      <header className="space-y-2">
-        <p className="text-sm font-medium text-blue-600 dark:text-blue-300">
-          Administration
-        </p>
-        <h1 className="text-3xl font-bold tracking-tight">Facility settings</h1>
-        <p className="max-w-2xl text-slate-600 dark:text-slate-400">
-          Configure facility identity, zones, vehicle types, and space inventory.
-          Historical records are deactivated, never deleted.
-        </p>
-      </header>
+    <div className="page-root">
+      <PageHeader
+        title="Facility settings"
+        description="Configure facility identity, timezone, capacity pools, zones, and vehicle types."
+        badge={<Badge variant="outline">Admin</Badge>}
+      />
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
-        <h2 className="text-lg font-semibold">General settings</h2>
-        <div className="mt-4">
-          <FacilitySettingsForm settings={settings} />
-        </div>
-      </section>
+      <Tabs defaultValue="general" className="w-full">
+        <TabsList>
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="capacity">Capacity Pools</TabsTrigger>
+          <TabsTrigger value="spaces">Zones &amp; Spaces</TabsTrigger>
+        </TabsList>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
-        <h2 className="text-lg font-semibold">Zones, types, and spaces</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Add inventory using audited configuration RPCs.
-        </p>
-        <div className="mt-4">
-          <SpaceEditor zones={zones} vehicleTypes={vehicleTypes} />
-        </div>
-      </section>
+        <TabsContent value="general" className="mt-4">
+          <SectionPanel
+            title="General settings"
+            description="Facility identity, timezone, and receipt formatting."
+          >
+            <GeneralSettingsForm settings={settings} />
+          </SectionPanel>
+        </TabsContent>
+
+        <TabsContent value="capacity" className="mt-4">
+          <SectionPanel
+            title="Capacity pools"
+            description="Set maximum vehicle occupancy limits for real-time entry validation."
+          >
+            <CapacitySettingsForm settings={settings} />
+          </SectionPanel>
+        </TabsContent>
+
+        <TabsContent value="spaces" className="mt-4">
+          <SectionPanel
+            title="Zones, types, and spaces"
+            description="Configure facility zones, vehicle type mappings, and space inventory."
+          >
+            <SpaceEditor zones={zones} vehicleTypes={vehicleTypes} />
+          </SectionPanel>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
