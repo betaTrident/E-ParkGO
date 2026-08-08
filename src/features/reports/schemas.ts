@@ -20,7 +20,7 @@ export const reportTypeSchema = z.enum([
   'SHIFT_RECONCILIATION',
 ])
 
-export const transactionQuerySchema = z
+export const baseTransactionQuerySchema = z
   .object({
     from: businessDateSchema,
     to: businessDateSchema,
@@ -30,6 +30,8 @@ export const transactionQuerySchema = z
     limit: z.coerce.number().int().min(1).max(100).optional(),
   })
   .strict()
+
+export const transactionQuerySchema = baseTransactionQuerySchema
   .superRefine((value, ctx) => {
     const fromDate = new Date(`${value.from}T00:00:00Z`)
     const toDate = new Date(`${value.to}T00:00:00Z`)
@@ -51,38 +53,41 @@ export const transactionQuerySchema = z
     }
   })
 
-export const reportPreviewSchema = z
+const baseReportSchema = z
   .object({
     type: reportTypeSchema,
     from: businessDateSchema,
     to: businessDateSchema,
   })
   .strict()
-  .superRefine((value, ctx) => {
-    const fromDate = new Date(`${value.from}T00:00:00Z`)
-    const toDate = new Date(`${value.to}T00:00:00Z`)
-    if (fromDate > toDate) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'from must be on or before to',
-        path: ['from'],
-      })
-    }
 
-    const daySpan = Math.floor((toDate.getTime() - fromDate.getTime()) / 86_400_000)
-    if (daySpan > 90) {
-      ctx.addIssue({
-        code: 'custom',
-        message: 'Date range cannot exceed 90 days',
-        path: ['to'],
-      })
-    }
-  })
+function validateDateSpan90(value: { from: string; to: string }, ctx: z.RefinementCtx) {
+  const fromDate = new Date(`${value.from}T00:00:00Z`)
+  const toDate = new Date(`${value.to}T00:00:00Z`)
+  if (fromDate > toDate) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'from must be on or before to',
+      path: ['from'],
+    })
+  }
 
-export const reportExportSchema = reportPreviewSchema
+  const daySpan = Math.floor((toDate.getTime() - fromDate.getTime()) / 86_400_000)
+  if (daySpan > 90) {
+    ctx.addIssue({
+      code: 'custom',
+      message: 'Date range cannot exceed 90 days',
+      path: ['to'],
+    })
+  }
+}
+
+export const reportPreviewSchema = baseReportSchema.superRefine(validateDateSpan90)
+
+export const reportExportSchema = baseReportSchema
   .extend({
-    idempotency_key: z.uuid('Idempotency key is required'),
-    correlation_id: z.uuid().optional(),
+    idempotency_key: z.string().uuid('Idempotency key is required'),
+    correlation_id: z.string().uuid().optional(),
   })
   .superRefine((value, ctx) => {
     const fromDate = new Date(`${value.from}T00:00:00Z`)
@@ -99,11 +104,11 @@ export const reportExportSchema = reportPreviewSchema
 
 export const auditSearchSchema = z
   .object({
-    from: z.iso.datetime({ offset: true }),
-    to: z.iso.datetime({ offset: true }),
+    from: z.string().datetime({ offset: true }),
+    to: z.string().datetime({ offset: true }),
     action: z.string().min(1).max(80).optional(),
-    actor_id: z.uuid().optional(),
-    correlation_id: z.uuid().optional(),
+    actor_id: z.string().uuid().optional(),
+    correlation_id: z.string().uuid().optional(),
     cursor: z.string().min(1).optional(),
     limit: z.coerce.number().int().min(1).max(100).optional(),
   })

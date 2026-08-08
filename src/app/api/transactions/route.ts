@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 
 import { listTransactions } from '@/features/reports/service'
-import { transactionQuerySchema } from '@/features/reports/schemas'
+import { baseTransactionQuerySchema } from '@/features/reports/schemas'
 import { apiError, apiSuccess } from '@/lib/api/envelope'
 import { getSessionUser } from '@/lib/auth/session'
 
-const querySchema = transactionQuerySchema.extend({
+const querySchema = baseTransactionQuerySchema.extend({
   from: z.string().optional(),
   to: z.string().optional(),
 })

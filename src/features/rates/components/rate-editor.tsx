@@ -1,17 +1,31 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
+import { Plus } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import {
   createRateDraftAction,
-  publishRateAction,
   type RateActionState,
 } from "@/features/rates/actions";
 import type { VehicleTypeRecord } from "@/features/spaces/service";
@@ -28,179 +42,184 @@ interface RateEditorProps {
 }
 
 export function RateEditor({ vehicleTypes }: RateEditorProps) {
-  const [draftState, draftAction, draftPending] = useActionState(
+  const [open, setOpen] = useState(false);
+  const [vehicleTypeId, setVehicleTypeId] = useState("");
+  const [mode, setMode] = useState("TIERED");
+  const [state, formAction, pending] = useActionState(
     createRateDraftAction,
     initialState,
   );
-  const [publishState, publishAction, publishPending] = useActionState(
-    publishRateAction,
-    initialState,
-  );
+
+  if (state.success && open) {
+    setOpen(false);
+  }
 
   return (
-    <div className="space-y-8">
-      <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
-        <h2 className="text-lg font-semibold">Create rate draft</h2>
-        <p className="mt-1 text-sm text-slate-500">
-          Drafts stay editable until published. Amounts are integer centavos on
-          the wire (example: 5000 = {formatCentavosPhp("5000")}).
-        </p>
-        <form action={draftAction} className="mt-4 grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Label htmlFor="vehicleTypeId">Vehicle type</Label>
-            <NativeSelect
-              id="vehicleTypeId"
-              name="vehicleTypeId"
-              className="w-full"
-              required
-              defaultValue=""
-            >
-              <NativeSelectOption value="" disabled>
-                Select vehicle type
-              </NativeSelectOption>
-              {vehicleTypes
-                .filter((type) => type.is_active)
-                .map((type) => (
-                  <NativeSelectOption key={type.id} value={type.id}>
-                    {type.code} — {type.name}
-                  </NativeSelectOption>
-                ))}
-            </NativeSelect>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="mode">Mode</Label>
-            <NativeSelect
-              id="mode"
-              name="mode"
-              className="w-full"
-              defaultValue="TIERED"
-              required
-            >
-              <NativeSelectOption value="TIERED">Tiered</NativeSelectOption>
-              <NativeSelectOption value="FLAT">Flat</NativeSelectOption>
-            </NativeSelect>
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="graceMinutes">Grace minutes</Label>
-            <Input
-              id="graceMinutes"
-              name="graceMinutes"
-              type="number"
-              min={0}
-              defaultValue={15}
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="effectiveFrom">Effective from (ISO)</Label>
-            <Input
-              id="effectiveFrom"
-              name="effectiveFrom"
-              defaultValue="2026-08-01T00:00:00+08:00"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="initialMinutes">Initial minutes (tiered)</Label>
-            <Input id="initialMinutes" name="initialMinutes" type="number" min={1} />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="initialFeeCentavos">Initial fee centavos</Label>
-            <Input id="initialFeeCentavos" name="initialFeeCentavos" inputMode="numeric" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="succeedingIntervalMinutes">Succeeding interval minutes</Label>
-            <Input
-              id="succeedingIntervalMinutes"
-              name="succeedingIntervalMinutes"
-              type="number"
-              min={1}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="succeedingFeeCentavos">Succeeding fee centavos</Label>
-            <Input
-              id="succeedingFeeCentavos"
-              name="succeedingFeeCentavos"
-              inputMode="numeric"
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="flatFeeCentavos">Flat fee centavos</Label>
-            <Input id="flatFeeCentavos" name="flatFeeCentavos" inputMode="numeric" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="dailyMaxCentavos">Daily max centavos</Label>
-            <Input id="dailyMaxCentavos" name="dailyMaxCentavos" inputMode="numeric" />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="overnightFeeCentavos">Overnight fee centavos</Label>
-            <Input
-              id="overnightFeeCentavos"
-              name="overnightFeeCentavos"
-              defaultValue="5000"
-              required
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="lostTicketPenaltyCentavos">Lost ticket penalty centavos</Label>
-            <p className="text-xs text-slate-500">
-              Applied when processing a lost ticket. Charged on top of parking fees at exit.
-            </p>
-            <Input
-              id="lostTicketPenaltyCentavos"
-              name="lostTicketPenaltyCentavos"
-              defaultValue="20000"
-              required
-            />
-          </div>
-          {draftState.error ? (
-            <p role="alert" className="text-sm text-red-600 md:col-span-2">
-              {draftState.error}
-            </p>
-          ) : null}
-          {draftState.message ? (
-            <p role="status" className="text-sm text-emerald-600 md:col-span-2">
-              {draftState.message}
-            </p>
-          ) : null}
-          <div className="md:col-span-2">
-            <Button type="submit" disabled={draftPending}>
-              {draftPending ? "Saving draft..." : "Save draft"}
-            </Button>
-          </div>
-        </form>
-      </section>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger
+        render={
+          <Button size="sm" className="gap-1.5">
+            <Plus className="size-4" />
+            New rate draft
+          </Button>
+        }
+      />
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
+        <DialogHeader>
+          <DialogTitle>Create rate draft</DialogTitle>
+          <DialogDescription>
+            Drafts stay editable until published. Amounts are in integer centavos on the wire (e.g. 5000 = {formatCentavosPhp("5000")}).
+          </DialogDescription>
+        </DialogHeader>
 
-      <section className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950">
-        <h2 className="text-lg font-semibold">Publish draft</h2>
-        <form action={publishAction} className="mt-4 flex flex-col gap-3 sm:flex-row">
-          <div className="grow space-y-2">
-            <Label htmlFor="publish-rate-id">Draft rate ID</Label>
-            <Input
-              id="publish-rate-id"
-              name="rateId"
-              placeholder="Paste draft UUID from the list below"
-              required
-            />
+        <form action={formAction} className="space-y-4">
+          <input type="hidden" name="vehicleTypeId" value={vehicleTypeId} />
+          <input type="hidden" name="mode" value={mode} />
+
+          {/* Group 1: Configuration */}
+          <div className="space-y-3">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Tariff Configuration
+            </h4>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="vehicleTypeId-select">Vehicle type</Label>
+                <Select value={vehicleTypeId} onValueChange={(val) => val && setVehicleTypeId(val)}>
+                  <SelectTrigger id="vehicleTypeId-select" className="w-full">
+                    <SelectValue placeholder="Select vehicle type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {vehicleTypes
+                      .filter((type) => type.is_active)
+                      .map((type) => (
+                        <SelectItem key={type.id} value={type.id}>
+                          {type.code} — {type.name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mode-select">Tariff mode</Label>
+                <Select value={mode} onValueChange={(val) => val && setMode(val)}>
+                  <SelectTrigger id="mode-select" className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="TIERED">Tiered</SelectItem>
+                    <SelectItem value="FLAT">Flat</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
-          <div className="flex items-end">
-            <Button type="submit" disabled={publishPending}>
-              {publishPending ? "Publishing..." : "Publish rate"}
+
+          <Separator />
+
+          {/* Group 2: Effective window & Grace */}
+          <div className="space-y-3">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Timing & Grace
+            </h4>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="graceMinutes">Grace minutes</Label>
+                <Input
+                  id="graceMinutes"
+                  name="graceMinutes"
+                  type="number"
+                  min={0}
+                  defaultValue={15}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="effectiveFrom">Effective from (ISO)</Label>
+                <Input
+                  id="effectiveFrom"
+                  name="effectiveFrom"
+                  defaultValue="2026-08-01T00:00:00+08:00"
+                  className="font-mono text-xs"
+                  required
+                />
+              </div>
+            </div>
+          </div>
+
+          <Separator />
+
+          {/* Group 3: Rates & Penalties */}
+          <div className="space-y-3">
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+              Fee Structures (Centavos)
+            </h4>
+            {mode === "TIERED" ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="initialMinutes">Initial minutes</Label>
+                  <Input id="initialMinutes" name="initialMinutes" type="number" min={1} defaultValue={120} />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="initialFeeCentavos">Initial fee (centavos)</Label>
+                  <Input id="initialFeeCentavos" name="initialFeeCentavos" inputMode="numeric" defaultValue="5000" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="succeedingIntervalMinutes">Succeeding interval (mins)</Label>
+                  <Input id="succeedingIntervalMinutes" name="succeedingIntervalMinutes" type="number" min={1} defaultValue={60} />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="succeedingFeeCentavos">Succeeding fee (centavos)</Label>
+                  <Input id="succeedingFeeCentavos" name="succeedingFeeCentavos" inputMode="numeric" defaultValue="2000" />
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="flatFeeCentavos">Flat fee (centavos)</Label>
+                  <Input id="flatFeeCentavos" name="flatFeeCentavos" inputMode="numeric" defaultValue="5000" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="dailyMaxCentavos">Daily max (centavos)</Label>
+                  <Input id="dailyMaxCentavos" name="dailyMaxCentavos" inputMode="numeric" />
+                </div>
+              </div>
+            )}
+
+            <div className="grid gap-4 sm:grid-cols-2 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="overnightFeeCentavos">Overnight fee (centavos)</Label>
+                <Input id="overnightFeeCentavos" name="overnightFeeCentavos" defaultValue="5000" required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lostTicketPenaltyCentavos">Lost ticket penalty (centavos)</Label>
+                <Input id="lostTicketPenaltyCentavos" name="lostTicketPenaltyCentavos" defaultValue="20000" required />
+              </div>
+            </div>
+          </div>
+
+          {state.error && (
+            <Alert variant="destructive">
+              <AlertDescription>{state.error}</AlertDescription>
+            </Alert>
+          )}
+
+          <DialogFooter className="pt-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Cancel
             </Button>
-          </div>
+            <Button type="submit" disabled={pending || !vehicleTypeId}>
+              {pending ? "Saving draft..." : "Save rate draft"}
+            </Button>
+          </DialogFooter>
         </form>
-        {publishState.error ? (
-          <p role="alert" className="mt-3 text-sm text-red-600">
-            {publishState.error}
-          </p>
-        ) : null}
-        {publishState.message ? (
-          <p role="status" className="mt-3 text-sm text-emerald-600">
-            {publishState.message}
-          </p>
-        ) : null}
-      </section>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

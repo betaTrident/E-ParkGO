@@ -2,12 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { AlertCircle, ArrowLeft, CheckCircle2, QrCode } from 'lucide-react'
 
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { SectionPanel } from '@/components/shared/section-panel'
 import { manualTicketFormSchema } from '@/features/scanner/schemas'
 import { extractTokenFromPayload } from '@/lib/security/qr-token'
+import { cn } from '@/lib/utils'
 
 type BarcodeDetectorLike = {
   detect: (source: ImageBitmapSource) => Promise<Array<{ rawValue?: string }>>
@@ -41,7 +45,6 @@ export function ScannerView({
   const [cameraDenied, setCameraDenied] = useState(false)
   const [manualTicket, setManualTicket] = useState('')
   const [manualError, setManualError] = useState<string | null>(null)
-  const [showManualPrompt, setShowManualPrompt] = useState(false)
 
   const stopCamera = () => {
     streamRef.current?.getTracks().forEach((track) => track.stop())
@@ -50,9 +53,7 @@ export function ScannerView({
   }
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setShowManualPrompt(true), 10_000)
     return () => {
-      window.clearTimeout(timer)
       stopCamera()
     }
   }, [])
@@ -129,29 +130,62 @@ export function ScannerView({
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-black/90 dark:border-slate-800">
-        <video
-          ref={videoRef}
-          className="aspect-[3/4] w-full object-cover"
-          muted
-          playsInline
-          aria-label="Live QR scanner preview"
-        />
-        {!cameraActive ? (
-          <div className="flex flex-col items-center gap-4 bg-slate-950 px-6 py-10 text-center text-white">
-            <p className="text-sm text-slate-200">
-              Camera access starts only after you choose Scan ticket. Manual entry is always
-              available.
-            </p>
-            <Button type="button" onClick={() => void startCamera()} disabled={pending}>
-              Scan ticket
-            </Button>
-          </div>
-        ) : null}
-      </div>
+      <SectionPanel
+        title="Scan QR ticket"
+        headerAction={
+          <span className={cn('chip', cameraActive ? 'chip-active' : 'chip-neutral')}>
+            {cameraActive ? 'Camera active' : 'Camera inactive'}
+          </span>
+        }
+        bodyClassName="p-0 overflow-hidden"
+      >
+        <div className="relative aspect-[4/3] w-full bg-slate-950 sm:aspect-video">
+          <video
+            ref={videoRef}
+            className={cn('size-full object-cover', !cameraActive && 'hidden')}
+            muted
+            playsInline
+            aria-label="Live QR scanner preview"
+          />
 
-      {cameraDenied || showManualPrompt ? (
-        <form className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-900" onSubmit={(event) => void handleManualSubmit(event)}>
+          {cameraActive && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="size-48 rounded-lg border-2 border-primary/80 bg-primary/5 animate-pulse" />
+            </div>
+          )}
+
+          {!cameraActive && (
+            <div className="flex size-full flex-col items-center justify-center gap-3 p-6 text-center text-white">
+              <div className="flex size-12 items-center justify-center rounded-full bg-white/10">
+                <QrCode className="size-6 text-white/80" />
+              </div>
+              <div className="max-w-xs space-y-1">
+                <p className="text-sm font-semibold">Camera Scanner</p>
+                <p className="text-xs text-slate-400">
+                  {cameraDenied
+                    ? 'Camera access was denied or unavailable. Use manual entry below.'
+                    : 'Activate camera to scan physical QR ticket slips.'}
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={() => void startCamera()}
+                disabled={pending}
+                className="mt-2"
+                size="sm"
+              >
+                Activate camera
+              </Button>
+            </div>
+          )}
+        </div>
+      </SectionPanel>
+
+      <SectionPanel
+        title="Manual ticket entry"
+        description="Enter the full ticket number printed on the entry slip."
+      >
+        <form className="space-y-4" onSubmit={(event) => void handleManualSubmit(event)}>
           <div className="space-y-2">
             <Label htmlFor="manual-ticket-number">Ticket number</Label>
             <Input
@@ -161,42 +195,49 @@ export function ScannerView({
               value={manualTicket}
               onChange={(event) => setManualTicket(event.target.value)}
               placeholder="EPG-YYMMDD-XXXXXXXXC"
+              className="font-mono uppercase tracking-wider"
               disabled={pending}
             />
-            {manualError ? (
-              <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+            {manualError && (
+              <p role="alert" className="text-xs text-destructive">
                 {manualError}
               </p>
-            ) : null}
+            )}
           </div>
           <Button type="submit" className="w-full" disabled={pending}>
             Look up ticket
           </Button>
         </form>
-      ) : null}
+      </SectionPanel>
 
-      {statusMessage ? (
-        <p role="status" className="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-100">
-          {statusMessage}
-        </p>
-      ) : null}
+      {statusMessage && (
+        <Alert className="border-emerald-200 bg-emerald-50 text-emerald-900 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-200">
+          <CheckCircle2 className="size-4 text-emerald-600 dark:text-emerald-400" />
+          <AlertDescription>{statusMessage}</AlertDescription>
+        </Alert>
+      )}
 
-      {errorMessage ? (
-        <p role="alert" className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800 dark:bg-red-950/40 dark:text-red-100">
-          {errorMessage}
-        </p>
-      ) : null}
+      {errorMessage && (
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertDescription>{errorMessage}</AlertDescription>
+        </Alert>
+      )}
 
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => {
-          stopCamera()
-          router.push('/dashboard')
-        }}
-      >
-        Back to dashboard
-      </Button>
+      <div className="flex justify-start">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            stopCamera()
+            router.push('/dashboard')
+          }}
+        >
+          <ArrowLeft className="mr-1.5 size-4" />
+          Back to dashboard
+        </Button>
+      </div>
     </div>
   )
 }

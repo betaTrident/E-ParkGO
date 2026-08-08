@@ -1,5 +1,8 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 
+import { SectionPanel } from "@/components/shared/section-panel";
+import { StatusChip } from "@/components/shared/status-chip";
 import type {
   DashboardMovement,
   DashboardSnapshot,
@@ -8,30 +11,6 @@ import { formatBusinessDateTime } from "@/lib/time/business-time";
 
 interface EntryContextPanelProps {
   snapshot: DashboardSnapshot | null;
-}
-
-function formatSessionStatus(status: string): string {
-  return status
-    .toLowerCase()
-    .split("_")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function statusPillClass(status: string): string {
-  if (status === "ACTIVE") {
-    return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400";
-  }
-
-  if (status === "PAYMENT_PENDING" || status === "EXIT_PENDING") {
-    return "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-400";
-  }
-
-  if (status === "PAID_AWAITING_EXIT") {
-    return "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-400";
-  }
-
-  return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
 }
 
 function selectMovements(
@@ -50,7 +29,7 @@ function PoolSummary({ snapshot }: { snapshot: DashboardSnapshot | null }) {
 
   if (!metrics) {
     return (
-      <p className="text-sm text-slate-500 dark:text-slate-400">
+      <p className="text-xs text-muted-foreground">
         Pool capacity data is unavailable.
       </p>
     );
@@ -63,22 +42,20 @@ function PoolSummary({ snapshot }: { snapshot: DashboardSnapshot | null }) {
   );
 
   return (
-    <ul className="space-y-2">
-      <li className="flex items-center justify-between gap-3 rounded-md border border-slate-100 bg-slate-50/60 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-800/40">
-        <span className="font-medium text-slate-700 dark:text-slate-200">Cars</span>
-        <span className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-300">
-          {carFree}/{metrics.car_capacity} free
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3 text-xs">
+        <span className="font-medium text-foreground">Cars</span>
+        <span className="font-mono font-semibold text-muted-foreground">
+          {carFree} / {metrics.car_capacity} free
         </span>
-      </li>
-      <li className="flex items-center justify-between gap-3 rounded-md border border-slate-100 bg-slate-50/60 px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-800/40">
-        <span className="font-medium text-slate-700 dark:text-slate-200">
-          Motorcycles
+      </div>
+      <div className="flex items-center justify-between gap-3 text-xs">
+        <span className="font-medium text-foreground">Motorcycles</span>
+        <span className="font-mono font-semibold text-muted-foreground">
+          {motorcycleFree} / {metrics.motorcycle_capacity} free
         </span>
-        <span className="font-mono text-xs font-semibold text-slate-600 dark:text-slate-300">
-          {motorcycleFree}/{metrics.motorcycle_capacity} free
-        </span>
-      </li>
-    </ul>
+      </div>
+    </div>
   );
 }
 
@@ -86,67 +63,56 @@ export function EntryContextPanel({ snapshot }: EntryContextPanelProps) {
   const movements = selectMovements(snapshot?.recent_movements).slice(0, 8);
 
   return (
-    <section
-      aria-label="Recent activity"
-      className="rounded-md border border-slate-200/80 bg-white p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900"
-    >
-      <div className="flex items-center justify-between gap-3">
-        <h2 className="text-base font-bold tracking-tight text-slate-900 dark:text-white">
-          Recent activity
-        </h2>
+    <SectionPanel
+      title="Recent activity"
+      headerAction={
         <Link
           href="/sessions"
-          className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+          className="inline-flex items-center gap-1 text-xs font-semibold text-primary hover:underline"
         >
-          View sessions
+          View sessions <ArrowRight className="size-3" />
         </Link>
-      </div>
-
+      }
+    >
       {movements.length === 0 ? (
-        <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-muted-foreground py-4">
           No recent movements recorded for this facility.
         </p>
       ) : (
-        <ul className="mt-4 divide-y divide-slate-100 dark:divide-slate-800/60">
+        <ul className="divide-y divide-border">
           {movements.map((movement) => (
             <li
               key={`${movement.session_id}-${movement.occurred_at}`}
-              className="flex flex-wrap items-center justify-between gap-2 py-3 first:pt-0"
+              className="flex items-center justify-between gap-2 py-3 first:pt-0 last:pb-0"
             >
               <div className="flex min-w-0 flex-col gap-1">
-                <span className="inline-block w-fit rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] font-semibold tracking-wider text-slate-800 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200">
-                  {movement.plate_display}
-                </span>
+                <span className="ref-tag w-fit">{movement.plate_display}</span>
                 {movement.space_code ? (
-                  <span className="text-xs text-slate-500 dark:text-slate-400">
+                  <span className="text-[11px] text-muted-foreground">
                     {movement.zone_code}-{movement.space_code}
                   </span>
                 ) : null}
               </div>
 
               <div className="flex flex-col items-end gap-1">
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                <span className="font-mono text-xs font-medium text-muted-foreground">
                   {formatBusinessDateTime(movement.occurred_at, "h:mm a")}
                 </span>
-                <span
-                  className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${statusPillClass(movement.session_status)}`}
-                >
-                  {formatSessionStatus(movement.session_status)}
-                </span>
+                <StatusChip status={movement.session_status} />
               </div>
             </li>
           ))}
         </ul>
       )}
 
-      <div className="mt-6 border-t border-slate-100 pt-5 dark:border-slate-800">
-        <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+      <div className="mt-6 border-t border-border pt-4">
+        <h3 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
           Capacity pools
         </h3>
-        <div className="mt-3">
+        <div className="mt-2.5 rounded-md border border-border bg-muted/30 p-3">
           <PoolSummary snapshot={snapshot} />
         </div>
       </div>
-    </section>
+    </SectionPanel>
   );
 }

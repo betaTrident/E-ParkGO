@@ -2,20 +2,26 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { AlertCircle, CarFront, CheckCircle2 } from "lucide-react";
 
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@/components/ui/native-select";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   createEntryAction,
   type EntryActionState,
 } from "@/features/entry/actions";
 import type { VehicleTypeRecord } from "@/features/spaces/service";
 import { useTicketCredentials } from "@/lib/security/ticket-credential-context";
+import { cn } from "@/lib/utils";
 
 const initialState: EntryActionState = {
   success: false,
@@ -85,9 +91,10 @@ export function EntryForm({
   return (
     <form action={formAction} className="space-y-5">
       <input type="hidden" name="idempotencyKey" value={idempotencyKey} />
+      <input type="hidden" name="vehicleTypeId" value={vehicleTypeId} />
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="space-y-2 sm:col-span-2">
+      <div className="space-y-4">
+        <div className="space-y-2">
           <Label htmlFor="plateNumber">Plate number</Label>
           <Input
             id="plateNumber"
@@ -96,53 +103,65 @@ export function EntryForm({
             autoFocus
             required
             placeholder="ABC-1234"
+            className="font-mono uppercase tracking-wider"
           />
         </div>
 
-        <div className="space-y-2 sm:col-span-2">
-          <Label htmlFor="vehicleTypeId">Vehicle type</Label>
-          <NativeSelect
-            id="vehicleTypeId"
-            name="vehicleTypeId"
-            className="w-full"
-            value={vehicleTypeId}
-            onChange={(event) => setVehicleTypeId(event.target.value)}
-            required
-          >
-            {vehicleTypes.map((type) => (
-              <NativeSelectOption key={type.id} value={type.id}>
-                {type.name}
-              </NativeSelectOption>
-            ))}
-          </NativeSelect>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            {remaining} of {pool.capacity}{" "}
-            {poolKey === "car" ? "car" : "motorcycle"} pool slots free (
-            {pool.occupied} occupied).
+        <div className="space-y-2">
+          <div className="flex items-center justify-between gap-2">
+            <Label htmlFor="vehicleTypeId">Vehicle type</Label>
+            <span
+              className={cn(
+                "chip",
+                remaining > 0 ? "chip-active" : "chip-pending",
+              )}
+            >
+              {remaining} of {pool.capacity} free
+            </span>
+          </div>
+
+          <Select value={vehicleTypeId} onValueChange={(val) => val && setVehicleTypeId(val)}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select vehicle type" />
+            </SelectTrigger>
+            <SelectContent>
+              {vehicleTypes.map((type) => (
+                <SelectItem key={type.id} value={type.id}>
+                  {type.name} ({type.code})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <p className="text-xs text-muted-foreground">
+            {pool.occupied} occupied in {poolKey === "car" ? "car" : "motorcycle"} pool.
           </p>
         </div>
       </div>
 
-      {remaining <= 0 ? (
-        <p
-          role="status"
-          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
-        >
-          This vehicle type pool is at capacity. Choose a different type or
-          wait for a session to exit.
-        </p>
-      ) : null}
+      {remaining <= 0 && (
+        <Alert className="border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">
+          <AlertCircle className="size-4 text-amber-600 dark:text-amber-400" />
+          <AlertDescription>
+            This vehicle type pool is at capacity. Choose a different type or wait for a vehicle to exit.
+          </AlertDescription>
+        </Alert>
+      )}
 
-      {state.error ? (
-        <p
-          role="alert"
-          className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900 dark:bg-red-950/40 dark:text-red-200"
-        >
-          {state.error}
-        </p>
-      ) : null}
+      {state.error && (
+        <Alert variant="destructive">
+          <AlertCircle className="size-4" />
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
+      )}
 
-      <Button type="submit" disabled={pending || remaining <= 0}>
+      <Button
+        type="submit"
+        size="lg"
+        className="w-full"
+        disabled={pending || remaining <= 0}
+      >
+        <CarFront className="mr-2 size-4" />
         {pending ? "Creating entry..." : "Create entry and issue ticket"}
       </Button>
     </form>
