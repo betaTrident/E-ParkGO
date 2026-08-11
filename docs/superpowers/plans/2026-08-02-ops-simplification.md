@@ -1,4 +1,4 @@
-# E-ParkGO Ops Simplification v1 — Strategic Implementation Plan
+# E-ParkGO Ops Simplification v1 — Strategic Implementation Plans
 
 > **For agentic workers:** REQUIRED SUB-SKILL: `sp-executing` (`executing-plans`) or `sp-subagent-driven` (`subagent-driven-development`). Execute **one phase at a time**. Use checkbox tracking. **Do not scan the full codebase** — trust this plan’s file manifests and only open listed paths (plus Context7 when an API signature is uncertain).
 
@@ -131,7 +131,7 @@ Zero-fee quotes may skip tender UI but still complete exit under the same action
 
 ---
 
-# Phase S0 — Decision lock & execution control
+# Phase S0 — Decision lock & execution controls
 
 **Objective:** Freeze product contract; point execution control at this playbook; write ADR.
 
